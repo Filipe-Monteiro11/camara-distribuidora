@@ -6,36 +6,42 @@ import {
   ShieldCheck,
   Truck,
 } from "lucide-react";
+
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import "./Home.css";
+import "../styles/Home.css";
 
 const produtos = [
   {
     nome: "Charque Tradicional",
     descricao: "Conheça nossa seleção de carnes e opções disponíveis.",
-    imagem: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=900&q=85",
+    imagem:
+      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=900&q=85",
   },
   {
     nome: "Cortes Especiais",
     descricao: "Produtos selecionados para diferentes preparações.",
-    imagem: "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?auto=format&fit=crop&w=900&q=85",
+    imagem:
+      "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?auto=format&fit=crop&w=900&q=85",
   },
   {
     nome: "Linha de Carnes",
     descricao: "Confira as opções do nosso catálogo de produtos.",
-    imagem: "https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=900&q=85",
+    imagem:
+      "https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=900&q=85",
   },
 ];
 
 const receitas = [
   {
     nome: "Escondidinho de Charque",
-    imagem: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85",
+    imagem:
+      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85",
   },
   {
     nome: "Charque com Macaxeira",
-    imagem: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=85",
+    imagem:
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=85",
   },
 ];
 
@@ -46,8 +52,8 @@ export default function Home() {
 
       <main>
         <section className="hero" id="inicio">
-          <div className="hero-image" />
-          <div className="hero-overlay" />
+          <div className="hero-image" aria-hidden="true" />
+          <div className="hero-overlay" aria-hidden="true" />
 
           <div className="container hero-content">
             <span className="eyebrow hero-eyebrow">
@@ -61,16 +67,19 @@ export default function Home() {
             </h1>
 
             <p>
-              Conheça nossa linha de produtos e descubra
-              mais sobre a Camará Distribuidora.
+              Conheça nossa linha de produtos e descubra mais
+              sobre a Camará Distribuidora.
             </p>
 
             <div className="hero-actions">
               <a href="#produtos" className="btn btn-yellow">
-                Conhecer produtos <ArrowUpRight size={18} />
+                Conhecer produtos
+                <ArrowUpRight size={18} />
               </a>
+
               <a href="#sobre" className="btn btn-outline">
-                Nossa história <ArrowRight size={18} />
+                Nossa história
+                <ArrowRight size={18} />
               </a>
             </div>
           </div>
@@ -78,16 +87,18 @@ export default function Home() {
           <div className="hero-bottom-line" />
         </section>
 
-        <section className="highlights">
+        <section className="highlights" aria-label="Conheça a Camará">
           <div className="container highlights-grid">
             <div>
               <PackageCheck size={29} />
               <span>Conheça nossos produtos</span>
             </div>
+
             <div>
               <ShieldCheck size={29} />
               <span>Saiba mais sobre a Camará</span>
             </div>
+
             <div>
               <Truck size={29} />
               <span>Entre em contato com nossa equipe</span>
@@ -100,11 +111,14 @@ export default function Home() {
             <div className="section-heading">
               <div>
                 <span className="eyebrow">NOSSO CATÁLOGO</span>
-                <h2>Conheça nossos <span>produtos.</span></h2>
+                <h2>
+                  Conheça nossos <span>produtos.</span>
+                </h2>
               </div>
+
               <p>
-                Explore nossa linha de carnes e conheça as
-                opções disponíveis em nosso catálogo.
+                Explore nossa linha de carnes e conheça as opções
+                disponíveis em nosso catálogo.
               </p>
             </div>
 
@@ -112,17 +126,25 @@ export default function Home() {
               {produtos.map((produto) => (
                 <article className="product-card" key={produto.nome}>
                   <div className="product-image">
-                    <img src={produto.imagem} alt={produto.nome} />
+                    <img
+                      src={produto.imagem}
+                      alt={`Imagem ilustrativa de ${produto.nome}`}
+                      loading="lazy"
+                    />
+
                     <a href="#contato" className="product-overlay">
                       Conversar com atendente
                       <ArrowUpRight size={18} />
                     </a>
                   </div>
+
                   <div className="product-info">
                     <h3>{produto.nome}</h3>
                     <p>{produto.descricao}</p>
+
                     <a href="#contato">
-                      Saiba mais <ArrowUpRight size={16} />
+                      Saiba mais
+                      <ArrowUpRight size={16} />
                     </a>
                   </div>
                 </article>
@@ -131,7 +153,8 @@ export default function Home() {
 
             <div className="section-action">
               <a className="btn btn-red" href="#contato">
-                Solicitar catálogo <ArrowUpRight size={18} />
+                Solicitar catálogo
+                <ArrowUpRight size={18} />
               </a>
             </div>
           </div>
@@ -142,28 +165,35 @@ export default function Home() {
             <img
               src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1400&q=85"
               alt="Imagem ilustrativa de ambiente industrial"
+              loading="lazy"
             />
+
             <span className="image-note">Imagem ilustrativa</span>
           </div>
 
           <div className="about-content">
             <span className="eyebrow">SOBRE A CAMARÁ</span>
+
             <h2>
               Uma história para
               <br />
               <span>compartilhar.</span>
             </h2>
+
             <p>
               Toda empresa tem uma trajetória. Aqui você poderá
-              conhecer a história da Camará, a origem de sua
-              marca e os caminhos que fazem parte de sua identidade.
+              conhecer a história da Camará, a origem de sua marca
+              e os caminhos que fazem parte de sua identidade.
             </p>
+
             <p>
               Em breve, este espaço receberá as informações
               e fotografias oficiais da empresa.
             </p>
-            <a href="#historia" className="btn btn-red">
-              Conheça nossa história <ArrowUpRight size={18} />
+
+            <a href="#contato" className="btn btn-red">
+              Conheça nossa história
+              <ArrowUpRight size={18} />
             </a>
           </div>
         </section>
@@ -172,9 +202,15 @@ export default function Home() {
           <div className="container">
             <div className="section-heading">
               <div>
-                <span className="eyebrow">SABORES E INSPIRAÇÕES</span>
-                <h2>Receitas para <span>experimentar.</span></h2>
+                <span className="eyebrow">
+                  SABORES E INSPIRAÇÕES
+                </span>
+
+                <h2>
+                  Receitas para <span>experimentar.</span>
+                </h2>
               </div>
+
               <p>
                 Descubra ideias de pratos e diferentes maneiras
                 de preparar receitas com charque.
@@ -184,12 +220,19 @@ export default function Home() {
             <div className="recipes-grid">
               {receitas.map((receita) => (
                 <article className="recipe-card" key={receita.nome}>
-                  <img src={receita.imagem} alt={receita.nome} />
+                  <img
+                    src={receita.imagem}
+                    alt={`Imagem ilustrativa de ${receita.nome}`}
+                    loading="lazy"
+                  />
+
                   <div className="recipe-content">
                     <span>RECEITAS</span>
                     <h3>{receita.nome}</h3>
+
                     <a href="#contato">
-                      Ver receita <ArrowUpRight size={18} />
+                      Ver receita
+                      <ArrowUpRight size={18} />
                     </a>
                   </div>
                 </article>
@@ -202,20 +245,28 @@ export default function Home() {
           <div className="container location-content">
             <div>
               <span className="eyebrow">ONDE ESTAMOS</span>
-              <h2>Venha conhecer a <span>Camará.</span></h2>
+
+              <h2>
+                Venha conhecer a <span>Camará.</span>
+              </h2>
+
               <p>
                 Em breve, você encontrará aqui nosso endereço
                 oficial e as informações para chegar até nós.
               </p>
+
               <a href="#contato" className="btn btn-red">
-                Entre em contato <ArrowUpRight size={18} />
+                Entre em contato
+                <ArrowUpRight size={18} />
               </a>
             </div>
 
             <div className="location-placeholder">
               <MapPin size={42} />
               <strong>Localização da Camará</strong>
-              <span>Mapa disponível após confirmação do endereço</span>
+              <span>
+                Mapa disponível após confirmação do endereço
+              </span>
             </div>
           </div>
         </section>

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Menu, X, ArrowUpRight } from "lucide-react";
-import "../style/Header.css";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import "../styles/Header.css";
 
 const links = [
   { label: "Início", href: "#inicio" },
@@ -13,36 +13,45 @@ const links = [
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
     <header className="site-header">
       <div className="container header-content">
-        <a href="#inicio" className="brand" aria-label="Camará - Início">
-          <span className="brand-name">CAMARÁ<span>.</span></span>
+        <a
+          href="#inicio"
+          className="brand"
+          aria-label="Camará Distribuidora - Início"
+          onClick={closeMenu}
+        >
+          <span className="brand-name">CAMARÁ</span>
           <span className="brand-subtitle">DISTRIBUIDORA</span>
         </a>
 
-        <nav className={menuOpen ? "header-nav open" : "header-nav"} aria-label="Menu principal">
-          {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-            >
-              {link.label}
+        <nav
+          className={`header-nav${menuOpen ? " open" : ""}`}
+          aria-label="Navegação principal"
+          id="header-navigation"
+        >
+          {links.map(({ label, href }) => (
+            <a key={href} href={href} onClick={closeMenu}>
+              {label}
             </a>
           ))}
         </nav>
 
-        <a className="header-contact" href="#contato">
-          Entre em contato <ArrowUpRight size={17} />
+        <a href="#contato" className="header-contact">
+          Entre em contato
+          <ArrowUpRight size={17} aria-hidden="true" />
         </a>
 
         <button
-          className="menu-toggle"
           type="button"
+          className="menu-toggle"
           aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
           aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(!menuOpen)}
+          aria-controls="header-navigation"
+          onClick={() => setMenuOpen((open) => !open)}
         >
           {menuOpen ? <X size={25} /> : <Menu size={25} />}
         </button>

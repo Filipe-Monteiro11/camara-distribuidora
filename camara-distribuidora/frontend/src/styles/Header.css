@@ -2,43 +2,45 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #eeeeee;
 }
 
 .header-content {
-  min-height: 90px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 30px;
+  min-height: 90px;
 }
+
+/* LOGOMARCA PROVISÓRIA */
 
 .brand {
   display: flex;
   flex-direction: column;
-  text-decoration: none;
+  flex-shrink: 0;
   line-height: 1;
+  text-decoration: none;
 }
 
 .brand-name {
   color: var(--red);
   font-size: 34px;
   font-weight: 900;
-  letter-spacing: -2px;
-}
-
-.brand-name span {
-  color: var(--yellow);
+  letter-spacing: -1.5px;
 }
 
 .brand-subtitle {
   margin-top: 5px;
-  color: #555;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 4px;
+  color: var(--red);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 3px;
 }
+
+/* NAVEGAÇÃO */
 
 .header-nav {
   display: flex;
@@ -47,78 +49,104 @@
 }
 
 .header-nav a {
-  color: #333;
+  color: #333333;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  transition: color .2s;
+  transition: color 0.2s ease;
 }
 
 .header-nav a:hover {
   color: var(--red);
 }
 
+/* CONTATO */
+
 .header-contact {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   gap: 10px;
   padding: 14px 19px;
   border-radius: 5px;
   background: var(--red);
-  color: white;
-  text-decoration: none;
+  color: #ffffff;
   font-size: 13px;
   font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s ease;
 }
 
 .header-contact:hover {
   background: var(--red-dark);
 }
 
+/* MENU MOBILE */
+
 .menu-toggle {
   display: none;
-  border: 0;
-  background: none;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: var(--red);
   cursor: pointer;
 }
 
-@media (max-width: 1000px) {
+/* RESPONSIVIDADE */
+
+@media (max-width: 1100px) {
   .header-nav {
     gap: 18px;
   }
-
-  .header-contact {
-    display: none;
-  }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .header-content {
     min-height: 74px;
   }
 
   .brand-name {
-    font-size: 28px;
+    font-size: 29px;
+  }
+
+  .header-contact {
+    display: none;
   }
 
   .menu-toggle {
-    display: block;
+    display: flex;
   }
 
   .header-nav {
-    display: none;
     position: absolute;
-    top: 74px;
-    left: 0;
+    top: 100%;
     right: 0;
-    padding: 24px;
-    background: white;
-    border-bottom: 1px solid #eee;
+    left: 0;
+    display: none;
     flex-direction: column;
     align-items: stretch;
+    gap: 0;
+    padding: 12px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid #eeeeee;
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.06);
   }
 
   .header-nav.open {
     display: flex;
+  }
+
+  .header-nav a {
+    padding: 14px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-nav a,
+  .header-contact {
+    transition: none;
   }
 }
