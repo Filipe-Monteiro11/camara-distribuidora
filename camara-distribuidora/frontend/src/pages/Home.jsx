@@ -67,40 +67,40 @@ export default function Home() {
             </h1>
 
             <p>
-              Conheça nossa linha de produtos e descubra mais
-              sobre a Camará Distribuidora.
+              Conheça nossa linha de produtos e descubra mais sobre
+              a Camará Distribuidora.
             </p>
 
             <div className="hero-actions">
               <a href="#produtos" className="btn btn-yellow">
                 Conhecer produtos
-                <ArrowUpRight size={18} />
+                <ArrowUpRight size={18} aria-hidden="true" />
               </a>
 
               <a href="#sobre" className="btn btn-outline">
                 Nossa história
-                <ArrowRight size={18} />
+                <ArrowRight size={18} aria-hidden="true" />
               </a>
             </div>
           </div>
 
-          <div className="hero-bottom-line" />
+          <div className="hero-bottom-line" aria-hidden="true" />
         </section>
 
         <section className="highlights" aria-label="Conheça a Camará">
           <div className="container highlights-grid">
             <div>
-              <PackageCheck size={29} />
+              <PackageCheck size={29} aria-hidden="true" />
               <span>Conheça nossos produtos</span>
             </div>
 
             <div>
-              <ShieldCheck size={29} />
+              <ShieldCheck size={29} aria-hidden="true" />
               <span>Saiba mais sobre a Camará</span>
             </div>
 
             <div>
-              <Truck size={29} />
+              <Truck size={29} aria-hidden="true" />
               <span>Entre em contato com nossa equipe</span>
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function Home() {
 
                     <a href="#contato" className="product-overlay">
                       Conversar com atendente
-                      <ArrowUpRight size={18} />
+                      <ArrowUpRight size={18} aria-hidden="true" />
                     </a>
                   </div>
 
@@ -144,7 +144,7 @@ export default function Home() {
 
                     <a href="#contato">
                       Saiba mais
-                      <ArrowUpRight size={16} />
+                      <ArrowUpRight size={16} aria-hidden="true" />
                     </a>
                   </div>
                 </article>
@@ -152,9 +152,9 @@ export default function Home() {
             </div>
 
             <div className="section-action">
-              <a className="btn btn-red" href="#contato">
+              <a href="#contato" className="btn btn-red">
                 Solicitar catálogo
-                <ArrowUpRight size={18} />
+                <ArrowUpRight size={18} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function Home() {
 
             <a href="#contato" className="btn btn-red">
               Conheça nossa história
-              <ArrowUpRight size={18} />
+              <ArrowUpRight size={18} aria-hidden="true" />
             </a>
           </div>
         </section>
@@ -202,9 +202,7 @@ export default function Home() {
           <div className="container">
             <div className="section-heading">
               <div>
-                <span className="eyebrow">
-                  SABORES E INSPIRAÇÕES
-                </span>
+                <span className="eyebrow">SABORES E INSPIRAÇÕES</span>
 
                 <h2>
                   Receitas para <span>experimentar.</span>
@@ -232,7 +230,7 @@ export default function Home() {
 
                     <a href="#contato">
                       Ver receita
-                      <ArrowUpRight size={18} />
+                      <ArrowUpRight size={18} aria-hidden="true" />
                     </a>
                   </div>
                 </article>
@@ -251,22 +249,24 @@ export default function Home() {
               </h2>
 
               <p>
-                Em breve, você encontrará aqui nosso endereço
-                oficial e as informações para chegar até nós.
+                Rua Exemplo, nº 100, Recife - PE
+                <br />
+                CEP: 00000-000
+                <br />
+                <small>Endereço ilustrativo para demonstração.</small>
               </p>
 
               <a href="#contato" className="btn btn-red">
                 Entre em contato
-                <ArrowUpRight size={18} />
+                <ArrowUpRight size={18} aria-hidden="true" />
               </a>
             </div>
 
             <div className="location-placeholder">
-              <MapPin size={42} />
-              <strong>Localização da Camará</strong>
-              <span>
-                Mapa disponível após confirmação do endereço
-              </span>
+              <MapPin size={42} aria-hidden="true" />
+              <strong>Camará Distribuidora</strong>
+              <span>Recife - Pernambuco</span>
+              <span>Endereço ilustrativo</span>
             </div>
           </div>
         </section>

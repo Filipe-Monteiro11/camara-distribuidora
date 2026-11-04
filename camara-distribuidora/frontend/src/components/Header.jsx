@@ -1,13 +1,14 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import "../styles/Header.css";
 
 const links = [
-  { label: "Início", href: "#inicio" },
-  { label: "Produtos", href: "#produtos" },
-  { label: "Sobre nós", href: "#sobre" },
-  { label: "Receitas", href: "#receitas" },
-  { label: "Localização", href: "#localizacao" },
+  { label: "Início", href: "/#inicio" },
+  { label: "Produtos", href: "/produtos" },
+  { label: "Sobre nós", href: "/#sobre" },
+  { label: "Receitas", href: "/#receitas" },
+  { label: "Localização", href: "/#localizacao" },
 ];
 
 export default function Header() {
@@ -18,15 +19,15 @@ export default function Header() {
   return (
     <header className="site-header">
       <div className="container header-content">
-        <a
-          href="#inicio"
+        <Link
+          to="/#inicio"
           className="brand"
           aria-label="Camará Distribuidora - Início"
           onClick={closeMenu}
         >
           <span className="brand-name">CAMARÁ</span>
           <span className="brand-subtitle">DISTRIBUIDORA</span>
-        </a>
+        </Link>
 
         <nav
           className={`header-nav${menuOpen ? " open" : ""}`}
@@ -34,16 +35,20 @@ export default function Header() {
           id="header-navigation"
         >
           {links.map(({ label, href }) => (
-            <a key={href} href={href} onClick={closeMenu}>
+            <Link key={href} to={href} onClick={closeMenu}>
               {label}
-            </a>
+            </Link>
           ))}
         </nav>
 
-        <a href="#contato" className="header-contact">
+        <Link
+          to="/#contato"
+          className="header-contact"
+          onClick={closeMenu}
+        >
           Entre em contato
           <ArrowUpRight size={17} aria-hidden="true" />
-        </a>
+        </Link>
 
         <button
           type="button"
