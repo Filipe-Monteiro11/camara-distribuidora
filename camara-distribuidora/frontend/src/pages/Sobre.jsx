@@ -1,8 +1,31 @@
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Building2, History, Image } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Building2,
+  Camera,
+  History,
+  Images,
+} from "lucide-react";
+
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "../styles/Sobre.css";
+
+const galeria = [
+  {
+    titulo: "Nossa estrutura",
+    descricao: "Fotografias oficiais em breve",
+  },
+  {
+    titulo: "Nossas instalações",
+    descricao: "Fotografias oficiais em breve",
+  },
+  {
+    titulo: "Nosso ambiente",
+    descricao: "Fotografias oficiais em breve",
+  },
+];
 
 export default function Sobre() {
   return (
@@ -11,104 +34,178 @@ export default function Sobre() {
 
       <main className="about-page">
         <section className="about-hero">
-          <div className="container">
-            <span className="about-eyebrow">CONHEÇA A CAMARÁ</span>
+          <div className="container about-hero-content">
+            <span className="about-eyebrow">
+              CAMARÁ DISTRIBUIDORA
+            </span>
+
             <h1>
-              Nossa história, <span>nossa essência.</span>
+              Nossa história.
+              <br />
+              Nossa <span>essência.</span>
             </h1>
+
             <p>
-              Conheça mais sobre a Camará Distribuidora, sua
-              trajetória e a identidade da marca.
+              Conheça a Camará Distribuidora, descubra
+              o espaço dedicado à nossa trajetória
+              e saiba mais sobre a identidade da marca.
             </p>
+
+            <a href="#nossa-historia" className="about-hero-link">
+              Conheça nossa história
+              <ArrowRight size={18} />
+            </a>
           </div>
         </section>
 
-        <section className="about-section">
-          <div className="container about-grid">
-            <div className="about-image-placeholder">
-              <Building2 size={48} strokeWidth={1.4} />
-              <span>Foto oficial da empresa</span>
+        <section
+          className="about-story-section"
+          id="nossa-historia"
+        >
+          <div className="container about-story-grid">
+            <div className="about-story-visual">
+              <div className="about-story-image">
+                <img
+                  src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=85"
+                  alt="Imagem ilustrativa de ambiente industrial"
+                  loading="lazy"
+                />
+              </div>
+
+              <span className="about-image-label">
+                IMAGEM ILUSTRATIVA
+              </span>
             </div>
 
-            <div className="about-content">
+            <div className="about-story-content">
               <span className="about-eyebrow">
                 <History size={17} />
                 NOSSA TRAJETÓRIA
               </span>
 
-              <h2>Uma história para contar</h2>
+              <h2>
+                Uma história que
+                <br />
+                merece ser <span>contada.</span>
+              </h2>
 
               <p>
-                Este espaço será dedicado à história da Camará
-                Distribuidora, desde sua fundação até os dias atuais.
+                Toda empresa tem uma trajetória formada
+                por pessoas, experiências e momentos
+                importantes.
               </p>
 
               <p>
-                Aqui apresentaremos as principais conquistas, os
-                valores e os momentos que marcaram o crescimento
-                da empresa.
+                Este espaço será dedicado à história
+                oficial da Camará Distribuidora,
+                desde sua fundação até os dias atuais.
               </p>
 
-              <span className="about-pending">
-                Conteúdo oficial a ser fornecido pela empresa.
-              </span>
+              <p>
+                Aqui apresentaremos os principais
+                acontecimentos, as conquistas e os
+                caminhos que fazem parte de sua identidade.
+              </p>
+
+              <div className="about-info-note">
+                <Building2 size={19} />
+                <span>
+                  Aguardando informações históricas
+                  oficiais da empresa.
+                </span>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="about-section about-logo-section">
-          <div className="container about-grid">
-            <div className="about-content">
+        <section className="about-identity-section">
+          <div className="container about-identity-grid">
+            <div className="about-identity-content">
               <span className="about-eyebrow">
-                <History size={17} />
                 NOSSA IDENTIDADE
               </span>
 
-              <h2>A história da nossa marca</h2>
+              <h2>
+                Uma marca com
+                <br />
+                <span>identidade própria.</span>
+              </h2>
 
               <p>
-                A logomarca é parte importante da identidade de
-                uma empresa. Nesta seção, vamos apresentar a
-                origem da marca Camará e o significado de seus
-                elementos visuais.
+                Uma marca representa muito mais
+                do que um nome. Ela comunica a identidade
+                de uma empresa e a forma como deseja
+                ser reconhecida.
               </p>
 
-              <span className="about-pending">
-                Aguardando a história e a logomarca oficiais.
-              </span>
+              <p>
+                Em breve, esta seção apresentará
+                a origem da logomarca Camará
+                e o significado dos elementos
+                que fazem parte de sua história.
+              </p>
+
+              <div className="about-identity-note">
+                História e logomarca oficiais
+                em preparação.
+              </div>
             </div>
 
-            <div className="about-logo-placeholder">
-              <span className="about-logo-name">CAMARÁ</span>
-              <span className="about-logo-subtitle">
-                DISTRIBUIDORA
-              </span>
-              <small>Identidade visual provisória</small>
+            <div className="about-brand-card">
+              <div className="about-brand-symbol">
+                <span>CAMARÁ</span>
+                <small>DISTRIBUIDORA</small>
+              </div>
+
+              <div className="about-brand-bottom">
+                <span>IDENTIDADE VISUAL</span>
+                <span>PROVISÓRIA</span>
+              </div>
             </div>
           </div>
         </section>
 
         <section className="about-gallery-section">
           <div className="container">
-            <div className="about-gallery-heading">
-              <span className="about-eyebrow">
-                <Image size={17} />
-                NOSSA ESTRUTURA
-              </span>
+            <div className="about-gallery-header">
+              <div>
+                <span className="about-eyebrow">
+                  <Images size={17} />
+                  NOSSA ESTRUTURA
+                </span>
 
-              <h2>Conheça nossa estrutura</h2>
+                <h2>
+                  Conheça mais
+                  <br />
+                  sobre a <span>Camará.</span>
+                </h2>
+              </div>
+
               <p>
-                Em breve, fotos das instalações e das indústrias
-                relacionadas à Camará Distribuidora.
+                Um espaço reservado para apresentar
+                fotografias das instalações, ambientes
+                e estruturas relacionadas à empresa.
               </p>
             </div>
 
-            <div className="about-gallery">
-              {[1, 2, 3].map((item) => (
-                <div className="about-gallery-placeholder" key={item}>
-                  <Image size={30} strokeWidth={1.4} />
-                  <span>Foto {item}</span>
-                </div>
+            <div className="about-gallery-grid">
+              {galeria.map((item, index) => (
+                <article
+                  className="about-gallery-card"
+                  key={item.titulo}
+                >
+                  <div className="about-gallery-visual">
+                    <Camera size={35} strokeWidth={1.4} />
+                    <span>
+                      FOTO 0{index + 1}
+                    </span>
+                  </div>
+
+                  <div className="about-gallery-info">
+                    <h3>{item.titulo}</h3>
+                    <p>{item.descricao}</p>
+                  </div>
+                </article>
               ))}
             </div>
           </div>
@@ -117,16 +214,25 @@ export default function Sobre() {
         <section className="about-cta">
           <div className="container about-cta-content">
             <div>
-              <span>CAMARÁ DISTRIBUIDORA</span>
-              <h2>Conheça nossos produtos</h2>
+              <span className="about-eyebrow">
+                CAMARÁ DISTRIBUIDORA
+              </span>
+
+              <h2>
+                Conheça nossa linha
+                <br />
+                de produtos.
+              </h2>
+
               <p>
-                Explore o catálogo e descubra os produtos da Camará.
+                Explore nosso catálogo e descubra
+                mais sobre a seleção Camará.
               </p>
             </div>
 
-            <Link to="/produtos">
-              Ver produtos
-              <ArrowUpRight size={18} />
+            <Link to="/produtos" className="about-cta-button">
+              Explorar produtos
+              <ArrowUpRight size={19} />
             </Link>
           </div>
         </section>

@@ -5,7 +5,7 @@ import {
   CheckCircle2,
   FileText,
   Mail,
-  MapPin,
+  ShieldCheck,
   Upload,
   Users,
   X,
@@ -25,6 +25,36 @@ const initialForm = {
   mensagem: "",
 };
 
+const areas = [
+  "Administrativo",
+  "Comercial",
+  "Logística",
+  "Estoque",
+  "Operacional",
+  "Outras áreas",
+];
+
+const destaques = [
+  {
+    icon: Users,
+    titulo: "Faça parte da equipe",
+    descricao:
+      "Conheça nosso espaço dedicado a profissionais interessados em fazer parte da Camará.",
+  },
+  {
+    icon: BriefcaseBusiness,
+    titulo: "Sua área de interesse",
+    descricao:
+      "Informe a área em que deseja atuar e apresente suas experiências profissionais.",
+  },
+  {
+    icon: FileText,
+    titulo: "Apresente seu currículo",
+    descricao:
+      "Prepare seu currículo em PDF para futuras oportunidades na distribuidora.",
+  },
+];
+
 export default function TrabalheConosco() {
   const [form, setForm] = useState(initialForm);
   const [curriculo, setCurriculo] = useState(null);
@@ -42,7 +72,6 @@ export default function TrabalheConosco() {
 
   function handleFile(event) {
     const file = event.target.files?.[0];
-
     setErro("");
 
     if (!file) {
@@ -112,14 +141,14 @@ export default function TrabalheConosco() {
             </h1>
 
             <p>
-              Quer fazer parte da Camará Distribuidora?
-              Conheça nosso espaço de oportunidades
-              e prepare seu currículo.
+              Grandes histórias são construídas por pessoas.
+              Conheça nosso espaço dedicado a quem deseja
+              fazer parte da Camará Distribuidora.
             </p>
 
             <a href="#candidatura" className="careers-hero-link">
-              Cadastrar currículo
-              <ArrowUpRight size={19} />
+              Conhecer o cadastro
+              <ArrowUpRight size={19} aria-hidden="true" />
             </a>
           </div>
         </section>
@@ -127,7 +156,7 @@ export default function TrabalheConosco() {
         <section className="careers-intro">
           <div className="container careers-intro-grid">
             <div>
-              <span className="eyebrow">
+              <span className="careers-section-label">
                 TRABALHE CONOSCO
               </span>
 
@@ -140,66 +169,53 @@ export default function TrabalheConosco() {
 
             <div className="careers-intro-text">
               <p>
-                Este espaço foi criado para pessoas
-                interessadas em futuras oportunidades
-                na Camará Distribuidora.
+                A Camará Distribuidora está preparando um
+                espaço dedicado a profissionais interessados
+                em futuras oportunidades.
               </p>
 
               <p>
-                Em breve, será possível enviar seus dados
-                e currículo para avaliação da equipe responsável.
+                Em breve, será possível apresentar suas
+                experiências e encaminhar seu currículo
+                para avaliação da equipe responsável.
               </p>
             </div>
           </div>
         </section>
 
         <section className="careers-features">
-          <div className="container careers-features-grid">
-            <article>
-              <div className="careers-feature-icon">
-                <Users size={27} />
-              </div>
+          <div className="container">
+            <div className="careers-features-heading">
+              <span className="careers-section-label">
+                SUA JORNADA
+              </span>
 
-              <h3>Faça parte da equipe</h3>
+              <h2>
+                O primeiro passo para
+                <br />
+                novas <span>possibilidades.</span>
+              </h2>
+            </div>
 
-              <p>
-                Conheça nosso canal dedicado a pessoas
-                interessadas em trabalhar na Camará.
-              </p>
-            </article>
+            <div className="careers-features-grid">
+              {destaques.map(({ icon: Icon, titulo, descricao }) => (
+                <article key={titulo}>
+                  <div className="careers-feature-icon">
+                    <Icon size={26} strokeWidth={1.7} aria-hidden="true" />
+                  </div>
 
-            <article>
-              <div className="careers-feature-icon">
-                <BriefcaseBusiness size={27} />
-              </div>
-
-              <h3>Áreas de interesse</h3>
-
-              <p>
-                Informe a área em que deseja atuar
-                para facilitar a identificação do seu perfil.
-              </p>
-            </article>
-
-            <article>
-              <div className="careers-feature-icon">
-                <FileText size={27} />
-              </div>
-
-              <h3>Cadastro de currículo</h3>
-
-              <p>
-                Prepare suas informações profissionais
-                e seu currículo em formato PDF.
-              </p>
-            </article>
+                  <h3>{titulo}</h3>
+                  <p>{descricao}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
         <section className="careers-application" id="candidatura">
           <div className="container careers-application-grid">
             <div className="careers-application-info">
-              <span className="eyebrow">
+              <span className="careers-section-label">
                 CADASTRO DE CANDIDATOS
               </span>
 
@@ -210,33 +226,33 @@ export default function TrabalheConosco() {
               </h2>
 
               <p>
-                Preencha suas informações e anexe
-                seu currículo. O recebimento das
-                candidaturas será ativado após
+                Prepare seus dados e seu currículo para
+                futuras oportunidades. O recebimento das
+                candidaturas será disponibilizado após
                 a integração do formulário.
               </p>
 
               <div className="careers-info-list">
                 <div>
-                  <Mail size={21} />
+                  <Mail size={21} aria-hidden="true" />
 
                   <span>
-                    <strong>Contato profissional</strong>
-                    Informe um e-mail válido para contato.
+                    <strong>Informações de contato</strong>
+                    Utilize um e-mail e telefone válidos.
                   </span>
                 </div>
 
                 <div>
-                  <MapPin size={21} />
+                  <BriefcaseBusiness size={21} aria-hidden="true" />
 
                   <span>
-                    <strong>Localização</strong>
-                    Informações oficiais em breve.
+                    <strong>Área de interesse</strong>
+                    Escolha a área em que deseja atuar.
                   </span>
                 </div>
 
                 <div>
-                  <CheckCircle2 size={21} />
+                  <CheckCircle2 size={21} aria-hidden="true" />
 
                   <span>
                     <strong>Currículo em PDF</strong>
@@ -244,17 +260,23 @@ export default function TrabalheConosco() {
                   </span>
                 </div>
               </div>
+
+              <div className="careers-info-notice">
+                <ShieldCheck size={22} aria-hidden="true" />
+                <p>
+                  Este formulário é uma demonstração.
+                  Nenhum dado pessoal será enviado
+                  ou armazenado nesta etapa.
+                </p>
+              </div>
             </div>
 
-            <form
-              className="careers-form"
-              onSubmit={handleSubmit}
-            >
+            <form className="careers-form" onSubmit={handleSubmit}>
               <div className="careers-form-header">
                 <span>FORMULÁRIO DE CANDIDATURA</span>
                 <h3>Seus dados profissionais</h3>
                 <p>
-                  Preencha os campos abaixo para
+                  Preencha as informações abaixo para
                   preparar sua candidatura.
                 </p>
               </div>
@@ -327,27 +349,13 @@ export default function TrabalheConosco() {
                   onChange={handleChange}
                   required
                 >
-                  <option value="">
-                    Selecione uma área
-                  </option>
-                  <option value="Administrativo">
-                    Administrativo
-                  </option>
-                  <option value="Comercial">
-                    Comercial
-                  </option>
-                  <option value="Logística">
-                    Logística
-                  </option>
-                  <option value="Estoque">
-                    Estoque
-                  </option>
-                  <option value="Operacional">
-                    Operacional
-                  </option>
-                  <option value="Outras áreas">
-                    Outras áreas
-                  </option>
+                  <option value="">Selecione uma área</option>
+
+                  {areas.map((area) => (
+                    <option key={area} value={area}>
+                      {area}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -376,13 +384,13 @@ export default function TrabalheConosco() {
                   htmlFor="careers-curriculo"
                   className="careers-upload"
                 >
-                  <Upload size={26} />
+                  <Upload size={27} strokeWidth={1.7} aria-hidden="true" />
 
                   <strong>
                     Clique para selecionar seu currículo
                   </strong>
 
-                  <span>PDF de até 5 MB</span>
+                  <span>Arquivo PDF de até 5 MB</span>
                 </label>
 
                 <input
@@ -397,8 +405,7 @@ export default function TrabalheConosco() {
 
                 {curriculo && (
                   <div className="careers-selected-file">
-                    <FileText size={19} />
-
+                    <FileText size={19} aria-hidden="true" />
                     <span>{curriculo.name}</span>
 
                     <button
@@ -406,7 +413,7 @@ export default function TrabalheConosco() {
                       onClick={removeFile}
                       aria-label="Remover currículo"
                     >
-                      <X size={18} />
+                      <X size={18} aria-hidden="true" />
                     </button>
                   </div>
                 )}
@@ -418,17 +425,14 @@ export default function TrabalheConosco() {
                 </p>
               )}
 
-              <button
-                type="submit"
-                className="careers-submit"
-              >
+              <button type="submit" className="careers-submit">
                 Enviar candidatura
-                <ArrowUpRight size={19} />
+                <ArrowUpRight size={19} aria-hidden="true" />
               </button>
 
               <p className="careers-form-note">
-                Formulário demonstrativo. Nenhum dado
-                será enviado até a integração com o backend.
+                Formulário demonstrativo. O envio de currículos
+                estará disponível após a integração com o backend.
               </p>
             </form>
           </div>
