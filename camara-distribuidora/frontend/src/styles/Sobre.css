@@ -1,8 +1,19 @@
+/* PÁGINA SOBRE */
+
 .about-page {
+  width: 100%;
+  overflow-x: clip;
   color: #252525;
 }
 
-.about-eyebrow {
+.about-page .container {
+  display: block;
+  width: min(1200px, calc(100% - 48px));
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+.about-page .about-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -12,77 +23,71 @@
   letter-spacing: 1.5px;
 }
 
-.about-hero {
+/* APRESENTAÇÃO */
+
+.about-page .about-hero {
   padding: 100px 0;
   background: #f8f5f1;
 }
 
-.about-hero h1 {
-  max-width: 750px;
+.about-page .about-hero h1 {
+  max-width: 800px;
   margin: 18px 0;
   font-size: clamp(40px, 5vw, 65px);
   line-height: 1.12;
   letter-spacing: -2px;
 }
 
-.about-hero h1 span {
+.about-page .about-hero h1 span {
   color: var(--red);
 }
 
-.about-hero p {
-  max-width: 560px;
+.about-page .about-hero p {
+  max-width: 600px;
+  margin: 0;
   color: #666;
+  font-size: 16px;
   line-height: 1.8;
 }
 
-.about-section {
+/* HISTÓRIA E IDENTIDADE */
+
+.about-page .about-section {
   padding: 100px 0;
 }
 
-.about-grid {
+.about-page .about-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  gap: 75px;
+  gap: 70px;
 }
 
-.about-image-placeholder,
-.about-logo-placeholder,
-.about-gallery-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  background: #eee8e1;
-  color: #9a8779;
+.about-page .about-grid > * {
+  min-width: 0;
 }
 
-.about-image-placeholder {
-  min-height: 420px;
-  border-radius: 10px;
+.about-page .about-content {
+  width: 100%;
+  max-width: 540px;
+  min-width: 0;
 }
 
-.about-image-placeholder span,
-.about-gallery-placeholder span {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.about-content h2 {
+.about-page .about-content h2 {
   margin: 20px 0;
   font-size: clamp(30px, 3.5vw, 44px);
   line-height: 1.2;
   letter-spacing: -1px;
 }
 
-.about-content p {
-  margin-bottom: 17px;
+.about-page .about-content p {
+  margin: 0 0 18px;
   color: #666;
+  font-size: 15px;
   line-height: 1.9;
 }
 
-.about-pending {
+.about-page .about-pending {
   display: inline-block;
   margin-top: 12px;
   color: #927b67;
@@ -90,95 +95,129 @@
   font-style: italic;
 }
 
-.about-logo-section {
+/* IMAGENS */
+
+.about-page .about-image-placeholder,
+.about-page .about-logo-placeholder,
+.about-page .about-gallery-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+  border-radius: 10px;
+  background: #eee8e1;
+  color: #9a8779;
+  text-align: center;
+}
+
+.about-page .about-image-placeholder {
+  min-height: 420px;
+}
+
+.about-page .about-image-placeholder span,
+.about-page .about-gallery-placeholder span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* LOGOMARCA */
+
+.about-page .about-logo-section {
   background: #faf8f5;
 }
 
-.about-logo-placeholder {
+.about-page .about-logo-placeholder {
   min-height: 350px;
-  border-radius: 10px;
+  padding: 30px;
   background: var(--red);
-  color: #fff;
+  color: #ffffff;
 }
 
-.about-logo-name {
-  font-size: clamp(38px, 5vw, 60px);
+.about-page .about-logo-name {
+  font-size: clamp(36px, 4vw, 60px);
   font-weight: 800;
   letter-spacing: 3px;
 }
 
-.about-logo-subtitle {
+.about-page .about-logo-subtitle {
   color: var(--yellow);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 6px;
+  letter-spacing: 5px;
 }
 
-.about-logo-placeholder small {
-  margin-top: 35px;
+.about-page .about-logo-placeholder small {
+  margin-top: 30px;
   color: #d7b9b9;
   font-size: 11px;
 }
 
-.about-gallery-section {
+/* GALERIA */
+
+.about-page .about-gallery-section {
   padding: 100px 0;
 }
 
-.about-gallery-heading {
+.about-page .about-gallery-heading {
+  max-width: 700px;
   margin-bottom: 35px;
 }
 
-.about-gallery-heading h2 {
+.about-page .about-gallery-heading h2 {
   margin: 15px 0;
   font-size: clamp(30px, 3.5vw, 42px);
 }
 
-.about-gallery-heading p {
+.about-page .about-gallery-heading p {
   color: #666;
   line-height: 1.8;
 }
 
-.about-gallery {
+.about-page .about-gallery {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
 
-.about-gallery-placeholder {
+.about-page .about-gallery-placeholder {
   min-height: 230px;
-  border-radius: 8px;
 }
 
-.about-cta {
+/* CHAMADA PARA PRODUTOS */
+
+.about-page .about-cta {
   padding: 65px 0;
   background: var(--red);
-  color: #fff;
+  color: #ffffff;
 }
 
-.about-cta-content {
+.about-page .about-cta-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 30px;
 }
 
-.about-cta-content span {
+.about-page .about-cta-content span {
   color: var(--yellow);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 1.5px;
 }
 
-.about-cta-content h2 {
+.about-page .about-cta-content h2 {
   margin: 12px 0;
   font-size: clamp(27px, 3vw, 38px);
 }
 
-.about-cta-content p {
+.about-page .about-cta-content p {
+  margin: 0;
   color: #e7d5d5;
 }
 
-.about-cta-content a {
+.about-page .about-cta-content a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -189,50 +228,78 @@
   background: var(--yellow);
   color: var(--red-dark);
   font-weight: 800;
-  text-decoration: none;
   transition: background 0.2s ease;
 }
 
-.about-cta-content a:hover {
+.about-page .about-cta-content a:hover {
   background: #ffd34d;
 }
 
-@media (max-width: 800px) {
-  .about-hero,
-  .about-section,
-  .about-gallery-section {
-    padding: 70px 0;
-  }
+/* RESPONSIVIDADE */
 
-  .about-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 900px) {
+  .about-page .about-grid {
     gap: 35px;
   }
 
-  .about-image-placeholder {
+  .about-page .about-image-placeholder {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 700px) {
+  .about-page .container {
+    width: calc(100% - 32px);
+  }
+
+  .about-page .about-hero,
+  .about-page .about-section,
+  .about-page .about-gallery-section {
+    padding: 65px 0;
+  }
+
+  .about-page .about-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 35px;
+  }
+
+  .about-page .about-content {
+    max-width: none;
+  }
+
+  .about-page .about-image-placeholder {
+    min-height: 280px;
+  }
+
+  .about-page .about-logo-placeholder {
     min-height: 300px;
   }
 
-  .about-gallery {
+  .about-page .about-gallery {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .about-cta-content {
+  .about-page .about-cta-content {
     align-items: flex-start;
     flex-direction: column;
   }
 }
 
 @media (max-width: 500px) {
-  .about-gallery {
+  .about-page .about-gallery {
     grid-template-columns: 1fr;
   }
 
-  .about-gallery-placeholder {
+  .about-page .about-gallery-placeholder {
     min-height: 190px;
   }
 
-  .about-logo-placeholder {
-    min-height: 280px;
+  .about-page .about-logo-name {
+    font-size: 36px;
+  }
+
+  .about-page .about-logo-subtitle {
+    font-size: 11px;
+    letter-spacing: 4px;
   }
 }

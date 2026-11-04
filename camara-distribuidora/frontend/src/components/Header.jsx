@@ -6,10 +6,9 @@ import "../styles/Header.css";
 const links = [
   { label: "Início", href: "/#inicio" },
   { label: "Produtos", href: "/produtos" },
-  { label: "Sobre nós", href: "/#sobre" },
+  { label: "Sobre nós", href: "/sobre" },
   { label: "Receitas", href: "/receitas" },
   { label: "Localização", href: "/#localizacao" },
-  { label: "Sobre nós", href: "/sobre" },
 ];
 
 export default function Header() {

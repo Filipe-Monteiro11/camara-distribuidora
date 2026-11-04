@@ -11,7 +11,9 @@
   --muted: #6f6f6f;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
