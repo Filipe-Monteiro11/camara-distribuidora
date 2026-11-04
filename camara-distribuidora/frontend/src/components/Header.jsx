@@ -8,7 +8,7 @@ const links = [
   { label: "Produtos", href: "/produtos" },
   { label: "Sobre nós", href: "/sobre" },
   { label: "Receitas", href: "/receitas" },
-  { label: "Localização", href: "/#localizacao" },
+  { label: "Trabalhe Conosco", href: "/trabalhe-conosco" },
 ];
 
 export default function Header() {
@@ -35,7 +35,11 @@ export default function Header() {
           aria-label="Navegação principal"
         >
           {links.map(({ label, href }) => (
-            <Link key={href} to={href} onClick={closeMenu}>
+            <Link
+              key={href}
+              to={href}
+              onClick={closeMenu}
+            >
               {label}
             </Link>
           ))}

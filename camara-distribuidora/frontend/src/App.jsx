@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Produtos from "./pages/Produtos";
 import Receitas from "./pages/Receitas";
 import Sobre from "./pages/Sobre";
+import TrabalheConosco from "./pages/TrabalheConosco";
 
 export default function App() {
   return (
@@ -15,6 +16,10 @@ export default function App() {
         <Route path="/produtos" element={<Produtos />} />
         <Route path="/receitas" element={<Receitas />} />
         <Route path="/sobre" element={<Sobre />} />
+        <Route
+          path="/trabalhe-conosco"
+          element={<TrabalheConosco />}
+        />
       </Routes>
     </BrowserRouter>
   );
