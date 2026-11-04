@@ -1,0 +1,246 @@
+/* APRESENTAÇÃO */
+
+.recipes-intro {
+  padding: 95px 0;
+  background: #f8f5f1;
+}
+
+.recipes-intro h1 {
+  margin: 15px 0;
+  font-size: clamp(42px, 5vw, 66px);
+  letter-spacing: -2px;
+}
+
+.recipes-intro h1 span {
+  color: var(--red);
+}
+
+.recipes-intro p {
+  max-width: 560px;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+/* LISTAGEM */
+
+.recipes-list-section {
+  padding: 90px 0 110px;
+}
+
+.recipes-list-heading {
+  margin-bottom: 40px;
+}
+
+.recipes-list-heading h2 {
+  margin: 12px 0;
+  font-size: clamp(28px, 3vw, 40px);
+}
+
+.recipes-list-heading p {
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.recipes-list-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.recipes-list-card {
+  overflow: hidden;
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  background: #ffffff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.recipes-list-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 35px rgba(84, 1, 1, 0.1);
+}
+
+.recipes-list-image {
+  height: 250px;
+  overflow: hidden;
+}
+
+.recipes-list-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.recipes-list-card:hover .recipes-list-image img {
+  transform: scale(1.05);
+}
+
+.recipes-list-info {
+  padding: 25px;
+}
+
+.recipes-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.recipes-list-info h3 {
+  margin: 14px 0 10px;
+  font-size: 20px;
+}
+
+.recipes-list-info p {
+  min-height: 48px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.recipes-list-info button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--red);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.recipes-list-info button:hover {
+  color: var(--red-dark);
+}
+
+/* DETALHES DA RECEITA */
+
+.recipe-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.recipe-modal {
+  position: relative;
+  width: min(700px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.recipe-modal > img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.recipe-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--red);
+}
+
+.recipe-modal-content {
+  padding: 35px;
+}
+
+.recipe-modal-content h2 {
+  margin: 12px 0;
+  font-size: clamp(27px, 4vw, 36px);
+}
+
+.recipe-modal-content h3 {
+  margin: 30px 0 15px;
+  color: var(--red);
+  font-size: 19px;
+}
+
+.recipe-modal-content ul,
+.recipe-modal-content ol {
+  padding-left: 22px;
+  color: #555555;
+  line-height: 2;
+}
+
+.recipe-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 25px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--red);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.recipe-back:hover {
+  background: var(--red-dark);
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 900px) {
+  .recipes-list-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .recipes-intro {
+    padding: 65px 0;
+  }
+
+  .recipes-list-section {
+    padding: 65px 0;
+  }
+
+  .recipes-list-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-modal-backdrop {
+    padding: 12px;
+  }
+
+  .recipe-modal > img {
+    height: 180px;
+  }
+
+  .recipe-modal-content {
+    padding: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .recipes-list-card,
+  .recipes-list-image img {
+    transition: none;
+  }
+
+  .recipes-list-card:hover,
+  .recipes-list-card:hover .recipes-list-image img {
+    transform: none;
+  }
+}

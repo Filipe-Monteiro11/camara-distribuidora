@@ -7,8 +7,9 @@ const links = [
   { label: "Início", href: "/#inicio" },
   { label: "Produtos", href: "/produtos" },
   { label: "Sobre nós", href: "/#sobre" },
-  { label: "Receitas", href: "/#receitas" },
+  { label: "Receitas", href: "/receitas" },
   { label: "Localização", href: "/#localizacao" },
+  { label: "Sobre nós", href: "/sobre" },
 ];
 
 export default function Header() {
@@ -31,8 +32,8 @@ export default function Header() {
 
         <nav
           className={`header-nav${menuOpen ? " open" : ""}`}
-          aria-label="Navegação principal"
           id="header-navigation"
+          aria-label="Navegação principal"
         >
           {links.map(({ label, href }) => (
             <Link key={href} to={href} onClick={closeMenu}>
@@ -58,7 +59,11 @@ export default function Header() {
           aria-controls="header-navigation"
           onClick={() => setMenuOpen((open) => !open)}
         >
-          {menuOpen ? <X size={25} /> : <Menu size={25} />}
+          {menuOpen ? (
+            <X size={25} aria-hidden="true" />
+          ) : (
+            <Menu size={25} aria-hidden="true" />
+          )}
         </button>
       </div>
     </header>
