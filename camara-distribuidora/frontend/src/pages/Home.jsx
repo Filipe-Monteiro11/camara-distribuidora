@@ -1,8 +1,10 @@
+import { Link } from "react-router-dom";
 import {
   ArrowRight,
   ArrowUpRight,
+  Check,
   MapPin,
-  PackageCheck,
+  Package,
   ShieldCheck,
   Truck,
 } from "lucide-react";
@@ -14,21 +16,24 @@ import "../styles/Home.css";
 const produtos = [
   {
     nome: "Charque Tradicional",
-    descricao: "Conheça nossa seleção de carnes e opções disponíveis.",
+    categoria: "LINHA DE CHARQUE",
+    descricao: "Conheça as opções disponíveis em nosso catálogo.",
     imagem:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=1000&q=85",
   },
   {
     nome: "Cortes Especiais",
-    descricao: "Produtos selecionados para diferentes preparações.",
+    categoria: "SELEÇÃO DE CARNES",
+    descricao: "Explore nossa seleção de cortes e produtos.",
     imagem:
-      "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?auto=format&fit=crop&w=1000&q=85",
   },
   {
     nome: "Linha de Carnes",
-    descricao: "Confira as opções do nosso catálogo de produtos.",
+    categoria: "NOSSO CATÁLOGO",
+    descricao: "Descubra as opções para diferentes preparações.",
     imagem:
-      "https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=1000&q=85",
   },
 ];
 
@@ -36,12 +41,12 @@ const receitas = [
   {
     nome: "Escondidinho de Charque",
     imagem:
-      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1000&q=85",
   },
   {
     nome: "Charque com Macaxeira",
     imagem:
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85",
   },
 ];
 
@@ -56,52 +61,94 @@ export default function Home() {
           <div className="hero-overlay" aria-hidden="true" />
 
           <div className="container hero-content">
-            <span className="eyebrow hero-eyebrow">
-              CONHEÇA A CAMARÁ DISTRIBUIDORA
+            <span className="hero-tag">
+              CAMARÁ DISTRIBUIDORA
             </span>
 
             <h1>
-              Qualidade que faz
+              O sabor da tradição
               <br />
-              parte da sua <em>mesa.</em>
+              em cada <em>escolha.</em>
             </h1>
 
             <p>
-              Conheça nossa linha de produtos e descubra mais sobre
-              a Camará Distribuidora.
+              Conheça a Camará Distribuidora e explore nossa
+              seleção de carnes e produtos para diferentes
+              momentos à mesa.
             </p>
 
             <div className="hero-actions">
-              <a href="#produtos" className="btn btn-yellow">
-                Conhecer produtos
-                <ArrowUpRight size={18} aria-hidden="true" />
-              </a>
+              <Link to="/produtos" className="btn btn-yellow">
+                Explorar produtos
+                <ArrowUpRight size={18} />
+              </Link>
 
-              <a href="#sobre" className="btn btn-outline">
-                Nossa história
-                <ArrowRight size={18} aria-hidden="true" />
-              </a>
+              <Link to="/sobre" className="hero-secondary">
+                Conheça a Camará
+                <ArrowRight size={18} />
+              </Link>
+            </div>
+
+            <div className="hero-caption">
+              <span className="hero-caption-line" />
+              CONHEÇA NOSSA MARCA
             </div>
           </div>
-
-          <div className="hero-bottom-line" aria-hidden="true" />
         </section>
 
-        <section className="highlights" aria-label="Conheça a Camará">
+        <section className="highlights">
           <div className="container highlights-grid">
-            <div>
-              <PackageCheck size={29} aria-hidden="true" />
-              <span>Conheça nossos produtos</span>
+            <div className="highlight-item">
+              <Package size={30} strokeWidth={1.6} />
+              <div>
+                <strong>Nosso catálogo</strong>
+                <span>Explore nossas linhas de produtos</span>
+              </div>
             </div>
 
-            <div>
-              <ShieldCheck size={29} aria-hidden="true" />
-              <span>Saiba mais sobre a Camará</span>
+            <div className="highlight-item">
+              <ShieldCheck size={30} strokeWidth={1.6} />
+              <div>
+                <strong>Conheça a Camará</strong>
+                <span>Saiba mais sobre nossa identidade</span>
+              </div>
             </div>
 
+            <div className="highlight-item">
+              <Truck size={30} strokeWidth={1.6} />
+              <div>
+                <strong>Atendimento</strong>
+                <span>Fale com nossa equipe</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="home-intro">
+          <div className="container home-intro-grid">
             <div>
-              <Truck size={29} aria-hidden="true" />
-              <span>Entre em contato com nossa equipe</span>
+              <span className="eyebrow">
+                BEM-VINDO À CAMARÁ
+              </span>
+
+              <h2>
+                Uma marca para
+                <br />
+                conhecer de perto.
+              </h2>
+            </div>
+
+            <div className="home-intro-text">
+              <p>
+                A Camará Distribuidora apresenta um espaço
+                dedicado aos seus produtos, à sua história
+                e ao contato com seus clientes.
+              </p>
+
+              <Link to="/sobre" className="text-link">
+                Saiba mais sobre nós
+                <ArrowUpRight size={18} />
+              </Link>
             </div>
           </div>
         </section>
@@ -110,16 +157,19 @@ export default function Home() {
           <div className="container">
             <div className="section-heading">
               <div>
-                <span className="eyebrow">NOSSO CATÁLOGO</span>
+                <span className="eyebrow">
+                  SELEÇÃO CAMARÁ
+                </span>
+
                 <h2>
                   Conheça nossos <span>produtos.</span>
                 </h2>
               </div>
 
-              <p>
-                Explore nossa linha de carnes e conheça as opções
-                disponíveis em nosso catálogo.
-              </p>
+              <Link to="/produtos" className="text-link">
+                Ver catálogo completo
+                <ArrowUpRight size={18} />
+              </Link>
             </div>
 
             <div className="products-grid">
@@ -132,35 +182,46 @@ export default function Home() {
                       loading="lazy"
                     />
 
-                    <a href="#contato" className="product-overlay">
-                      Conversar com atendente
-                      <ArrowUpRight size={18} aria-hidden="true" />
-                    </a>
+                    <span className="product-image-label">
+                      Imagem ilustrativa
+                    </span>
+
+                    <Link
+                      to="/produtos"
+                      className="product-overlay"
+                      aria-label={`Conhecer ${produto.nome}`}
+                    >
+                      <ArrowUpRight size={23} />
+                    </Link>
                   </div>
 
                   <div className="product-info">
+                    <span className="product-category">
+                      {produto.categoria}
+                    </span>
+
                     <h3>{produto.nome}</h3>
                     <p>{produto.descricao}</p>
 
-                    <a href="#contato">
-                      Saiba mais
-                      <ArrowUpRight size={16} aria-hidden="true" />
-                    </a>
+                    <Link to="/produtos">
+                      Conhecer produto
+                      <ArrowUpRight size={17} />
+                    </Link>
                   </div>
                 </article>
               ))}
             </div>
 
             <div className="section-action">
-              <a href="#contato" className="btn btn-red">
-                Solicitar catálogo
-                <ArrowUpRight size={18} aria-hidden="true" />
-              </a>
+              <Link to="/produtos" className="btn btn-red">
+                Ver todos os produtos
+                <ArrowUpRight size={18} />
+              </Link>
             </div>
           </div>
         </section>
 
-        <section className="about-section" id="sobre">
+        <section className="home-about-section" id="sobre">
           <div className="about-photo">
             <img
               src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1400&q=85"
@@ -168,33 +229,48 @@ export default function Home() {
               loading="lazy"
             />
 
-            <span className="image-note">Imagem ilustrativa</span>
+            <span className="image-note">
+              Imagem ilustrativa
+            </span>
           </div>
 
-          <div className="about-content">
-            <span className="eyebrow">SOBRE A CAMARÁ</span>
+          <div className="home-about-content">
+            <span className="eyebrow">
+              NOSSA HISTÓRIA
+            </span>
 
             <h2>
-              Uma história para
+              Muito mais que
               <br />
-              <span>compartilhar.</span>
+              <span>uma marca.</span>
             </h2>
 
             <p>
-              Toda empresa tem uma trajetória. Aqui você poderá
-              conhecer a história da Camará, a origem de sua marca
-              e os caminhos que fazem parte de sua identidade.
+              Toda empresa tem uma história. A Camará
+              também tem uma trajetória, uma identidade
+              e pessoas que fazem parte dela.
             </p>
 
             <p>
-              Em breve, este espaço receberá as informações
-              e fotografias oficiais da empresa.
+              Conheça o espaço dedicado à história
+              da distribuidora, à origem da marca
+              e à sua estrutura.
             </p>
 
-            <a href="#contato" className="btn btn-red">
+            <div className="about-check">
+              <Check size={17} />
+              História e identidade da marca
+            </div>
+
+            <div className="about-check">
+              <Check size={17} />
+              Estrutura e informações institucionais
+            </div>
+
+            <Link to="/sobre" className="btn btn-red">
               Conheça nossa história
-              <ArrowUpRight size={18} aria-hidden="true" />
-            </a>
+              <ArrowUpRight size={18} />
+            </Link>
           </div>
         </section>
 
@@ -202,21 +278,25 @@ export default function Home() {
           <div className="container">
             <div className="section-heading">
               <div>
-                <span className="eyebrow">SABORES E INSPIRAÇÕES</span>
+                <span className="eyebrow">
+                  SABORES E INSPIRAÇÕES
+                </span>
 
                 <h2>
-                  Receitas para <span>experimentar.</span>
+                  Da nossa seleção
+                  <br />
+                  para a <span>sua mesa.</span>
                 </h2>
               </div>
 
               <p>
-                Descubra ideias de pratos e diferentes maneiras
-                de preparar receitas com charque.
+                Explore inspirações de pratos e descubra
+                maneiras de preparar receitas com charque.
               </p>
             </div>
 
             <div className="recipes-grid">
-              {receitas.map((receita) => (
+              {receitas.map((receita, index) => (
                 <article className="recipe-card" key={receita.nome}>
                   <img
                     src={receita.imagem}
@@ -225,13 +305,15 @@ export default function Home() {
                   />
 
                   <div className="recipe-content">
-                    <span>RECEITAS</span>
+                    <span>
+                      INSPIRAÇÃO 0{index + 1}
+                    </span>
+
                     <h3>{receita.nome}</h3>
 
-                    <a href="#contato">
-                      Ver receita
-                      <ArrowUpRight size={18} aria-hidden="true" />
-                    </a>
+                    <span className="recipe-note">
+                      Receita em preparação
+                    </span>
                   </div>
                 </article>
               ))}
@@ -241,33 +323,60 @@ export default function Home() {
 
         <section className="location-section" id="localizacao">
           <div className="container location-content">
-            <div>
-              <span className="eyebrow">ONDE ESTAMOS</span>
+            <div className="location-text">
+              <span className="eyebrow">
+                LOCALIZAÇÃO
+              </span>
 
               <h2>
-                Venha conhecer a <span>Camará.</span>
+                Estamos prontos
+                <br />
+                para <span>conversar.</span>
               </h2>
 
               <p>
-                Rua Exemplo, nº 100, Recife - PE
-                <br />
-                CEP: 00000-000
-                <br />
-                <small>Endereço ilustrativo para demonstração.</small>
+                Em breve, disponibilizaremos o endereço
+                oficial e mais informações de contato
+                da Camará Distribuidora.
               </p>
 
               <a href="#contato" className="btn btn-red">
                 Entre em contato
-                <ArrowUpRight size={18} aria-hidden="true" />
+                <ArrowUpRight size={18} />
               </a>
             </div>
 
             <div className="location-placeholder">
-              <MapPin size={42} aria-hidden="true" />
+              <MapPin size={45} strokeWidth={1.5} />
               <strong>Camará Distribuidora</strong>
-              <span>Recife - Pernambuco</span>
-              <span>Endereço ilustrativo</span>
+              <span>Localização oficial em breve</span>
             </div>
+          </div>
+        </section>
+
+        <section className="home-cta">
+          <div className="container home-cta-content">
+            <div>
+              <span className="eyebrow">
+                CAMARÁ DISTRIBUIDORA
+              </span>
+
+              <h2>
+                Conheça nossa linha
+                <br />
+                de produtos.
+              </h2>
+
+              <p>
+                Explore nosso catálogo e descubra mais
+                sobre a Camará.
+              </p>
+            </div>
+
+            <Link to="/produtos" className="btn btn-yellow">
+              Acessar catálogo
+              <ArrowUpRight size={18} />
+            </Link>
           </div>
         </section>
       </main>
