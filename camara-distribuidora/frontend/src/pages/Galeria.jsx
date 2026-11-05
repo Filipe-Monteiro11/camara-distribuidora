@@ -1,22 +1,84 @@
 import { useEffect, useState } from "react";
 import { ImageIcon, Play, X, ArrowUpRight } from "lucide-react";
-import {categoriasGaleria,publicacoesGaleria,} from "../data/galeria";
+import {
+  categoriasGaleria,
+  publicacoesGaleria,
+} from "../data/galeria";
 import "../styles/Galeria.css";
+
+const GALERIA_KEY = "camara-galeria";
+
+function carregarPublicacoes() {
+  try {
+    const dados = localStorage.getItem(GALERIA_KEY);
+    const publicacoes = dados ? JSON.parse(dados) : publicacoesGaleria;
+
+    return Array.isArray(publicacoes)
+      ? publicacoes
+      : publicacoesGaleria;
+  } catch {
+    return publicacoesGaleria;
+  }
+}
+
+function obterUrlVideo(url) {
+  try {
+    const endereco = new URL(url);
+
+    if (endereco.hostname === "youtu.be") {
+      return `https://www.youtube.com/embed/${endereco.pathname.slice(1)}`;
+    }
+
+    if (
+      ["youtube.com", "www.youtube.com", "m.youtube.com"].includes(
+        endereco.hostname
+      )
+    ) {
+      const id = endereco.searchParams.get("v");
+
+      if (id) return `https://www.youtube.com/embed/${id}`;
+
+      if (endereco.pathname.startsWith("/embed/")) {
+        return endereco.href;
+      }
+
+      if (endereco.pathname.startsWith("/shorts/")) {
+        return `https://www.youtube.com/embed/${endereco.pathname.split("/")[2]}`;
+      }
+    }
+
+    return "";
+  } catch {
+    return "";
+  }
+}
 
 export default function Galeria() {
   const [categoria, setCategoria] = useState("Todos");
   const [publicacao, setPublicacao] = useState(null);
+  const [publicacoes, setPublicacoes] = useState(carregarPublicacoes);
 
-  const publicacoes = publicacoesGaleria.filter(
-    (item) =>
-      categoria === "Todos" || item.categoria === categoria
-  );
+  useEffect(() => {
+    const atualizarPublicacoes = () => {
+      setPublicacoes(carregarPublicacoes());
+    };
+
+    window.addEventListener("storage", atualizarPublicacoes);
+    window.addEventListener("focus", atualizarPublicacoes);
+
+    return () => {
+      window.removeEventListener("storage", atualizarPublicacoes);
+      window.removeEventListener("focus", atualizarPublicacoes);
+    };
+  }, []);
 
   useEffect(() => {
     if (!publicacao) return;
 
-    const fechar = (event) => {
-      if (event.key === "Escape") setPublicacao(null);
+    const fechar = (evento) => {
+      if (evento.key === "Escape") {
+        setPublicacao(null);
+      }
     };
 
     document.addEventListener("keydown", fechar);
@@ -30,15 +92,22 @@ export default function Galeria() {
     };
   }, [publicacao]);
 
-  const abrirPublicacao = (item) => {
-    if (item.tipo === "foto" && item.imagem) {
-      setPublicacao(item);
-    }
+  const publicacoesFiltradas = publicacoes.filter(
+    (item) =>
+      item.ativo !== false &&
+      (categoria === "Todos" || item.categoria === categoria)
+  );
 
-    if (item.tipo === "video" && item.video) {
+  function abrirPublicacao(item) {
+    const disponivel =
+      item.tipo === "video"
+        ? Boolean(obterUrlVideo(item.video))
+        : Boolean(item.imagem);
+
+    if (disponivel) {
       setPublicacao(item);
     }
-  };
+  }
 
   return (
     <main className="gallery-page">
@@ -92,9 +161,7 @@ export default function Galeria() {
               <button
                 key={item}
                 type="button"
-                className={
-                  categoria === item ? "active" : ""
-                }
+                className={categoria === item ? "active" : ""}
                 aria-pressed={categoria === item}
                 onClick={() => setCategoria(item)}
               >
@@ -104,17 +171,14 @@ export default function Galeria() {
           </div>
 
           <div className="gallery-grid">
-            {publicacoes.map((item) => {
+            {publicacoesFiltradas.map((item) => {
               const disponivel =
                 item.tipo === "video"
-                  ? Boolean(item.video)
+                  ? Boolean(obterUrlVideo(item.video))
                   : Boolean(item.imagem);
 
               return (
-                <article
-                  className="gallery-card"
-                  key={item.id}
-                >
+                <article className="gallery-card" key={item.id}>
                   <div className="gallery-card-media">
                     {item.imagem ? (
                       <img
@@ -130,9 +194,7 @@ export default function Galeria() {
                           <ImageIcon size={35} />
                         )}
 
-                        <span>
-                          Conteúdo em breve
-                        </span>
+                        <span>Conteúdo em breve</span>
                       </div>
                     )}
 
@@ -162,9 +224,7 @@ export default function Galeria() {
                       disabled={!disponivel}
                       onClick={() => abrirPublicacao(item)}
                     >
-                      {disponivel
-                        ? "Visualizar"
-                        : "Em breve"}
+                      {disponivel ? "Visualizar" : "Em breve"}
                       <ArrowUpRight size={17} />
                     </button>
                   </div>
@@ -172,6 +232,12 @@ export default function Galeria() {
               );
             })}
           </div>
+
+          {publicacoesFiltradas.length === 0 && (
+            <p className="gallery-notice">
+              Nenhuma publicação disponível nesta categoria.
+            </p>
+          )}
 
           <p className="gallery-notice">
             Conteúdos ilustrativos do protótipo.
@@ -188,9 +254,7 @@ export default function Galeria() {
               FIQUE POR DENTRO
             </span>
 
-            <h2>
-              Acompanhe a nossa jornada
-            </h2>
+            <h2>Acompanhe a nossa jornada</h2>
 
             <p>
               Em breve, novos registros, produtos
@@ -203,8 +267,8 @@ export default function Galeria() {
       {publicacao && (
         <div
           className="gallery-modal-backdrop"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
+          onMouseDown={(evento) => {
+            if (evento.target === evento.currentTarget) {
               setPublicacao(null);
             }
           }}
@@ -232,7 +296,7 @@ export default function Galeria() {
               />
             ) : (
               <iframe
-                src={publicacao.video}
+                src={obterUrlVideo(publicacao.video)}
                 title={publicacao.titulo}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen

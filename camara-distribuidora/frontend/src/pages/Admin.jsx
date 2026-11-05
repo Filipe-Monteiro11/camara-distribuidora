@@ -13,11 +13,16 @@ import {
   Search,
   Pencil,
   Trash2,
+  ImageIcon,
+  Play,
 } from "lucide-react";
+
 import { produtosIniciais } from "../data/produtos";
+import { categoriasGaleria, publicacoesGaleria } from "../data/galeria";
 import "../styles/Admin.css";
 
-const STORAGE_KEY = "camara-produtos";
+const PRODUTOS_KEY = "camara-produtos";
+const GALERIA_KEY = "camara-galeria";
 
 const menuItems = [
   { id: "dashboard", label: "Visão geral", icon: LayoutDashboard },
@@ -27,7 +32,7 @@ const menuItems = [
   { id: "configuracoes", label: "Configurações", icon: Settings },
 ];
 
-const formularioVazio = {
+const produtoVazio = {
   nome: "",
   descricao: "",
   categoria: "",
@@ -35,26 +40,88 @@ const formularioVazio = {
   ativo: true,
 };
 
-function carregarProdutos() {
+const publicacaoVazia = {
+  titulo: "",
+  descricao: "",
+  categoria: "Produtos",
+  tipo: "foto",
+  imagem: "",
+  video: "",
+  ativo: true,
+};
+
+function carregarDados(chave, iniciais) {
   try {
-    const salvos = localStorage.getItem(STORAGE_KEY);
-    return salvos ? JSON.parse(salvos) : produtosIniciais;
+    const dados = localStorage.getItem(chave);
+    const resultado = dados ? JSON.parse(dados) : iniciais;
+
+    return Array.isArray(resultado) ? resultado : iniciais;
   } catch {
-    return produtosIniciais;
+    return iniciais;
   }
+}
+
+function gerarId() {
+  return crypto.randomUUID();
 }
 
 export default function Admin() {
   const [pagina, setPagina] = useState("dashboard");
   const [menuAberto, setMenuAberto] = useState(false);
-  const [produtos, setProdutos] = useState(carregarProdutos);
+
+  const [produtos, setProdutos] = useState(() =>
+    carregarDados(PRODUTOS_KEY, produtosIniciais)
+  );
+
+  const [publicacoes, setPublicacoes] = useState(() =>
+    carregarDados(GALERIA_KEY, publicacoesGaleria)
+  );
+
   const [busca, setBusca] = useState("");
+  const [buscaGaleria, setBuscaGaleria] = useState("");
   const [formulario, setFormulario] = useState(null);
+  const [tipoFormulario, setTipoFormulario] = useState(null);
   const [editandoId, setEditandoId] = useState(null);
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(produtos));
+    try {
+      localStorage.setItem(PRODUTOS_KEY, JSON.stringify(produtos));
+    } catch {
+      console.error("Não foi possível salvar os produtos.");
+    }
   }, [produtos]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(GALERIA_KEY, JSON.stringify(publicacoes));
+    } catch {
+      console.error("Não foi possível salvar a galeria.");
+    }
+  }, [publicacoes]);
+
+  useEffect(() => {
+    if (!formulario) return;
+
+    const fechar = (evento) => {
+      if (evento.key === "Escape") {
+        setFormulario(null);
+        setTipoFormulario(null);
+        setEditandoId(null);
+        setErro("");
+      }
+    };
+
+    document.addEventListener("keydown", fechar);
+
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", fechar);
+      document.body.style.overflow = overflowAnterior;
+    };
+  }, [formulario]);
 
   const paginaAtual = menuItems.find((item) => item.id === pagina);
   const IconePagina = paginaAtual.icon;
@@ -63,70 +130,249 @@ export default function Admin() {
     produto.nome.toLowerCase().includes(busca.toLowerCase())
   );
 
-  const navegar = (destino) => {
-    setPagina(destino);
-    setMenuAberto(false);
-    setFormulario(null);
-  };
-
-  const abrirFormulario = (produto = null) => {
-    setEditandoId(produto?.id ?? null);
-    setFormulario(produto ? { ...produto } : { ...formularioVazio });
-  };
-
-  const salvarProduto = (evento) => {
-    evento.preventDefault();
-
-    const dados = {
-      ...formulario,
-      nome: formulario.nome.trim(),
-      descricao: formulario.descricao.trim(),
-      categoria: formulario.categoria.trim(),
-      imagem: formulario.imagem.trim(),
-    };
-
-    if (!dados.nome || !dados.descricao || !dados.categoria) return;
-
-    if (editandoId !== null) {
-      setProdutos((atuais) =>
-        atuais.map((produto) =>
-          produto.id === editandoId ? { ...dados, id: editandoId } : produto
-        )
-      );
-    } else {
-      setProdutos((atuais) => [
-        ...atuais,
-        { ...dados, id: crypto.randomUUID() },
-      ]);
-    }
-
-    setFormulario(null);
-    setEditandoId(null);
-  };
-
-  const excluirProduto = (produto) => {
-    if (!window.confirm(`Excluir o produto "${produto.nome}"?`)) return;
-
-    setProdutos((atuais) =>
-      atuais.filter((item) => item.id !== produto.id)
-    );
-  };
-
-  const alternarStatus = (id) => {
-    setProdutos((atuais) =>
-      atuais.map((produto) =>
-        produto.id === id
-          ? { ...produto, ativo: !produto.ativo }
-          : produto
-      )
-    );
-  };
+  const publicacoesFiltradas = publicacoes.filter((item) =>
+    item.titulo.toLowerCase().includes(buscaGaleria.toLowerCase())
+  );
 
   const resumo = [
-    { label: "Produtos cadastrados", value: produtos.length, icon: Package },
-    { label: "Publicações", value: "—", icon: Images },
-    { label: "Currículos recebidos", value: "—", icon: FileText },
+    {
+      label: "Produtos cadastrados",
+      value: produtos.length,
+      icon: Package,
+    },
+    {
+      label: "Publicações",
+      value: publicacoes.length,
+      icon: Images,
+    },
+    {
+      label: "Currículos recebidos",
+      value: "—",
+      icon: FileText,
+    },
   ];
+
+  function fecharFormulario() {
+    setFormulario(null);
+    setTipoFormulario(null);
+    setEditandoId(null);
+    setErro("");
+  }
+
+  function navegar(destino) {
+    setPagina(destino);
+    setMenuAberto(false);
+    fecharFormulario();
+  }
+
+  function abrirFormulario(tipo, item = null) {
+    const dadosIniciais =
+      tipo === "produto" ? produtoVazio : publicacaoVazia;
+
+    setTipoFormulario(tipo);
+    setEditandoId(item?.id ?? null);
+    setFormulario(item ? { ...item } : { ...dadosIniciais });
+    setErro("");
+  }
+
+  function atualizarCampo(campo, valor) {
+    setFormulario((atual) => ({
+      ...atual,
+      [campo]: valor,
+    }));
+  }
+
+  function selecionarImagem(evento) {
+    const arquivo = evento.target.files?.[0];
+
+    if (!arquivo) return;
+
+    const formatos = ["image/jpeg", "image/png", "image/webp"];
+
+    if (!formatos.includes(arquivo.type)) {
+      setErro("Selecione uma imagem JPG, PNG ou WebP.");
+      evento.target.value = "";
+      return;
+    }
+
+    if (arquivo.size > 2 * 1024 * 1024) {
+      setErro("A imagem deve ter no máximo 2 MB.");
+      evento.target.value = "";
+      return;
+    }
+
+    setErro("");
+
+    const leitor = new FileReader();
+
+    leitor.onload = () => {
+      if (typeof leitor.result === "string") {
+        atualizarCampo("imagem", leitor.result);
+      }
+    };
+
+    leitor.onerror = () => {
+      setErro("Não foi possível carregar a imagem.");
+    };
+
+    leitor.readAsDataURL(arquivo);
+  }
+
+  function salvarFormulario(evento) {
+    evento.preventDefault();
+    setErro("");
+
+    if (tipoFormulario === "produto") {
+      const dados = {
+        ...formulario,
+        nome: formulario.nome.trim(),
+        descricao: formulario.descricao.trim(),
+        categoria: formulario.categoria.trim(),
+        imagem: formulario.imagem || "",
+      };
+
+      if (!dados.nome || !dados.descricao || !dados.categoria) {
+        setErro("Preencha todos os campos obrigatórios.");
+        return;
+      }
+
+      const atualizados =
+        editandoId !== null
+          ? produtos.map((item) =>
+              item.id === editandoId
+                ? { ...dados, id: editandoId }
+                : item
+            )
+          : [...produtos, { ...dados, id: gerarId() }];
+
+      try {
+        localStorage.setItem(
+          PRODUTOS_KEY,
+          JSON.stringify(atualizados)
+        );
+
+        setProdutos(atualizados);
+      } catch {
+        setErro(
+          "Espaço de armazenamento insuficiente. Utilize uma imagem menor."
+        );
+        return;
+      }
+    }
+
+    if (tipoFormulario === "galeria") {
+      const dados = {
+        ...formulario,
+        titulo: formulario.titulo.trim(),
+        descricao: formulario.descricao.trim(),
+        imagem: formulario.imagem || "",
+        video: formulario.video.trim(),
+      };
+
+      if (!dados.titulo || !dados.descricao) {
+        setErro("Preencha todos os campos obrigatórios.");
+        return;
+      }
+
+      const atualizadas =
+        editandoId !== null
+          ? publicacoes.map((item) =>
+              item.id === editandoId
+                ? { ...dados, id: editandoId }
+                : item
+            )
+          : [...publicacoes, { ...dados, id: gerarId() }];
+
+      try {
+        localStorage.setItem(
+          GALERIA_KEY,
+          JSON.stringify(atualizadas)
+        );
+
+        setPublicacoes(atualizadas);
+      } catch {
+        setErro(
+          "Espaço de armazenamento insuficiente. Utilize uma imagem menor."
+        );
+        return;
+      }
+    }
+
+    fecharFormulario();
+  }
+
+  function excluirItem(tipo, item) {
+    const nome = tipo === "produto" ? item.nome : item.titulo;
+
+    if (!window.confirm(`Excluir "${nome}"?`)) return;
+
+    if (tipo === "produto") {
+      setProdutos((atuais) =>
+        atuais.filter((produto) => produto.id !== item.id)
+      );
+    } else {
+      setPublicacoes((atuais) =>
+        atuais.filter((publicacao) => publicacao.id !== item.id)
+      );
+    }
+  }
+
+  function alternarStatus(tipo, id) {
+    const atualizar = (atuais) =>
+      atuais.map((item) =>
+        item.id === id
+          ? { ...item, ativo: item.ativo === false }
+          : item
+      );
+
+    if (tipo === "produto") {
+      setProdutos(atualizar);
+    } else {
+      setPublicacoes(atualizar);
+    }
+  }
+
+  function renderizarAcoes(tipo, item) {
+    const nome = tipo === "produto" ? item.nome : item.titulo;
+
+    return (
+      <div className="admin-table-actions">
+        <button
+          type="button"
+          aria-label={`Editar ${nome}`}
+          onClick={() => abrirFormulario(tipo, item)}
+        >
+          <Pencil size={17} />
+        </button>
+
+        <button
+          type="button"
+          className="delete"
+          aria-label={`Excluir ${nome}`}
+          onClick={() => excluirItem(tipo, item)}
+        >
+          <Trash2 size={17} />
+        </button>
+      </div>
+    );
+  }
+
+  function renderizarStatus(tipo, item) {
+    const ativo = item.ativo !== false;
+
+    return (
+      <button
+        type="button"
+        className={`admin-status ${ativo ? "active" : "inactive"}`}
+        onClick={() => alternarStatus(tipo, item.id)}
+        aria-label={`${ativo ? "Desativar" : "Ativar"} ${
+          tipo === "produto" ? item.nome : item.titulo
+        }`}
+      >
+        {ativo ? "Ativo" : "Inativo"}
+      </button>
+    );
+  }
 
   return (
     <div className="admin-layout">
@@ -148,7 +394,10 @@ export default function Admin() {
           <span>PAINEL ADMINISTRATIVO</span>
         </div>
 
-        <nav className="admin-navigation" aria-label="Menu administrativo">
+        <nav
+          className="admin-navigation"
+          aria-label="Menu administrativo"
+        >
           {menuItems.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -209,9 +458,9 @@ export default function Admin() {
                 <span>VISÃO GERAL</span>
                 <h2>Bem-vindo ao painel Camará</h2>
                 <p>
-                  Gerencie os conteúdos do site em um só lugar.
-                  O gerenciamento de produtos está disponível
-                  em modo de demonstração.
+                  Gerencie produtos e publicações do site em um só
+                  lugar. Os dados estão disponíveis em modo de
+                  demonstração.
                 </p>
               </div>
 
@@ -266,7 +515,7 @@ export default function Admin() {
                 <button
                   type="button"
                   className="admin-primary-button"
-                  onClick={() => abrirFormulario()}
+                  onClick={() => abrirFormulario("produto")}
                 >
                   <Plus size={18} />
                   Novo produto
@@ -315,42 +564,8 @@ export default function Admin() {
                         </td>
 
                         <td>{produto.categoria}</td>
-
-                        <td>
-                          <button
-                            type="button"
-                            className={`admin-status ${
-                              produto.ativo ? "active" : "inactive"
-                            }`}
-                            onClick={() => alternarStatus(produto.id)}
-                            aria-label={`${
-                              produto.ativo ? "Desativar" : "Ativar"
-                            } ${produto.nome}`}
-                          >
-                            {produto.ativo ? "Ativo" : "Inativo"}
-                          </button>
-                        </td>
-
-                        <td>
-                          <div className="admin-table-actions">
-                            <button
-                              type="button"
-                              aria-label={`Editar ${produto.nome}`}
-                              onClick={() => abrirFormulario(produto)}
-                            >
-                              <Pencil size={17} />
-                            </button>
-
-                            <button
-                              type="button"
-                              className="delete"
-                              aria-label={`Excluir ${produto.nome}`}
-                              onClick={() => excluirProduto(produto)}
-                            >
-                              <Trash2 size={17} />
-                            </button>
-                          </div>
-                        </td>
+                        <td>{renderizarStatus("produto", produto)}</td>
+                        <td>{renderizarAcoes("produto", produto)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -365,18 +580,112 @@ export default function Admin() {
             </section>
           )}
 
-          {pagina !== "dashboard" && pagina !== "produtos" && (
-            <section className="admin-panel admin-empty">
-              <div className="admin-empty-icon">
-                <IconePagina size={30} />
+          {pagina === "galeria" && (
+            <section className="admin-panel">
+              <div className="admin-products-heading">
+                <div>
+                  <span className="admin-section-label">
+                    PUBLICAÇÕES
+                  </span>
+                  <h2>Gerenciar galeria</h2>
+                  <p>
+                    Organize fotos, vídeos, novidades e eventos da Camará.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className="admin-primary-button"
+                  onClick={() => abrirFormulario("galeria")}
+                >
+                  <Plus size={18} />
+                  Nova publicação
+                </button>
               </div>
-              <h2>{paginaAtual.label}</h2>
-              <p>
-                Esta área está preparada para receber as
-                funcionalidades de gerenciamento.
-              </p>
+
+              <div className="admin-search">
+                <Search size={19} />
+                <input
+                  type="search"
+                  placeholder="Buscar publicação..."
+                  value={buscaGaleria}
+                  onChange={(evento) =>
+                    setBuscaGaleria(evento.target.value)
+                  }
+                />
+              </div>
+
+              <div className="admin-table-wrapper">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Publicação</th>
+                      <th>Categoria</th>
+                      <th>Tipo</th>
+                      <th>Status</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {publicacoesFiltradas.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="admin-product-info">
+                            {item.imagem ? (
+                              <img src={item.imagem} alt="" />
+                            ) : (
+                              <div className="admin-product-placeholder">
+                                {item.tipo === "video" ? (
+                                  <Play size={22} />
+                                ) : (
+                                  <ImageIcon size={22} />
+                                )}
+                              </div>
+                            )}
+
+                            <div>
+                              <strong>{item.titulo}</strong>
+                              <span>{item.descricao}</span>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td>{item.categoria}</td>
+                        <td>
+                          {item.tipo === "video" ? "Vídeo" : "Foto"}
+                        </td>
+                        <td>{renderizarStatus("galeria", item)}</td>
+                        <td>{renderizarAcoes("galeria", item)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {publicacoesFiltradas.length === 0 && (
+                  <p className="admin-no-results">
+                    Nenhuma publicação encontrada.
+                  </p>
+                )}
+              </div>
             </section>
           )}
+
+          {pagina !== "dashboard" &&
+            pagina !== "produtos" &&
+            pagina !== "galeria" && (
+              <section className="admin-panel admin-empty">
+                <div className="admin-empty-icon">
+                  <IconePagina size={30} />
+                </div>
+
+                <h2>{paginaAtual.label}</h2>
+                <p>
+                  Esta área está preparada para receber as
+                  funcionalidades de gerenciamento.
+                </p>
+              </section>
+            )}
         </main>
       </div>
 
@@ -390,104 +699,205 @@ export default function Admin() {
           >
             <div className="admin-modal-heading">
               <h2 id="admin-form-title">
-                {editandoId !== null ? "Editar produto" : "Novo produto"}
+                {editandoId !== null ? "Editar" : "Novo"}
+                {tipoFormulario === "produto"
+                  ? " produto"
+                  : " publicação"}
               </h2>
 
               <button
                 type="button"
                 aria-label="Fechar formulário"
-                onClick={() => setFormulario(null)}
+                onClick={fecharFormulario}
               >
                 <X size={21} />
               </button>
             </div>
 
-            <form onSubmit={salvarProduto} className="admin-product-form">
+            <form
+              onSubmit={salvarFormulario}
+              className="admin-product-form"
+            >
               <label>
-                Nome do produto
+                {tipoFormulario === "produto"
+                  ? "Nome do produto"
+                  : "Título da publicação"}
+
                 <input
                   required
                   maxLength={120}
-                  value={formulario.nome}
+                  value={
+                    tipoFormulario === "produto"
+                      ? formulario.nome
+                      : formulario.titulo
+                  }
                   onChange={(evento) =>
-                    setFormulario({
-                      ...formulario,
-                      nome: evento.target.value,
-                    })
+                    atualizarCampo(
+                      tipoFormulario === "produto" ? "nome" : "titulo",
+                      evento.target.value
+                    )
                   }
                 />
               </label>
 
               <label>
                 Categoria
-                <input
-                  required
-                  maxLength={80}
-                  value={formulario.categoria}
-                  onChange={(evento) =>
-                    setFormulario({
-                      ...formulario,
-                      categoria: evento.target.value,
-                    })
-                  }
-                />
+
+                {tipoFormulario === "produto" ? (
+                  <input
+                    required
+                    maxLength={80}
+                    value={formulario.categoria}
+                    onChange={(evento) =>
+                      atualizarCampo("categoria", evento.target.value)
+                    }
+                  />
+                ) : (
+                  <select
+                    value={formulario.categoria}
+                    onChange={(evento) =>
+                      atualizarCampo("categoria", evento.target.value)
+                    }
+                  >
+                    {categoriasGaleria
+                      .filter((categoria) => categoria !== "Todos")
+                      .map((categoria) => (
+                        <option key={categoria} value={categoria}>
+                          {categoria}
+                        </option>
+                      ))}
+                  </select>
+                )}
               </label>
+
+              {tipoFormulario === "galeria" && (
+                <label>
+                  Tipo de publicação
+
+                  <select
+                    value={formulario.tipo}
+                    onChange={(evento) =>
+                      atualizarCampo("tipo", evento.target.value)
+                    }
+                  >
+                    <option value="foto">Fotografia</option>
+                    <option value="video">Vídeo</option>
+                  </select>
+                </label>
+              )}
 
               <label>
                 Descrição
+
                 <textarea
                   required
                   rows={4}
+                  maxLength={1000}
                   value={formulario.descricao}
                   onChange={(evento) =>
-                    setFormulario({
-                      ...formulario,
-                      descricao: evento.target.value,
-                    })
+                    atualizarCampo("descricao", evento.target.value)
                   }
                 />
               </label>
 
-              <label>
-                URL da imagem
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={formulario.imagem}
-                  onChange={(evento) =>
-                    setFormulario({
-                      ...formulario,
-                      imagem: evento.target.value,
-                    })
-                  }
-                />
-              </label>
+              <div className="admin-image-field">
+                <span>
+                  {tipoFormulario === "galeria" &&
+                  formulario.tipo === "video"
+                    ? "Imagem de capa"
+                    : "Imagem"}
+                </span>
+
+                <label className="admin-image-upload">
+                  <ImageIcon size={28} />
+
+                  <strong>Selecionar imagem</strong>
+                  <span>JPG, PNG ou WebP • Máximo 2 MB</span>
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={selecionarImagem}
+                  />
+                </label>
+
+                {formulario.imagem && (
+                  <div className="admin-image-preview">
+                    <img
+                      src={formulario.imagem}
+                      alt="Prévia da imagem selecionada"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => atualizarCampo("imagem", "")}
+                    >
+                      <Trash2 size={16} />
+                      Remover imagem
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {tipoFormulario === "galeria" &&
+                formulario.tipo === "video" && (
+                  <label>
+                    URL do vídeo do YouTube
+
+                    <input
+                      type="url"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      value={formulario.video}
+                      onChange={(evento) =>
+                        atualizarCampo("video", evento.target.value)
+                      }
+                    />
+                  </label>
+                )}
 
               <label className="admin-checkbox">
                 <input
                   type="checkbox"
-                  checked={formulario.ativo}
+                  checked={formulario.ativo !== false}
                   onChange={(evento) =>
-                    setFormulario({
-                      ...formulario,
-                      ativo: evento.target.checked,
-                    })
+                    atualizarCampo("ativo", evento.target.checked)
                   }
                 />
-                Produto ativo
+
+                {tipoFormulario === "produto"
+                  ? "Produto ativo"
+                  : "Publicação ativa"}
               </label>
+
+              {erro && (
+                <p
+                  role="alert"
+                  style={{
+                    color: "#b42318",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                  }}
+                >
+                  {erro}
+                </p>
+              )}
 
               <div className="admin-form-actions">
                 <button
                   type="button"
                   className="admin-secondary-button"
-                  onClick={() => setFormulario(null)}
+                  onClick={fecharFormulario}
                 >
                   Cancelar
                 </button>
 
-                <button type="submit" className="admin-primary-button">
-                  Salvar produto
+                <button
+                  type="submit"
+                  className="admin-primary-button"
+                >
+                  {tipoFormulario === "produto"
+                    ? "Salvar produto"
+                    : "Salvar publicação"}
                 </button>
               </div>
             </form>
