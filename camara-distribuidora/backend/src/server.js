@@ -1,15 +1,15 @@
+
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "./lib/prisma.js";
+import productRoutes from "./routes/productRoutes.js";
 
 const app = express();
-const prisma = new PrismaClient();
-
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({ origin: "http://localhost:5173" }));
-app.use(express.json());
+app.use(express.json({ limit: "100kb" }));
 
 app.get("/api/health", async (req, res) => {
   try {
@@ -26,6 +26,8 @@ app.get("/api/health", async (req, res) => {
     });
   }
 });
+
+app.use("/api/products", productRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
