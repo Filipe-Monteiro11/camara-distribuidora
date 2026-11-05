@@ -10,7 +10,7 @@ import Receitas from "./pages/Receitas";
 import Sobre from "./pages/Sobre";
 import Galeria from "./pages/Galeria";
 import TrabalheConosco from "./pages/TrabalheConosco";
-import Admin from "./pages/Admin";
+import AdminGuard from "./components/AdminGuard";
 
 export default function App() {
   return (
@@ -36,7 +36,7 @@ export default function App() {
             </>
           }
         />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin" element={<AdminGuard />} />
       </Routes>
     </BrowserRouter>
   );

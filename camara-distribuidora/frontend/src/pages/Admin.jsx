@@ -14,7 +14,7 @@ import {
   Pencil,
   Trash2,
   ImageIcon,
-  Play,
+  Play
 } from "lucide-react";
 
 import { produtosIniciais } from "../data/produtos";
@@ -23,13 +23,14 @@ import "../styles/Admin.css";
 
 const PRODUTOS_KEY = "camara-produtos";
 const GALERIA_KEY = "camara-galeria";
+const LIMITE_IMAGEM = 20 * 1024 * 1024;
 
 const menuItems = [
   { id: "dashboard", label: "Visão geral", icon: LayoutDashboard },
   { id: "produtos", label: "Produtos", icon: Package },
   { id: "galeria", label: "Galeria", icon: Images },
   { id: "curriculos", label: "Currículos", icon: FileText },
-  { id: "configuracoes", label: "Configurações", icon: Settings },
+  { id: "configuracoes", label: "Configurações", icon: Settings }
 ];
 
 const produtoVazio = {
@@ -37,7 +38,7 @@ const produtoVazio = {
   descricao: "",
   categoria: "",
   imagem: "",
-  ativo: true,
+  ativo: true
 };
 
 const publicacaoVazia = {
@@ -47,7 +48,7 @@ const publicacaoVazia = {
   tipo: "foto",
   imagem: "",
   video: "",
-  ativo: true,
+  ativo: true
 };
 
 function carregarDados(chave, iniciais) {
@@ -61,11 +62,7 @@ function carregarDados(chave, iniciais) {
   }
 }
 
-function gerarId() {
-  return crypto.randomUUID();
-}
-
-export default function Admin() {
+export default function Admin({ admin, onLogout }) {
   const [pagina, setPagina] = useState("dashboard");
   const [menuAberto, setMenuAberto] = useState(false);
 
@@ -79,6 +76,7 @@ export default function Admin() {
 
   const [busca, setBusca] = useState("");
   const [buscaGaleria, setBuscaGaleria] = useState("");
+
   const [formulario, setFormulario] = useState(null);
   const [tipoFormulario, setTipoFormulario] = useState(null);
   const [editandoId, setEditandoId] = useState(null);
@@ -103,14 +101,14 @@ export default function Admin() {
   useEffect(() => {
     if (!formulario) return;
 
-    const fechar = (evento) => {
+    function fechar(evento) {
       if (evento.key === "Escape") {
         setFormulario(null);
         setTipoFormulario(null);
         setEditandoId(null);
         setErro("");
       }
-    };
+    }
 
     document.addEventListener("keydown", fechar);
 
@@ -138,18 +136,18 @@ export default function Admin() {
     {
       label: "Produtos cadastrados",
       value: produtos.length,
-      icon: Package,
+      icon: Package
     },
     {
       label: "Publicações",
       value: publicacoes.length,
-      icon: Images,
+      icon: Images
     },
     {
       label: "Currículos recebidos",
       value: "—",
-      icon: FileText,
-    },
+      icon: FileText
+    }
   ];
 
   function fecharFormulario() {
@@ -178,7 +176,7 @@ export default function Admin() {
   function atualizarCampo(campo, valor) {
     setFormulario((atual) => ({
       ...atual,
-      [campo]: valor,
+      [campo]: valor
     }));
   }
 
@@ -195,8 +193,8 @@ export default function Admin() {
       return;
     }
 
-    if (arquivo.size > 2 * 1024 * 1024) {
-      setErro("A imagem deve ter no máximo 2 MB.");
+    if (arquivo.size > LIMITE_IMAGEM) {
+      setErro("A imagem deve ter no máximo 20 MB.");
       evento.target.value = "";
       return;
     }
@@ -228,7 +226,7 @@ export default function Admin() {
         nome: formulario.nome.trim(),
         descricao: formulario.descricao.trim(),
         categoria: formulario.categoria.trim(),
-        imagem: formulario.imagem || "",
+        imagem: formulario.imagem || ""
       };
 
       if (!dados.nome || !dados.descricao || !dados.categoria) {
@@ -243,7 +241,7 @@ export default function Admin() {
                 ? { ...dados, id: editandoId }
                 : item
             )
-          : [...produtos, { ...dados, id: gerarId() }];
+          : [...produtos, { ...dados, id: crypto.randomUUID() }];
 
       try {
         localStorage.setItem(
@@ -254,7 +252,7 @@ export default function Admin() {
         setProdutos(atualizados);
       } catch {
         setErro(
-          "Espaço de armazenamento insuficiente. Utilize uma imagem menor."
+          "Não foi possível salvar. O armazenamento local pode estar cheio."
         );
         return;
       }
@@ -266,7 +264,7 @@ export default function Admin() {
         titulo: formulario.titulo.trim(),
         descricao: formulario.descricao.trim(),
         imagem: formulario.imagem || "",
-        video: formulario.video.trim(),
+        video: formulario.video.trim()
       };
 
       if (!dados.titulo || !dados.descricao) {
@@ -281,7 +279,7 @@ export default function Admin() {
                 ? { ...dados, id: editandoId }
                 : item
             )
-          : [...publicacoes, { ...dados, id: gerarId() }];
+          : [...publicacoes, { ...dados, id: crypto.randomUUID() }];
 
       try {
         localStorage.setItem(
@@ -292,7 +290,7 @@ export default function Admin() {
         setPublicacoes(atualizadas);
       } catch {
         setErro(
-          "Espaço de armazenamento insuficiente. Utilize uma imagem menor."
+          "Não foi possível salvar. O armazenamento local pode estar cheio."
         );
         return;
       }
@@ -359,15 +357,14 @@ export default function Admin() {
 
   function renderizarStatus(tipo, item) {
     const ativo = item.ativo !== false;
+    const nome = tipo === "produto" ? item.nome : item.titulo;
 
     return (
       <button
         type="button"
         className={`admin-status ${ativo ? "active" : "inactive"}`}
         onClick={() => alternarStatus(tipo, item.id)}
-        aria-label={`${ativo ? "Desativar" : "Ativar"} ${
-          tipo === "produto" ? item.nome : item.titulo
-        }`}
+        aria-label={`${ativo ? "Desativar" : "Ativar"} ${nome}`}
       >
         {ativo ? "Ativo" : "Inativo"}
       </button>
@@ -419,11 +416,27 @@ export default function Admin() {
 
           <div className="admin-user">
             <div className="admin-avatar">A</div>
+
             <div>
               <strong>Administrador</strong>
-              <span>Modo demonstração</span>
+              <span>{admin?.email || "Conta administrativa"}</span>
             </div>
-            <LogOut size={18} aria-hidden="true" />
+
+            <button
+              type="button"
+              onClick={onLogout}
+              aria-label="Sair do painel"
+              title="Sair"
+              style={{
+                border: 0,
+                background: "transparent",
+                color: "inherit",
+                cursor: "pointer",
+                padding: 4
+              }}
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         </div>
       </aside>
@@ -459,8 +472,7 @@ export default function Admin() {
                 <h2>Bem-vindo ao painel Camará</h2>
                 <p>
                   Gerencie produtos e publicações do site em um só
-                  lugar. Os dados estão disponíveis em modo de
-                  demonstração.
+                  lugar.
                 </p>
               </div>
 
@@ -470,6 +482,7 @@ export default function Admin() {
                     <div className="admin-stat-icon">
                       <Icon size={22} />
                     </div>
+
                     <span>{label}</span>
                     <strong>{value}</strong>
                   </div>
@@ -507,9 +520,13 @@ export default function Admin() {
             <section className="admin-panel">
               <div className="admin-products-heading">
                 <div>
-                  <span className="admin-section-label">CATÁLOGO</span>
+                  <span className="admin-section-label">
+                    CATÁLOGO
+                  </span>
                   <h2>Gerenciar produtos</h2>
-                  <p>Cadastre e organize os produtos da distribuidora.</p>
+                  <p>
+                    Cadastre e organize os produtos da distribuidora.
+                  </p>
                 </div>
 
                 <button
@@ -524,6 +541,7 @@ export default function Admin() {
 
               <div className="admin-search">
                 <Search size={19} />
+
                 <input
                   type="search"
                   placeholder="Buscar produto..."
@@ -605,6 +623,7 @@ export default function Admin() {
 
               <div className="admin-search">
                 <Search size={19} />
+
                 <input
                   type="search"
                   placeholder="Buscar publicação..."
@@ -671,21 +690,19 @@ export default function Admin() {
             </section>
           )}
 
-          {pagina !== "dashboard" &&
-            pagina !== "produtos" &&
-            pagina !== "galeria" && (
-              <section className="admin-panel admin-empty">
-                <div className="admin-empty-icon">
-                  <IconePagina size={30} />
-                </div>
+          {!["dashboard", "produtos", "galeria"].includes(pagina) && (
+            <section className="admin-panel admin-empty">
+              <div className="admin-empty-icon">
+                <IconePagina size={30} />
+              </div>
 
-                <h2>{paginaAtual.label}</h2>
-                <p>
-                  Esta área está preparada para receber as
-                  funcionalidades de gerenciamento.
-                </p>
-              </section>
-            )}
+              <h2>{paginaAtual.label}</h2>
+              <p>
+                Esta área está preparada para receber as
+                funcionalidades de gerenciamento.
+              </p>
+            </section>
+          )}
         </main>
       </div>
 
@@ -733,7 +750,9 @@ export default function Admin() {
                   }
                   onChange={(evento) =>
                     atualizarCampo(
-                      tipoFormulario === "produto" ? "nome" : "titulo",
+                      tipoFormulario === "produto"
+                        ? "nome"
+                        : "titulo",
                       evento.target.value
                     )
                   }
@@ -810,9 +829,8 @@ export default function Admin() {
 
                 <label className="admin-image-upload">
                   <ImageIcon size={28} />
-
                   <strong>Selecionar imagem</strong>
-                  <span>JPG, PNG ou WebP • Máximo 2 MB</span>
+                  <span>JPG, PNG ou WebP • Máximo 20 MB</span>
 
                   <input
                     type="file"
@@ -875,7 +893,7 @@ export default function Admin() {
                   style={{
                     color: "#b42318",
                     fontSize: "13px",
-                    fontWeight: 600,
+                    fontWeight: 600
                   }}
                 >
                   {erro}
