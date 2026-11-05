@@ -1,85 +1,69 @@
+/* CABEÇALHO */
+
 .site-header {
   position: sticky;
   top: 0;
   z-index: 100;
   width: 100%;
-  background: #ffffff;
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 1px solid #eee;
+  background: #fff;
 }
 
-.header-content {
+.site-header .header-content {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 30px;
+  width: 100%;
+  max-width: none;
   min-height: 90px;
+  margin: 0;
+  padding: 0 40px;
 }
 
-/* LOGOMARCA PROVISÓRIA */
+/* LOGOMARCA */
 
 .brand {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  line-height: 1;
+  width: 175px;
+  height: 80px;
+  overflow: hidden;
   text-decoration: none;
 }
 
-.brand-name {
-  color: var(--red);
-  font-size: 34px;
-  font-weight: 900;
-  letter-spacing: -1.5px;
-}
-
-.brand-subtitle {
-  margin-top: 5px;
-  color: var(--red);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 3px;
+.brand-logo {
+  display: block;
+  width: 175px;
+  height: 175px;
+  object-fit: contain;
 }
 
 /* NAVEGAÇÃO */
 
 .header-nav {
+  position: absolute;
+  left: 50%;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 32px;
+  transform: translateX(-50%);
 }
 
 .header-nav a {
-  color: #333333;
+  color: #333;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
+  white-space: nowrap;
   transition: color 0.2s ease;
 }
 
 .header-nav a:hover {
   color: var(--red);
-}
-
-/* CONTATO */
-
-.header-contact {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  gap: 10px;
-  padding: 14px 19px;
-  border-radius: 5px;
-  background: var(--red);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 700;
-  text-decoration: none;
-  transition: background 0.2s ease;
-}
-
-.header-contact:hover {
-  background: var(--red-dark);
 }
 
 /* MENU MOBILE */
@@ -88,32 +72,53 @@
   display: none;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   padding: 8px;
-  border: none;
+  border: 0;
   background: transparent;
   color: var(--red);
   cursor: pointer;
 }
 
+/* ACESSIBILIDADE */
+
+.brand:focus-visible,
+.header-nav a:focus-visible,
+.menu-toggle:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 4px;
+}
+
 /* RESPONSIVIDADE */
 
 @media (max-width: 1100px) {
+  .site-header .header-content {
+    padding: 0 28px;
+  }
+
   .header-nav {
     gap: 18px;
+  }
+
+  .header-nav a {
+    font-size: 13px;
   }
 }
 
 @media (max-width: 900px) {
-  .header-content {
+  .site-header .header-content {
     min-height: 74px;
+    padding: 0 20px;
   }
 
-  .brand-name {
-    font-size: 29px;
+  .brand {
+    width: 145px;
+    height: 70px;
   }
 
-  .header-contact {
-    display: none;
+  .brand-logo {
+    width: 145px;
+    height: 145px;
   }
 
   .menu-toggle {
@@ -130,9 +135,10 @@
     align-items: stretch;
     gap: 0;
     padding: 12px 24px;
-    background: #ffffff;
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid #eee;
+    background: #fff;
     box-shadow: 0 12px 20px rgba(0, 0, 0, 0.06);
+    transform: none;
   }
 
   .header-nav.open {
@@ -141,12 +147,12 @@
 
   .header-nav a {
     padding: 14px 0;
+    font-size: 14px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .header-nav a,
-  .header-contact {
+  .header-nav a {
     transition: none;
   }
 }

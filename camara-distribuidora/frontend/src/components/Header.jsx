@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import "../styles/Header.css";
 
 const links = [
@@ -26,8 +26,11 @@ export default function Header() {
           aria-label="Camará Distribuidora - Início"
           onClick={closeMenu}
         >
-          <span className="brand-name">CAMARÁ</span>
-          <span className="brand-subtitle">DISTRIBUIDORA</span>
+          <img
+            src="/images/logo-camara.png"
+            alt="Camará Distribuidora"
+            className="brand-logo"
+          />
         </Link>
 
         <nav
@@ -45,15 +48,6 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-
-        <Link
-          to="/#contato"
-          className="header-contact"
-          onClick={closeMenu}
-        >
-          Entre em contato
-          <ArrowUpRight size={17} aria-hidden="true" />
-        </Link>
 
         <button
           type="button"

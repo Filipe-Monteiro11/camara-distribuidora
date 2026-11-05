@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import ScrollToSection from "./components/ScrollToSection";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -7,8 +8,9 @@ import Home from "./pages/Home";
 import Produtos from "./pages/Produtos";
 import Receitas from "./pages/Receitas";
 import Sobre from "./pages/Sobre";
-import TrabalheConosco from "./pages/TrabalheConosco";
 import Galeria from "./pages/Galeria";
+import TrabalheConosco from "./pages/TrabalheConosco";
+import Admin from "./pages/Admin";
 
 export default function App() {
   return (
@@ -34,6 +36,7 @@ export default function App() {
             </>
           }
         />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </BrowserRouter>
   );
