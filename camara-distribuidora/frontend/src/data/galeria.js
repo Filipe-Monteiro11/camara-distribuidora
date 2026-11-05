@@ -1,0 +1,60 @@
+export const categoriasGaleria = [
+  "Todos",
+  "Produtos",
+  "Novidades",
+  "Eventos",
+  "Bastidores",
+];
+
+export const publicacoesGaleria = [
+  {
+    id: 1,
+    titulo: "Produtos da Camará",
+    descricao: "Conheça os produtos da nossa distribuidora.",
+    categoria: "Produtos",
+    tipo: "foto",
+    imagem: "",
+  },
+  {
+    id: 2,
+    titulo: "Novidades da distribuidora",
+    descricao: "Acompanhe as novidades da Camará.",
+    categoria: "Novidades",
+    tipo: "foto",
+    imagem: "",
+  },
+  {
+    id: 3,
+    titulo: "Momentos especiais",
+    descricao: "Registros de eventos e confraternizações.",
+    categoria: "Eventos",
+    tipo: "foto",
+    imagem: "",
+  },
+  {
+    id: 4,
+    titulo: "Bastidores da Camará",
+    descricao: "Um espaço para conhecer nossa rotina.",
+    categoria: "Bastidores",
+    tipo: "video",
+    imagem: "",
+    video: "",
+  },
+  {
+    id: 5,
+    titulo: "Novos produtos",
+    descricao: "Um espaço para apresentar nossos lançamentos.",
+    categoria: "Produtos",
+    tipo: "foto",
+    imagem: "",
+  },
+  {
+    id: 6,
+    titulo: "Nossa equipe",
+    descricao: "Momentos compartilhados pela equipe.",
+    categoria: "Eventos",
+    tipo: "video",
+    imagem: "",
+    video: "",
+  },
+];
