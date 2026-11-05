@@ -1,12 +1,41 @@
-
+import { useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { produtosIniciais } from "../data/produtos";
 import "../styles/Produtos.css";
 
+const STORAGE_KEY = "camara-produtos";
+
+function carregarProdutos() {
+  try {
+    const dados = localStorage.getItem(STORAGE_KEY);
+    const produtos = dados ? JSON.parse(dados) : produtosIniciais;
+
+    return Array.isArray(produtos) ? produtos : produtosIniciais;
+  } catch {
+    return produtosIniciais;
+  }
+}
+
 export default function Produtos() {
-  const produtos = produtosIniciais.filter((produto) => produto.ativo);
+  const [produtos, setProdutos] = useState(carregarProdutos);
+
+  useEffect(() => {
+    const atualizarProdutos = (evento) => {
+      if (evento.key === STORAGE_KEY) {
+        setProdutos(carregarProdutos());
+      }
+    };
+
+    window.addEventListener("storage", atualizarProdutos);
+
+    return () => {
+      window.removeEventListener("storage", atualizarProdutos);
+    };
+  }, []);
+
+  const produtosAtivos = produtos.filter((produto) => produto.ativo);
 
   return (
     <>
@@ -37,7 +66,7 @@ export default function Produtos() {
             </div>
 
             <div className="catalog-grid">
-              {produtos.map((produto) => (
+              {produtosAtivos.map((produto) => (
                 <article className="catalog-card" key={produto.id}>
                   <div className="catalog-image">
                     <img
@@ -53,7 +82,10 @@ export default function Produtos() {
 
                     <a href="/#contato">
                       Consultar produto
-                      <ArrowUpRight size={17} aria-hidden="true" />
+                      <ArrowUpRight
+                        size={17}
+                        aria-hidden="true"
+                      />
                     </a>
                   </div>
                 </article>
