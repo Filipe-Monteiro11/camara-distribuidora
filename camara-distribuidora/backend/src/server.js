@@ -2,9 +2,12 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { prisma } from "./lib/prisma.js";
+import { uploadDir } from "./middleware/upload.js";
+
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import galleryRoutes from "./routes/galleryRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,6 +19,12 @@ app.use(cors({
 }));
 
 app.use(express.json({ limit: "100kb" }));
+
+app.use("/uploads", express.static(uploadDir, {
+  dotfiles: "deny",
+  index: false,
+  fallthrough: false
+}));
 
 app.get("/api/health", async (req, res) => {
   try {
@@ -36,6 +45,7 @@ app.get("/api/health", async (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/gallery", galleryRoutes);
+app.use("/api/upload", uploadRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
