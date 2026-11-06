@@ -19,10 +19,7 @@ async function requisicao(caminho, opcoes = {}) {
     },
     ...(body !== undefined
       ? {
-          body:
-            body instanceof FormData
-              ? body
-              : JSON.stringify(body)
+          body: body instanceof FormData ? body : JSON.stringify(body)
         }
       : {})
   });
@@ -44,73 +41,45 @@ async function requisicao(caminho, opcoes = {}) {
   return dados;
 }
 
-export const produtosApi = {
-  listar() {
-    return requisicao("/products");
-  },
+function criarApiCrud(recurso) {
+  return {
+    listar() {
+      return requisicao(`/${recurso}`);
+    },
 
-  listarTodos() {
-    return requisicao("/products/admin/all");
-  },
+    listarTodos() {
+      return requisicao(`/${recurso}/admin/all`);
+    },
 
-  buscar(id) {
-    return requisicao(`/products/${encodeURIComponent(id)}`);
-  },
+    buscar(id) {
+      return requisicao(`/${recurso}/${encodeURIComponent(id)}`);
+    },
 
-  criar(dados) {
-    return requisicao("/products", {
-      method: "POST",
-      body: dados
-    });
-  },
+    criar(dados) {
+      return requisicao(`/${recurso}`, {
+        method: "POST",
+        body: dados
+      });
+    },
 
-  atualizar(id, dados) {
-    return requisicao(`/products/${encodeURIComponent(id)}`, {
-      method: "PUT",
-      body: dados
-    });
-  },
+    atualizar(id, dados) {
+      return requisicao(`/${recurso}/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        body: dados
+      });
+    },
 
-  excluir(id) {
-    return requisicao(`/products/${encodeURIComponent(id)}`, {
-      method: "DELETE"
-    });
-  }
-};
+    excluir(id) {
+      return requisicao(`/${recurso}/${encodeURIComponent(id)}`, {
+        method: "DELETE"
+      });
+    }
+  };
+}
 
-export const galeriaApi = {
-  listar() {
-    return requisicao("/gallery");
-  },
-
-  listarTodos() {
-    return requisicao("/gallery/admin/all");
-  },
-
-  buscar(id) {
-    return requisicao(`/gallery/${encodeURIComponent(id)}`);
-  },
-
-  criar(dados) {
-    return requisicao("/gallery", {
-      method: "POST",
-      body: dados
-    });
-  },
-
-  atualizar(id, dados) {
-    return requisicao(`/gallery/${encodeURIComponent(id)}`, {
-      method: "PUT",
-      body: dados
-    });
-  },
-
-  excluir(id) {
-    return requisicao(`/gallery/${encodeURIComponent(id)}`, {
-      method: "DELETE"
-    });
-  }
-};
+export const produtosApi = criarApiCrud("products");
+export const galeriaApi = criarApiCrud("gallery");
+export const receitasApi = criarApiCrud("recipes");
 
 export const uploadApi = {
   enviar(arquivo) {

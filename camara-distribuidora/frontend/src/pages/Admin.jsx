@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Package,
   Images,
+  ChefHat,
   FileText,
   Settings,
   Menu,
@@ -17,6 +18,7 @@ import {
   Play
 } from "lucide-react";
 
+import AdminReceitas from "../components/AdminReceitas";
 import { categoriasGaleria } from "../data/galeria";
 import { produtosApi, galeriaApi, uploadApi } from "../services/api";
 import "../styles/Admin.css";
@@ -26,6 +28,7 @@ const LIMITE_IMAGEM = 20 * 1024 * 1024;
 const menuItems = [
   { id: "dashboard", label: "Visão geral", icon: LayoutDashboard },
   { id: "produtos", label: "Produtos", icon: Package },
+  { id: "receitas", label: "Receitas", icon: ChefHat },
   { id: "galeria", label: "Galeria", icon: Images },
   { id: "curriculos", label: "Currículos", icon: FileText },
   { id: "configuracoes", label: "Configurações", icon: Settings }
@@ -49,6 +52,14 @@ const publicacaoVazia = {
   ativo: true
 };
 
+const categoriasPublicacao = categoriasGaleria.filter((categoria) =>
+  ["Produtos", "Novidades", "Eventos", "Bastidores"].includes(categoria)
+);
+
+function normalizarLista(dados, propriedade) {
+  return Array.isArray(dados) ? dados : dados?.[propriedade] ?? [];
+}
+
 export default function Admin({ admin, onLogout }) {
   const [pagina, setPagina] = useState("dashboard");
   const [menuAberto, setMenuAberto] = useState(false);
@@ -66,6 +77,7 @@ export default function Admin({ admin, onLogout }) {
   const [tipoFormulario, setTipoFormulario] = useState(null);
   const [editandoId, setEditandoId] = useState(null);
   const [arquivoImagem, setArquivoImagem] = useState(null);
+  const [imagemPreview, setImagemPreview] = useState("");
   const [erro, setErro] = useState("");
 
   useEffect(() => {
@@ -83,16 +95,16 @@ export default function Admin({ admin, onLogout }) {
       const erros = [];
 
       if (resultadoProdutos.status === "fulfilled") {
-        const dados = resultadoProdutos.value;
-        setProdutos(Array.isArray(dados) ? dados : dados?.produtos ?? []);
+        setProdutos(
+          normalizarLista(resultadoProdutos.value, "produtos")
+        );
       } else {
         erros.push(`Produtos: ${resultadoProdutos.reason.message}`);
       }
 
       if (resultadoGaleria.status === "fulfilled") {
-        const dados = resultadoGaleria.value;
         setPublicacoes(
-          Array.isArray(dados) ? dados : dados?.publicacoes ?? []
+          normalizarLista(resultadoGaleria.value, "publicacoes")
         );
       } else {
         erros.push(`Galeria: ${resultadoGaleria.reason.message}`);
@@ -110,20 +122,29 @@ export default function Admin({ admin, onLogout }) {
   }, []);
 
   useEffect(() => {
-    if (!formulario) return;
-
-    function aoPressionarTecla(evento) {
-      if (evento.key === "Escape" && !processando) {
-        setFormulario(null);
-        setTipoFormulario(null);
-        setEditandoId(null);
-        setArquivoImagem(null);
-        setErro("");
-      }
+    if (!arquivoImagem) {
+      setImagemPreview("");
+      return;
     }
+
+    const url = URL.createObjectURL(arquivoImagem);
+    setImagemPreview(url);
+
+    return () => URL.revokeObjectURL(url);
+  }, [arquivoImagem]);
+
+  useEffect(() => {
+    if (!formulario) return;
 
     const overflowAnterior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
+    function aoPressionarTecla(evento) {
+      if (evento.key === "Escape" && !processando) {
+        fecharFormulario();
+      }
+    }
+
     document.addEventListener("keydown", aoPressionarTecla);
 
     return () => {
@@ -131,15 +152,6 @@ export default function Admin({ admin, onLogout }) {
       document.removeEventListener("keydown", aoPressionarTecla);
     };
   }, [formulario, processando]);
-
-  const imagemPreview = arquivoImagem
-    ? URL.createObjectURL(arquivoImagem)
-    : "";
-
-  useEffect(() => {
-    if (!imagemPreview) return;
-    return () => URL.revokeObjectURL(imagemPreview);
-  }, [imagemPreview]);
 
   const paginaAtual = menuItems.find((item) => item.id === pagina);
   const IconePagina = paginaAtual.icon;
@@ -208,25 +220,22 @@ export default function Admin({ admin, onLogout }) {
 
   function selecionarImagem(evento) {
     const arquivo = evento.target.files?.[0];
+    evento.target.value = "";
+
     if (!arquivo) return;
 
-    const formatos = ["image/jpeg", "image/png", "image/webp"];
-
-    if (!formatos.includes(arquivo.type)) {
+    if (!["image/jpeg", "image/png", "image/webp"].includes(arquivo.type)) {
       setErro("Selecione uma imagem JPG, PNG ou WebP.");
-      evento.target.value = "";
       return;
     }
 
     if (arquivo.size > LIMITE_IMAGEM) {
       setErro("A imagem deve ter no máximo 20 MB.");
-      evento.target.value = "";
       return;
     }
 
     setArquivoImagem(arquivo);
     setErro("");
-    evento.target.value = "";
   }
 
   async function salvarFormulario(evento) {
@@ -262,12 +271,7 @@ export default function Admin({ admin, onLogout }) {
         }
 
         const atualizados = await produtosApi.listarTodos();
-
-        setProdutos(
-          Array.isArray(atualizados)
-            ? atualizados
-            : atualizados?.produtos ?? []
-        );
+        setProdutos(normalizarLista(atualizados, "produtos"));
       }
 
       if (tipoFormulario === "galeria") {
@@ -304,11 +308,8 @@ export default function Admin({ admin, onLogout }) {
         }
 
         const atualizadas = await galeriaApi.listarTodos();
-
         setPublicacoes(
-          Array.isArray(atualizadas)
-            ? atualizadas
-            : atualizadas?.publicacoes ?? []
+          normalizarLista(atualizadas, "publicacoes")
         );
       }
 
@@ -331,13 +332,11 @@ export default function Admin({ admin, onLogout }) {
     try {
       if (tipo === "produto") {
         await produtosApi.excluir(item.id);
-
         setProdutos((atuais) =>
           atuais.filter((produto) => produto.id !== item.id)
         );
       } else {
         await galeriaApi.excluir(item.id);
-
         setPublicacoes((atuais) =>
           atuais.filter((publicacao) => publicacao.id !== item.id)
         );
@@ -364,9 +363,7 @@ export default function Admin({ admin, onLogout }) {
 
         setProdutos((atuais) =>
           atuais.map((produto) =>
-            produto.id === item.id
-              ? { ...produto, ativo }
-              : produto
+            produto.id === item.id ? { ...produto, ativo } : produto
           )
         );
       } else {
@@ -542,7 +539,8 @@ export default function Admin({ admin, onLogout }) {
                 <span>VISÃO GERAL</span>
                 <h2>Bem-vindo ao painel Camará</h2>
                 <p>
-                  Gerencie produtos e publicações do site em um só lugar.
+                  Gerencie produtos, receitas e publicações do site
+                  em um só lugar.
                 </p>
               </div>
 
@@ -585,13 +583,17 @@ export default function Admin({ admin, onLogout }) {
             </>
           )}
 
+          {pagina === "receitas" && <AdminReceitas />}
+
           {pagina === "produtos" && (
             <section className="admin-panel">
               <div className="admin-products-heading">
                 <div>
                   <span className="admin-section-label">CATÁLOGO</span>
                   <h2>Gerenciar produtos</h2>
-                  <p>Cadastre e organize os produtos da distribuidora.</p>
+                  <p>
+                    Cadastre e organize os produtos da distribuidora.
+                  </p>
                 </div>
 
                 <button
@@ -606,7 +608,6 @@ export default function Admin({ admin, onLogout }) {
 
               <div className="admin-search">
                 <Search size={19} />
-
                 <input
                   type="search"
                   placeholder="Buscar produto..."
@@ -653,12 +654,8 @@ export default function Admin({ admin, onLogout }) {
                             </td>
 
                             <td>{produto.categoria}</td>
-                            <td>
-                              {renderizarStatus("produto", produto)}
-                            </td>
-                            <td>
-                              {renderizarAcoes("produto", produto)}
-                            </td>
+                            <td>{renderizarStatus("produto", produto)}</td>
+                            <td>{renderizarAcoes("produto", produto)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -700,7 +697,6 @@ export default function Admin({ admin, onLogout }) {
 
               <div className="admin-search">
                 <Search size={19} />
-
                 <input
                   type="search"
                   placeholder="Buscar publicação..."
@@ -757,12 +753,8 @@ export default function Admin({ admin, onLogout }) {
                             <td>
                               {item.tipo === "video" ? "Vídeo" : "Foto"}
                             </td>
-                            <td>
-                              {renderizarStatus("galeria", item)}
-                            </td>
-                            <td>
-                              {renderizarAcoes("galeria", item)}
-                            </td>
+                            <td>{renderizarStatus("galeria", item)}</td>
+                            <td>{renderizarAcoes("galeria", item)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -779,7 +771,9 @@ export default function Admin({ admin, onLogout }) {
             </section>
           )}
 
-          {!["dashboard", "produtos", "galeria"].includes(pagina) && (
+          {!["dashboard", "produtos", "receitas", "galeria"].includes(
+            pagina
+          ) && (
             <section className="admin-panel admin-empty">
               <div className="admin-empty-icon">
                 <IconePagina size={30} />
@@ -868,20 +862,11 @@ export default function Admin({ admin, onLogout }) {
                       atualizarCampo("categoria", evento.target.value)
                     }
                   >
-                    {categoriasGaleria
-                      .filter((categoria) =>
-                        [
-                          "Produtos",
-                          "Novidades",
-                          "Eventos",
-                          "Bastidores"
-                        ].includes(categoria)
-                      )
-                      .map((categoria) => (
-                        <option key={categoria} value={categoria}>
-                          {categoria}
-                        </option>
-                      ))}
+                    {categoriasPublicacao.map((categoria) => (
+                      <option key={categoria} value={categoria}>
+                        {categoria}
+                      </option>
+                    ))}
                   </select>
                 )}
               </label>

@@ -456,16 +456,19 @@
 
 .recipes-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 27px;
 }
 
 .recipe-card {
   position: relative;
+  display: block;
   height: 380px;
   overflow: hidden;
   border-radius: 10px;
   background: #252525;
+  color: #fff;
+  cursor: default;
 }
 
 .recipe-card::after {
@@ -619,7 +622,8 @@
 }
 
 @media (max-width: 900px) {
-  .products-grid {
+  .products-grid,
+  .recipes-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

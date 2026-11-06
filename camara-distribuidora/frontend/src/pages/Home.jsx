@@ -12,55 +12,60 @@ import {
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { produtosApi } from "../services/api";
+import { produtosApi, receitasApi } from "../services/api";
 import "../styles/Home.css";
-
-const receitas = [
-  {
-    nome: "Escondidinho de Charque",
-    imagem:
-      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1000&q=85"
-  },
-  {
-    nome: "Charque com Macaxeira",
-    imagem:
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85"
-  }
-];
 
 export default function Home() {
   const [produtos, setProdutos] = useState([]);
-  const [carregando, setCarregando] = useState(true);
+  const [receitas, setReceitas] = useState([]);
+  const [carregandoProdutos, setCarregandoProdutos] = useState(true);
+  const [carregandoReceitas, setCarregandoReceitas] = useState(true);
   const [erroProdutos, setErroProdutos] = useState(false);
+  const [erroReceitas, setErroReceitas] = useState(false);
 
   useEffect(() => {
     let ativo = true;
 
-    async function carregarProdutos() {
-      try {
-        const dados = await produtosApi.listar();
+    async function carregarDados() {
+      const [resultadoProdutos, resultadoReceitas] =
+        await Promise.allSettled([
+          produtosApi.listar(),
+          receitasApi.listar()
+        ]);
 
-        if (ativo) {
-          const lista = Array.isArray(dados)
-            ? dados
-            : dados?.produtos ?? [];
+      if (!ativo) return;
 
-          setProdutos(
-            lista.filter((produto) => produto.ativo !== false).slice(0, 3)
-          );
-        }
-      } catch {
-        if (ativo) {
-          setErroProdutos(true);
-        }
-      } finally {
-        if (ativo) {
-          setCarregando(false);
-        }
+      if (resultadoProdutos.status === "fulfilled") {
+        const dados = resultadoProdutos.value;
+        const lista = Array.isArray(dados)
+          ? dados
+          : dados?.produtos ?? [];
+
+        setProdutos(
+          lista.filter((item) => item.ativo !== false).slice(0, 3)
+        );
+      } else {
+        setErroProdutos(true);
       }
+
+      if (resultadoReceitas.status === "fulfilled") {
+        const dados = resultadoReceitas.value;
+        const lista = Array.isArray(dados)
+          ? dados
+          : dados?.receitas ?? [];
+
+        setReceitas(
+          lista.filter((item) => item.ativo !== false).slice(0, 3)
+        );
+      } else {
+        setErroReceitas(true);
+      }
+
+      setCarregandoProdutos(false);
+      setCarregandoReceitas(false);
     }
 
-    carregarProdutos();
+    carregarDados();
 
     return () => {
       ativo = false;
@@ -116,7 +121,6 @@ export default function Home() {
           <div className="container highlights-grid">
             <div className="highlight-item">
               <Package size={30} strokeWidth={1.6} />
-
               <div>
                 <strong>Nosso catálogo</strong>
                 <span>Explore nossas linhas de produtos</span>
@@ -125,7 +129,6 @@ export default function Home() {
 
             <div className="highlight-item">
               <ShieldCheck size={30} strokeWidth={1.6} />
-
               <div>
                 <strong>Conheça a Camará</strong>
                 <span>Saiba mais sobre nossa identidade</span>
@@ -134,7 +137,6 @@ export default function Home() {
 
             <div className="highlight-item">
               <Truck size={30} strokeWidth={1.6} />
-
               <div>
                 <strong>Atendimento</strong>
                 <span>Fale com nossa equipe</span>
@@ -233,21 +235,21 @@ export default function Home() {
               ))}
             </div>
 
-            {carregando && (
+            {carregandoProdutos && (
               <p>Carregando produtos...</p>
             )}
 
-            {!carregando && erroProdutos && (
+            {!carregandoProdutos && erroProdutos && (
               <p role="alert">
                 Não foi possível carregar os produtos.
               </p>
             )}
 
-            {!carregando && !erroProdutos && produtos.length === 0 && (
-              <p>
-                Nenhum produto disponível no momento.
-              </p>
-            )}
+            {!carregandoProdutos &&
+              !erroProdutos &&
+              produtos.length === 0 && (
+                <p>Nenhum produto disponível no momento.</p>
+              )}
 
             <div className="section-action">
               <Link to="/produtos" className="btn btn-red">
@@ -334,26 +336,54 @@ export default function Home() {
 
             <div className="recipes-grid">
               {receitas.map((receita, index) => (
-                <article className="recipe-card" key={receita.nome}>
-                  <img
-                    src={receita.imagem}
-                    alt={`Imagem ilustrativa de ${receita.nome}`}
-                    loading="lazy"
-                  />
+                <article
+                  className="recipe-card"
+                  key={receita.id}
+                >
+                  {receita.imagem && (
+                    <img
+                      src={receita.imagem}
+                      alt={receita.titulo}
+                      loading="lazy"
+                    />
+                  )}
 
                   <div className="recipe-content">
                     <span>
-                      INSPIRAÇÃO 0{index + 1}
+                      RECEITA {String(index + 1).padStart(2, "0")}
                     </span>
 
-                    <h3>{receita.nome}</h3>
+                    <h3>{receita.titulo}</h3>
 
                     <span className="recipe-note">
-                      Receita em preparação
+                      Conheça nossas receitas
                     </span>
                   </div>
                 </article>
               ))}
+            </div>
+
+            {carregandoReceitas && (
+              <p>Carregando receitas...</p>
+            )}
+
+            {!carregandoReceitas && erroReceitas && (
+              <p role="alert">
+                Não foi possível carregar as receitas.
+              </p>
+            )}
+
+            {!carregandoReceitas &&
+              !erroReceitas &&
+              receitas.length === 0 && (
+                <p>Nenhuma receita disponível no momento.</p>
+              )}
+
+            <div className="section-action">
+              <Link to="/receitas" className="btn btn-red">
+                Ver todas as receitas
+                <ArrowUpRight size={18} />
+              </Link>
             </div>
           </div>
         </section>
