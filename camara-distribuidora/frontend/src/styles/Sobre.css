@@ -198,16 +198,6 @@
   min-width: 0;
 }
 
-.about-page .about-identity-note {
-  display: inline-block;
-  margin-top: 15px;
-  padding-bottom: 9px;
-  border-bottom: 2px solid var(--red);
-  color: var(--red);
-  font-size: 12px;
-  font-weight: 700;
-}
-
 /* CARD DA MARCA */
 
 .about-page .about-brand-card {
@@ -216,41 +206,27 @@
   justify-content: space-between;
   min-height: 420px;
   padding: 38px;
+  border: 1px solid #eae5df;
   border-radius: 10px;
-  background: linear-gradient(
-    145deg,
-    #680707 0%,
-    #390000 100%
-  );
-  color: #fff;
-  box-shadow: 0 22px 50px rgba(57, 0, 0, 0.12);
+  background: #fff;
+  box-shadow: 0 22px 50px rgba(57, 0, 0, 0.06);
 }
 
 .about-page .about-brand-symbol {
   display: flex;
   flex: 1;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-width: 0;
-  text-align: center;
+  padding: 20px;
 }
 
-.about-page .about-brand-symbol > span {
-  max-width: 100%;
-  font-size: clamp(35px, 4vw, 58px);
-  font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: 3px;
-  overflow-wrap: anywhere;
-}
-
-.about-page .about-brand-symbol small {
-  margin-top: 8px;
-  color: var(--yellow);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 5px;
+.about-page .about-brand-symbol img {
+  display: block;
+  width: 100%;
+  max-width: 380px;
+  height: auto;
+  object-fit: contain;
 }
 
 .about-page .about-brand-bottom {
@@ -258,11 +234,11 @@
   justify-content: space-between;
   gap: 15px;
   padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid #eee8e1;
 }
 
 .about-page .about-brand-bottom span {
-  color: #dfc4c4;
+  color: #7a6963;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.2px;
@@ -326,11 +302,7 @@
   justify-content: center;
   gap: 17px;
   height: 245px;
-  background: linear-gradient(
-    145deg,
-    #f1eae2,
-    #e8ddd2
-  );
+  background: linear-gradient(145deg, #f1eae2, #e8ddd2);
   color: #9b8776;
 }
 
@@ -497,13 +469,8 @@
     padding: 25px;
   }
 
-  .about-page .about-brand-symbol > span {
-    font-size: 37px;
-  }
-
-  .about-page .about-brand-symbol small {
-    font-size: 10px;
-    letter-spacing: 3px;
+  .about-page .about-brand-symbol {
+    padding: 10px;
   }
 
   .about-page .about-gallery-grid {

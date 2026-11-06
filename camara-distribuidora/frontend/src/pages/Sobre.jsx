@@ -132,34 +132,31 @@ export default function Sobre() {
               </h2>
 
               <p>
-                Uma marca representa muito mais
-                do que um nome. Ela comunica a identidade
-                de uma empresa e a forma como deseja
-                ser reconhecida.
+                A identidade visual da Camará Distribuidora
+                reúne elementos que tornam a marca
+                reconhecível e presente em sua comunicação.
               </p>
 
               <p>
-                Em breve, esta seção apresentará
-                a origem da logomarca Camará
-                e o significado dos elementos
-                que fazem parte de sua história.
+                Com uma composição marcante e cores
+                características, nossa logomarca
+                representa visualmente a Camará
+                Distribuidora.
               </p>
-
-              <div className="about-identity-note">
-                História e logomarca oficiais
-                em preparação.
-              </div>
             </div>
 
             <div className="about-brand-card">
               <div className="about-brand-symbol">
-                <span>CAMARÁ</span>
-                <small>DISTRIBUIDORA</small>
+                <img
+                  src="/images/logo-camara.png"
+                  alt="Logomarca oficial da Camará Distribuidora"
+                  loading="lazy"
+                />
               </div>
 
               <div className="about-brand-bottom">
+                <span>CAMARÁ DISTRIBUIDORA</span>
                 <span>IDENTIDADE VISUAL</span>
-                <span>PROVISÓRIA</span>
               </div>
             </div>
           </div>
@@ -196,9 +193,7 @@ export default function Sobre() {
                 >
                   <div className="about-gallery-visual">
                     <Camera size={35} strokeWidth={1.4} />
-                    <span>
-                      FOTO 0{index + 1}
-                    </span>
+                    <span>FOTO 0{index + 1}</span>
                   </div>
 
                   <div className="about-gallery-info">
