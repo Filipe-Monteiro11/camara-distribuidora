@@ -37,3 +37,15 @@ model Admin {
   senhaHash String
   criadoEm  DateTime @default(now())
 }
+
+model Recipe {
+  id           String   @id @default(uuid())
+  titulo       String
+  descricao    String?
+  imagem       String?
+  ingredientes String[]
+  preparo      String
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+}

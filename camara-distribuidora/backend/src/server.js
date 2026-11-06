@@ -7,6 +7,7 @@ import { uploadDir } from "./middleware/upload.js";
 import authRoutes from "./routes/authRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import galleryRoutes from "./routes/galleryRoutes.js";
+import recipeRoutes from "./routes/recipeRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 
 const app = express();
@@ -45,7 +46,9 @@ app.get("/api/health", async (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/gallery", galleryRoutes);
+app.use("/api/recipes", recipeRoutes);
 app.use("/api/upload", uploadRoutes);
+
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
