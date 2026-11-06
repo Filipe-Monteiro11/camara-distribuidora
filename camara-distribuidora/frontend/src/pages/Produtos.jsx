@@ -2,42 +2,43 @@ import { useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import { produtosIniciais } from "../data/produtos";
+import { produtosApi } from "../services/api";
 import "../styles/Produtos.css";
 
-const PRODUTOS_KEY = "camara-produtos";
-
-function carregarProdutos() {
-  try {
-    const dados = localStorage.getItem(PRODUTOS_KEY);
-    const produtos = dados ? JSON.parse(dados) : produtosIniciais;
-
-    return Array.isArray(produtos) ? produtos : produtosIniciais;
-  } catch {
-    return produtosIniciais;
-  }
-}
-
 export default function Produtos() {
-  const [produtos, setProdutos] = useState(carregarProdutos);
+  const [produtos, setProdutos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
-    const atualizarProdutos = () => {
-      setProdutos(carregarProdutos());
-    };
+    let ativo = true;
 
-    window.addEventListener("storage", atualizarProdutos);
-    window.addEventListener("focus", atualizarProdutos);
+    async function carregarProdutos() {
+      try {
+        const dados = await produtosApi.listar();
+
+        if (ativo) {
+          setProdutos(
+            Array.isArray(dados) ? dados : dados?.produtos ?? []
+          );
+        }
+      } catch {
+        if (ativo) {
+          setErro("Não foi possível carregar os produtos.");
+        }
+      } finally {
+        if (ativo) {
+          setCarregando(false);
+        }
+      }
+    }
+
+    carregarProdutos();
 
     return () => {
-      window.removeEventListener("storage", atualizarProdutos);
-      window.removeEventListener("focus", atualizarProdutos);
+      ativo = false;
     };
   }, []);
-
-  const produtosAtivos = produtos.filter(
-    (produto) => produto.ativo !== false
-  );
 
   return (
     <>
@@ -76,7 +77,7 @@ export default function Produtos() {
             </div>
 
             <div className="catalog-grid">
-              {produtosAtivos.map((produto) => (
+              {produtos.map((produto) => (
                 <article
                   className="catalog-card"
                   key={produto.id}
@@ -107,7 +108,19 @@ export default function Produtos() {
               ))}
             </div>
 
-            {produtosAtivos.length === 0 && (
+            {carregando && (
+              <p className="catalog-empty">
+                Carregando produtos...
+              </p>
+            )}
+
+            {!carregando && erro && (
+              <p className="catalog-empty" role="alert">
+                {erro}
+              </p>
+            )}
+
+            {!carregando && !erro && produtos.length === 0 && (
               <p className="catalog-empty">
                 Nenhum produto disponível no momento.
               </p>

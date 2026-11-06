@@ -1,53 +1,33 @@
 import { useEffect, useState } from "react";
 import { ImageIcon, Play, X, ArrowUpRight } from "lucide-react";
-import {
-  categoriasGaleria,
-  publicacoesGaleria,
-} from "../data/galeria";
+import { categoriasGaleria } from "../data/galeria";
+import { galeriaApi } from "../services/api";
 import "../styles/Galeria.css";
-
-const GALERIA_KEY = "camara-galeria";
-
-function carregarPublicacoes() {
-  try {
-    const dados = localStorage.getItem(GALERIA_KEY);
-    const publicacoes = dados ? JSON.parse(dados) : publicacoesGaleria;
-
-    return Array.isArray(publicacoes)
-      ? publicacoes
-      : publicacoesGaleria;
-  } catch {
-    return publicacoesGaleria;
-  }
-}
 
 function obterUrlVideo(url) {
   try {
     const endereco = new URL(url);
+    const hostname = endereco.hostname.toLowerCase();
+    let id = "";
 
-    if (endereco.hostname === "youtu.be") {
-      return `https://www.youtube.com/embed/${endereco.pathname.slice(1)}`;
-    }
-
-    if (
-      ["youtube.com", "www.youtube.com", "m.youtube.com"].includes(
-        endereco.hostname
-      )
+    if (hostname === "youtu.be") {
+      id = endereco.pathname.split("/")[1];
+    } else if (
+      ["youtube.com", "www.youtube.com", "m.youtube.com"].includes(hostname)
     ) {
-      const id = endereco.searchParams.get("v");
-
-      if (id) return `https://www.youtube.com/embed/${id}`;
-
-      if (endereco.pathname.startsWith("/embed/")) {
-        return endereco.href;
-      }
-
-      if (endereco.pathname.startsWith("/shorts/")) {
-        return `https://www.youtube.com/embed/${endereco.pathname.split("/")[2]}`;
+      if (endereco.pathname === "/watch") {
+        id = endereco.searchParams.get("v");
+      } else if (
+        endereco.pathname.startsWith("/embed/") ||
+        endereco.pathname.startsWith("/shorts/")
+      ) {
+        id = endereco.pathname.split("/")[2];
       }
     }
 
-    return "";
+    return /^[a-zA-Z0-9_-]{11}$/.test(id || "")
+      ? `https://www.youtube.com/embed/${id}`
+      : "";
   } catch {
     return "";
   }
@@ -56,39 +36,57 @@ function obterUrlVideo(url) {
 export default function Galeria() {
   const [categoria, setCategoria] = useState("Todos");
   const [publicacao, setPublicacao] = useState(null);
-  const [publicacoes, setPublicacoes] = useState(carregarPublicacoes);
+  const [publicacoes, setPublicacoes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
-    const atualizarPublicacoes = () => {
-      setPublicacoes(carregarPublicacoes());
-    };
+    let ativo = true;
 
-    window.addEventListener("storage", atualizarPublicacoes);
-    window.addEventListener("focus", atualizarPublicacoes);
+    async function carregarPublicacoes() {
+      try {
+        const dados = await galeriaApi.listar();
+
+        if (ativo) {
+          setPublicacoes(
+            Array.isArray(dados) ? dados : dados?.publicacoes ?? []
+          );
+        }
+      } catch {
+        if (ativo) {
+          setErro("Não foi possível carregar a galeria.");
+        }
+      } finally {
+        if (ativo) {
+          setCarregando(false);
+        }
+      }
+    }
+
+    carregarPublicacoes();
 
     return () => {
-      window.removeEventListener("storage", atualizarPublicacoes);
-      window.removeEventListener("focus", atualizarPublicacoes);
+      ativo = false;
     };
   }, []);
 
   useEffect(() => {
     if (!publicacao) return;
 
-    const fechar = (evento) => {
+    function fechar(evento) {
       if (evento.key === "Escape") {
         setPublicacao(null);
       }
-    };
-
-    document.addEventListener("keydown", fechar);
+    }
 
     const overflowAnterior = document.body.style.overflow;
+
     document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", fechar);
 
     return () => {
-      document.removeEventListener("keydown", fechar);
       document.body.style.overflow = overflowAnterior;
+      document.removeEventListener("keydown", fechar);
     };
   }, [publicacao]);
 
@@ -99,14 +97,7 @@ export default function Galeria() {
   );
 
   function abrirPublicacao(item) {
-    const disponivel =
-      item.tipo === "video"
-        ? Boolean(obterUrlVideo(item.video))
-        : Boolean(item.imagem);
-
-    if (disponivel) {
-      setPublicacao(item);
-    }
+    setPublicacao(item);
   }
 
   return (
@@ -171,79 +162,88 @@ export default function Galeria() {
           </div>
 
           <div className="gallery-grid">
-            {publicacoesFiltradas.map((item) => {
-              const disponivel =
-                item.tipo === "video"
-                  ? Boolean(obterUrlVideo(item.video))
-                  : Boolean(item.imagem);
+            {publicacoesFiltradas.map((item) => (
+              <article
+                className="gallery-card"
+                key={item.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Visualizar ${item.titulo}`}
+                onClick={() => abrirPublicacao(item)}
+                onKeyDown={(evento) => {
+                  if (
+                    evento.key === "Enter" ||
+                    evento.key === " "
+                  ) {
+                    evento.preventDefault();
+                    abrirPublicacao(item);
+                  }
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="gallery-card-media">
+                  {item.imagem ? (
+                    <img
+                      src={item.imagem}
+                      alt={item.titulo}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="gallery-placeholder">
+                      {item.tipo === "video" ? (
+                        <Play size={35} />
+                      ) : (
+                        <ImageIcon size={35} />
+                      )}
 
-              return (
-                <article className="gallery-card" key={item.id}>
-                  <div className="gallery-card-media">
-                    {item.imagem ? (
-                      <img
-                        src={item.imagem}
-                        alt={item.titulo}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="gallery-placeholder">
-                        {item.tipo === "video" ? (
-                          <Play size={35} />
-                        ) : (
-                          <ImageIcon size={35} />
-                        )}
+                      <span>Conteúdo em breve</span>
+                    </div>
+                  )}
 
-                        <span>Conteúdo em breve</span>
-                      </div>
-                    )}
+                  <span className="gallery-card-category">
+                    {item.categoria}
+                  </span>
 
-                    <span className="gallery-card-category">
-                      {item.categoria}
+                  {item.tipo === "video" && (
+                    <span className="gallery-video-icon">
+                      <Play size={19} fill="currentColor" />
                     </span>
+                  )}
+                </div>
 
-                    {item.tipo === "video" && (
-                      <span className="gallery-video-icon">
-                        <Play size={19} fill="currentColor" />
-                      </span>
-                    )}
-                  </div>
+                <div className="gallery-card-content">
+                  <span className="gallery-card-type">
+                    {item.tipo === "video"
+                      ? "VÍDEO"
+                      : "FOTOGRAFIA"}
+                  </span>
 
-                  <div className="gallery-card-content">
-                    <span className="gallery-card-type">
-                      {item.tipo === "video"
-                        ? "VÍDEO"
-                        : "FOTOGRAFIA"}
-                    </span>
-
-                    <h3>{item.titulo}</h3>
-                    <p>{item.descricao}</p>
-
-                    <button
-                      type="button"
-                      disabled={!disponivel}
-                      onClick={() => abrirPublicacao(item)}
-                    >
-                      {disponivel ? "Visualizar" : "Em breve"}
-                      <ArrowUpRight size={17} />
-                    </button>
-                  </div>
-                </article>
-              );
-            })}
+                  <h3>{item.titulo}</h3>
+                  <p>{item.descricao}</p>
+                </div>
+              </article>
+            ))}
           </div>
 
-          {publicacoesFiltradas.length === 0 && (
+          {carregando && (
             <p className="gallery-notice">
-              Nenhuma publicação disponível nesta categoria.
+              Carregando publicações...
             </p>
           )}
 
-          <p className="gallery-notice">
-            Conteúdos ilustrativos do protótipo.
-            As publicações oficiais serão adicionadas
-            posteriormente.
-          </p>
+          {!carregando && erro && (
+            <p className="gallery-notice" role="alert">
+              {erro}
+            </p>
+          )}
+
+          {!carregando &&
+            !erro &&
+            publicacoesFiltradas.length === 0 && (
+              <p className="gallery-notice">
+                Nenhuma publicação disponível nesta categoria.
+              </p>
+            )}
         </div>
       </section>
 
@@ -289,18 +289,24 @@ export default function Galeria() {
               <X size={22} />
             </button>
 
-            {publicacao.tipo === "foto" ? (
+            {publicacao.tipo === "video" &&
+            obterUrlVideo(publicacao.videoUrl) ? (
+              <iframe
+                src={obterUrlVideo(publicacao.videoUrl)}
+                title={publicacao.titulo}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : publicacao.imagem ? (
               <img
                 src={publicacao.imagem}
                 alt={publicacao.titulo}
               />
             ) : (
-              <iframe
-                src={obterUrlVideo(publicacao.video)}
-                title={publicacao.titulo}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
+              <div className="gallery-placeholder">
+                <ImageIcon size={35} />
+                <span>Conteúdo em breve</span>
+              </div>
             )}
 
             <div className="gallery-modal-info">

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -6,51 +7,66 @@ import {
   MapPin,
   Package,
   ShieldCheck,
-  Truck,
+  Truck
 } from "lucide-react";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { produtosApi } from "../services/api";
 import "../styles/Home.css";
-
-const produtos = [
-  {
-    nome: "Charque Tradicional",
-    categoria: "LINHA DE CHARQUE",
-    descricao: "Conheça as opções disponíveis em nosso catálogo.",
-    imagem:
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    nome: "Cortes Especiais",
-    categoria: "SELEÇÃO DE CARNES",
-    descricao: "Explore nossa seleção de cortes e produtos.",
-    imagem:
-      "https://images.unsplash.com/photo-1588168333986-5078d3ae3976?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    nome: "Linha de Carnes",
-    categoria: "NOSSO CATÁLOGO",
-    descricao: "Descubra as opções para diferentes preparações.",
-    imagem:
-      "https://images.unsplash.com/photo-1551028150-64b9f398f678?auto=format&fit=crop&w=1000&q=85",
-  },
-];
 
 const receitas = [
   {
     nome: "Escondidinho de Charque",
     imagem:
-      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1000&q=85",
+      "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1000&q=85"
   },
   {
     nome: "Charque com Macaxeira",
     imagem:
-      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85",
-  },
+      "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=85"
+  }
 ];
 
 export default function Home() {
+  const [produtos, setProdutos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erroProdutos, setErroProdutos] = useState(false);
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarProdutos() {
+      try {
+        const dados = await produtosApi.listar();
+
+        if (ativo) {
+          const lista = Array.isArray(dados)
+            ? dados
+            : dados?.produtos ?? [];
+
+          setProdutos(
+            lista.filter((produto) => produto.ativo !== false).slice(0, 3)
+          );
+        }
+      } catch {
+        if (ativo) {
+          setErroProdutos(true);
+        }
+      } finally {
+        if (ativo) {
+          setCarregando(false);
+        }
+      }
+    }
+
+    carregarProdutos();
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
+
   return (
     <>
       <Header />
@@ -100,6 +116,7 @@ export default function Home() {
           <div className="container highlights-grid">
             <div className="highlight-item">
               <Package size={30} strokeWidth={1.6} />
+
               <div>
                 <strong>Nosso catálogo</strong>
                 <span>Explore nossas linhas de produtos</span>
@@ -108,6 +125,7 @@ export default function Home() {
 
             <div className="highlight-item">
               <ShieldCheck size={30} strokeWidth={1.6} />
+
               <div>
                 <strong>Conheça a Camará</strong>
                 <span>Saiba mais sobre nossa identidade</span>
@@ -116,6 +134,7 @@ export default function Home() {
 
             <div className="highlight-item">
               <Truck size={30} strokeWidth={1.6} />
+
               <div>
                 <strong>Atendimento</strong>
                 <span>Fale com nossa equipe</span>
@@ -174,17 +193,19 @@ export default function Home() {
 
             <div className="products-grid">
               {produtos.map((produto) => (
-                <article className="product-card" key={produto.nome}>
+                <article className="product-card" key={produto.id}>
                   <div className="product-image">
-                    <img
-                      src={produto.imagem}
-                      alt={`Imagem ilustrativa de ${produto.nome}`}
-                      loading="lazy"
-                    />
-
-                    <span className="product-image-label">
-                      Imagem ilustrativa
-                    </span>
+                    {produto.imagem ? (
+                      <img
+                        src={produto.imagem}
+                        alt={produto.nome}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="product-image-placeholder">
+                        <Package size={36} />
+                      </div>
+                    )}
 
                     <Link
                       to="/produtos"
@@ -211,6 +232,22 @@ export default function Home() {
                 </article>
               ))}
             </div>
+
+            {carregando && (
+              <p>Carregando produtos...</p>
+            )}
+
+            {!carregando && erroProdutos && (
+              <p role="alert">
+                Não foi possível carregar os produtos.
+              </p>
+            )}
+
+            {!carregando && !erroProdutos && produtos.length === 0 && (
+              <p>
+                Nenhum produto disponível no momento.
+              </p>
+            )}
 
             <div className="section-action">
               <Link to="/produtos" className="btn btn-red">
