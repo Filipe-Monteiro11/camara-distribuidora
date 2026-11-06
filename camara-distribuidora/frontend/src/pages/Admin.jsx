@@ -17,12 +17,10 @@ import {
   Play
 } from "lucide-react";
 
-import { produtosIniciais } from "../data/produtos";
-import { categoriasGaleria, publicacoesGaleria } from "../data/galeria";
+import { categoriasGaleria } from "../data/galeria";
+import { produtosApi, galeriaApi, uploadApi } from "../services/api";
 import "../styles/Admin.css";
 
-const PRODUTOS_KEY = "camara-produtos";
-const GALERIA_KEY = "camara-galeria";
 const LIMITE_IMAGEM = 20 * 1024 * 1024;
 
 const menuItems = [
@@ -45,34 +43,21 @@ const publicacaoVazia = {
   titulo: "",
   descricao: "",
   categoria: "Produtos",
-  tipo: "foto",
+  tipo: "imagem",
   imagem: "",
-  video: "",
+  videoUrl: "",
   ativo: true
 };
-
-function carregarDados(chave, iniciais) {
-  try {
-    const dados = localStorage.getItem(chave);
-    const resultado = dados ? JSON.parse(dados) : iniciais;
-
-    return Array.isArray(resultado) ? resultado : iniciais;
-  } catch {
-    return iniciais;
-  }
-}
 
 export default function Admin({ admin, onLogout }) {
   const [pagina, setPagina] = useState("dashboard");
   const [menuAberto, setMenuAberto] = useState(false);
 
-  const [produtos, setProdutos] = useState(() =>
-    carregarDados(PRODUTOS_KEY, produtosIniciais)
-  );
-
-  const [publicacoes, setPublicacoes] = useState(() =>
-    carregarDados(GALERIA_KEY, publicacoesGaleria)
-  );
+  const [produtos, setProdutos] = useState([]);
+  const [publicacoes, setPublicacoes] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [processando, setProcessando] = useState(false);
+  const [erroPagina, setErroPagina] = useState("");
 
   const [busca, setBusca] = useState("");
   const [buscaGaleria, setBuscaGaleria] = useState("");
@@ -80,46 +65,81 @@ export default function Admin({ admin, onLogout }) {
   const [formulario, setFormulario] = useState(null);
   const [tipoFormulario, setTipoFormulario] = useState(null);
   const [editandoId, setEditandoId] = useState(null);
+  const [arquivoImagem, setArquivoImagem] = useState(null);
   const [erro, setErro] = useState("");
 
   useEffect(() => {
-    try {
-      localStorage.setItem(PRODUTOS_KEY, JSON.stringify(produtos));
-    } catch {
-      console.error("Não foi possível salvar os produtos.");
-    }
-  }, [produtos]);
+    let ativo = true;
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(GALERIA_KEY, JSON.stringify(publicacoes));
-    } catch {
-      console.error("Não foi possível salvar a galeria.");
+    async function carregarDados() {
+      const resultados = await Promise.allSettled([
+        produtosApi.listarTodos(),
+        galeriaApi.listarTodos()
+      ]);
+
+      if (!ativo) return;
+
+      const [resultadoProdutos, resultadoGaleria] = resultados;
+      const erros = [];
+
+      if (resultadoProdutos.status === "fulfilled") {
+        const dados = resultadoProdutos.value;
+        setProdutos(Array.isArray(dados) ? dados : dados?.produtos ?? []);
+      } else {
+        erros.push(`Produtos: ${resultadoProdutos.reason.message}`);
+      }
+
+      if (resultadoGaleria.status === "fulfilled") {
+        const dados = resultadoGaleria.value;
+        setPublicacoes(
+          Array.isArray(dados) ? dados : dados?.publicacoes ?? []
+        );
+      } else {
+        erros.push(`Galeria: ${resultadoGaleria.reason.message}`);
+      }
+
+      setErroPagina(erros.join(" | "));
+      setCarregando(false);
     }
-  }, [publicacoes]);
+
+    carregarDados();
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!formulario) return;
 
-    function fechar(evento) {
-      if (evento.key === "Escape") {
+    function aoPressionarTecla(evento) {
+      if (evento.key === "Escape" && !processando) {
         setFormulario(null);
         setTipoFormulario(null);
         setEditandoId(null);
+        setArquivoImagem(null);
         setErro("");
       }
     }
 
-    document.addEventListener("keydown", fechar);
-
     const overflowAnterior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", aoPressionarTecla);
 
     return () => {
-      document.removeEventListener("keydown", fechar);
       document.body.style.overflow = overflowAnterior;
+      document.removeEventListener("keydown", aoPressionarTecla);
     };
-  }, [formulario]);
+  }, [formulario, processando]);
+
+  const imagemPreview = arquivoImagem
+    ? URL.createObjectURL(arquivoImagem)
+    : "";
+
+  useEffect(() => {
+    if (!imagemPreview) return;
+    return () => URL.revokeObjectURL(imagemPreview);
+  }, [imagemPreview]);
 
   const paginaAtual = menuItems.find((item) => item.id === pagina);
   const IconePagina = paginaAtual.icon;
@@ -151,9 +171,12 @@ export default function Admin({ admin, onLogout }) {
   ];
 
   function fecharFormulario() {
+    if (processando) return;
+
     setFormulario(null);
     setTipoFormulario(null);
     setEditandoId(null);
+    setArquivoImagem(null);
     setErro("");
   }
 
@@ -169,7 +192,10 @@ export default function Admin({ admin, onLogout }) {
 
     setTipoFormulario(tipo);
     setEditandoId(item?.id ?? null);
-    setFormulario(item ? { ...item } : { ...dadosIniciais });
+    setFormulario(
+      item ? { ...dadosIniciais, ...item } : { ...dadosIniciais }
+    );
+    setArquivoImagem(null);
     setErro("");
   }
 
@@ -182,7 +208,6 @@ export default function Admin({ admin, onLogout }) {
 
   function selecionarImagem(evento) {
     const arquivo = evento.target.files?.[0];
-
     if (!arquivo) return;
 
     const formatos = ["image/jpeg", "image/png", "image/webp"];
@@ -199,134 +224,174 @@ export default function Admin({ admin, onLogout }) {
       return;
     }
 
+    setArquivoImagem(arquivo);
     setErro("");
-
-    const leitor = new FileReader();
-
-    leitor.onload = () => {
-      if (typeof leitor.result === "string") {
-        atualizarCampo("imagem", leitor.result);
-      }
-    };
-
-    leitor.onerror = () => {
-      setErro("Não foi possível carregar a imagem.");
-    };
-
-    leitor.readAsDataURL(arquivo);
+    evento.target.value = "";
   }
 
-  function salvarFormulario(evento) {
+  async function salvarFormulario(evento) {
     evento.preventDefault();
+    if (processando) return;
+
     setErro("");
+    setProcessando(true);
 
-    if (tipoFormulario === "produto") {
-      const dados = {
-        ...formulario,
-        nome: formulario.nome.trim(),
-        descricao: formulario.descricao.trim(),
-        categoria: formulario.categoria.trim(),
-        imagem: formulario.imagem || ""
-      };
+    try {
+      if (tipoFormulario === "produto") {
+        const dados = {
+          nome: formulario.nome.trim(),
+          descricao: formulario.descricao.trim(),
+          categoria: formulario.categoria.trim(),
+          imagem: formulario.imagem || "",
+          ativo: formulario.ativo !== false
+        };
 
-      if (!dados.nome || !dados.descricao || !dados.categoria) {
-        setErro("Preencha todos os campos obrigatórios.");
-        return;
+        if (!dados.nome || !dados.descricao || !dados.categoria) {
+          throw new Error("Preencha todos os campos obrigatórios.");
+        }
+
+        if (arquivoImagem) {
+          const resultado = await uploadApi.enviar(arquivoImagem);
+          dados.imagem = resultado.url;
+        }
+
+        if (editandoId) {
+          await produtosApi.atualizar(editandoId, dados);
+        } else {
+          await produtosApi.criar(dados);
+        }
+
+        const atualizados = await produtosApi.listarTodos();
+
+        setProdutos(
+          Array.isArray(atualizados)
+            ? atualizados
+            : atualizados?.produtos ?? []
+        );
       }
 
-      const atualizados =
-        editandoId !== null
-          ? produtos.map((item) =>
-              item.id === editandoId
-                ? { ...dados, id: editandoId }
-                : item
-            )
-          : [...produtos, { ...dados, id: crypto.randomUUID() }];
+      if (tipoFormulario === "galeria") {
+        const dados = {
+          titulo: formulario.titulo.trim(),
+          descricao: formulario.descricao.trim(),
+          categoria: formulario.categoria,
+          tipo: formulario.tipo,
+          imagem: formulario.imagem || null,
+          videoUrl:
+            formulario.tipo === "video"
+              ? (formulario.videoUrl || "").trim()
+              : null,
+          ativo: formulario.ativo !== false
+        };
 
-      try {
-        localStorage.setItem(
-          PRODUTOS_KEY,
-          JSON.stringify(atualizados)
-        );
+        if (!dados.titulo || !dados.descricao) {
+          throw new Error("Preencha todos os campos obrigatórios.");
+        }
 
-        setProdutos(atualizados);
-      } catch {
-        setErro(
-          "Não foi possível salvar. O armazenamento local pode estar cheio."
+        if (dados.tipo === "video" && !dados.videoUrl) {
+          throw new Error("Informe a URL do vídeo.");
+        }
+
+        if (arquivoImagem) {
+          const resultado = await uploadApi.enviar(arquivoImagem);
+          dados.imagem = resultado.url;
+        }
+
+        if (editandoId) {
+          await galeriaApi.atualizar(editandoId, dados);
+        } else {
+          await galeriaApi.criar(dados);
+        }
+
+        const atualizadas = await galeriaApi.listarTodos();
+
+        setPublicacoes(
+          Array.isArray(atualizadas)
+            ? atualizadas
+            : atualizadas?.publicacoes ?? []
         );
-        return;
       }
+
+      setFormulario(null);
+      setTipoFormulario(null);
+      setEditandoId(null);
+      setArquivoImagem(null);
+    } catch (error) {
+      setErro(error.message || "Não foi possível salvar.");
+    } finally {
+      setProcessando(false);
     }
-
-    if (tipoFormulario === "galeria") {
-      const dados = {
-        ...formulario,
-        titulo: formulario.titulo.trim(),
-        descricao: formulario.descricao.trim(),
-        imagem: formulario.imagem || "",
-        video: formulario.video.trim()
-      };
-
-      if (!dados.titulo || !dados.descricao) {
-        setErro("Preencha todos os campos obrigatórios.");
-        return;
-      }
-
-      const atualizadas =
-        editandoId !== null
-          ? publicacoes.map((item) =>
-              item.id === editandoId
-                ? { ...dados, id: editandoId }
-                : item
-            )
-          : [...publicacoes, { ...dados, id: crypto.randomUUID() }];
-
-      try {
-        localStorage.setItem(
-          GALERIA_KEY,
-          JSON.stringify(atualizadas)
-        );
-
-        setPublicacoes(atualizadas);
-      } catch {
-        setErro(
-          "Não foi possível salvar. O armazenamento local pode estar cheio."
-        );
-        return;
-      }
-    }
-
-    fecharFormulario();
   }
 
-  function excluirItem(tipo, item) {
+  async function excluirItem(tipo, item) {
     const nome = tipo === "produto" ? item.nome : item.titulo;
 
     if (!window.confirm(`Excluir "${nome}"?`)) return;
 
-    if (tipo === "produto") {
-      setProdutos((atuais) =>
-        atuais.filter((produto) => produto.id !== item.id)
-      );
-    } else {
-      setPublicacoes((atuais) =>
-        atuais.filter((publicacao) => publicacao.id !== item.id)
-      );
+    try {
+      if (tipo === "produto") {
+        await produtosApi.excluir(item.id);
+
+        setProdutos((atuais) =>
+          atuais.filter((produto) => produto.id !== item.id)
+        );
+      } else {
+        await galeriaApi.excluir(item.id);
+
+        setPublicacoes((atuais) =>
+          atuais.filter((publicacao) => publicacao.id !== item.id)
+        );
+      }
+
+      setErroPagina("");
+    } catch (error) {
+      setErroPagina(error.message);
     }
   }
 
-  function alternarStatus(tipo, id) {
-    const atualizar = (atuais) =>
-      atuais.map((item) =>
-        item.id === id
-          ? { ...item, ativo: item.ativo === false }
-          : item
-      );
+  async function alternarStatus(tipo, item) {
+    const ativo = item.ativo === false;
 
-    if (tipo === "produto") {
-      setProdutos(atualizar);
-    } else {
-      setPublicacoes(atualizar);
+    try {
+      if (tipo === "produto") {
+        await produtosApi.atualizar(item.id, {
+          nome: item.nome,
+          descricao: item.descricao,
+          categoria: item.categoria,
+          imagem: item.imagem,
+          ativo
+        });
+
+        setProdutos((atuais) =>
+          atuais.map((produto) =>
+            produto.id === item.id
+              ? { ...produto, ativo }
+              : produto
+          )
+        );
+      } else {
+        await galeriaApi.atualizar(item.id, {
+          titulo: item.titulo,
+          descricao: item.descricao,
+          categoria: item.categoria,
+          tipo: item.tipo,
+          imagem: item.imagem,
+          videoUrl: item.videoUrl || null,
+          ativo
+        });
+
+        setPublicacoes((atuais) =>
+          atuais.map((publicacao) =>
+            publicacao.id === item.id
+              ? { ...publicacao, ativo }
+              : publicacao
+          )
+        );
+      }
+
+      setErroPagina("");
+    } catch (error) {
+      setErroPagina(error.message);
     }
   }
 
@@ -363,7 +428,7 @@ export default function Admin({ admin, onLogout }) {
       <button
         type="button"
         className={`admin-status ${ativo ? "active" : "inactive"}`}
-        onClick={() => alternarStatus(tipo, item.id)}
+        onClick={() => alternarStatus(tipo, item)}
         aria-label={`${ativo ? "Desativar" : "Ativar"} ${nome}`}
       >
         {ativo ? "Ativo" : "Inativo"}
@@ -465,14 +530,19 @@ export default function Admin({ admin, onLogout }) {
         </header>
 
         <main className="admin-content">
+          {erroPagina && (
+            <p role="alert" style={{ color: "#b42318" }}>
+              {erroPagina}
+            </p>
+          )}
+
           {pagina === "dashboard" && (
             <>
               <div className="admin-welcome">
                 <span>VISÃO GERAL</span>
                 <h2>Bem-vindo ao painel Camará</h2>
                 <p>
-                  Gerencie produtos e publicações do site em um só
-                  lugar.
+                  Gerencie produtos e publicações do site em um só lugar.
                 </p>
               </div>
 
@@ -482,7 +552,6 @@ export default function Admin({ admin, onLogout }) {
                     <div className="admin-stat-icon">
                       <Icon size={22} />
                     </div>
-
                     <span>{label}</span>
                     <strong>{value}</strong>
                   </div>
@@ -520,13 +589,9 @@ export default function Admin({ admin, onLogout }) {
             <section className="admin-panel">
               <div className="admin-products-heading">
                 <div>
-                  <span className="admin-section-label">
-                    CATÁLOGO
-                  </span>
+                  <span className="admin-section-label">CATÁLOGO</span>
                   <h2>Gerenciar produtos</h2>
-                  <p>
-                    Cadastre e organize os produtos da distribuidora.
-                  </p>
+                  <p>Cadastre e organize os produtos da distribuidora.</p>
                 </div>
 
                 <button
@@ -551,48 +616,60 @@ export default function Admin({ admin, onLogout }) {
               </div>
 
               <div className="admin-table-wrapper">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Produto</th>
-                      <th>Categoria</th>
-                      <th>Status</th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {produtosFiltrados.map((produto) => (
-                      <tr key={produto.id}>
-                        <td>
-                          <div className="admin-product-info">
-                            {produto.imagem ? (
-                              <img src={produto.imagem} alt="" />
-                            ) : (
-                              <div className="admin-product-placeholder">
-                                <Package size={22} />
-                              </div>
-                            )}
-
-                            <div>
-                              <strong>{produto.nome}</strong>
-                              <span>{produto.descricao}</span>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td>{produto.categoria}</td>
-                        <td>{renderizarStatus("produto", produto)}</td>
-                        <td>{renderizarAcoes("produto", produto)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {produtosFiltrados.length === 0 && (
+                {carregando ? (
                   <p className="admin-no-results">
-                    Nenhum produto encontrado.
+                    Carregando produtos...
                   </p>
+                ) : (
+                  <>
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Produto</th>
+                          <th>Categoria</th>
+                          <th>Status</th>
+                          <th>Ações</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {produtosFiltrados.map((produto) => (
+                          <tr key={produto.id}>
+                            <td>
+                              <div className="admin-product-info">
+                                {produto.imagem ? (
+                                  <img src={produto.imagem} alt="" />
+                                ) : (
+                                  <div className="admin-product-placeholder">
+                                    <Package size={22} />
+                                  </div>
+                                )}
+
+                                <div>
+                                  <strong>{produto.nome}</strong>
+                                  <span>{produto.descricao}</span>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td>{produto.categoria}</td>
+                            <td>
+                              {renderizarStatus("produto", produto)}
+                            </td>
+                            <td>
+                              {renderizarAcoes("produto", produto)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {produtosFiltrados.length === 0 && (
+                      <p className="admin-no-results">
+                        Nenhum produto encontrado.
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </section>
@@ -635,56 +712,68 @@ export default function Admin({ admin, onLogout }) {
               </div>
 
               <div className="admin-table-wrapper">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Publicação</th>
-                      <th>Categoria</th>
-                      <th>Tipo</th>
-                      <th>Status</th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {publicacoesFiltradas.map((item) => (
-                      <tr key={item.id}>
-                        <td>
-                          <div className="admin-product-info">
-                            {item.imagem ? (
-                              <img src={item.imagem} alt="" />
-                            ) : (
-                              <div className="admin-product-placeholder">
-                                {item.tipo === "video" ? (
-                                  <Play size={22} />
-                                ) : (
-                                  <ImageIcon size={22} />
-                                )}
-                              </div>
-                            )}
-
-                            <div>
-                              <strong>{item.titulo}</strong>
-                              <span>{item.descricao}</span>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td>{item.categoria}</td>
-                        <td>
-                          {item.tipo === "video" ? "Vídeo" : "Foto"}
-                        </td>
-                        <td>{renderizarStatus("galeria", item)}</td>
-                        <td>{renderizarAcoes("galeria", item)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {publicacoesFiltradas.length === 0 && (
+                {carregando ? (
                   <p className="admin-no-results">
-                    Nenhuma publicação encontrada.
+                    Carregando publicações...
                   </p>
+                ) : (
+                  <>
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Publicação</th>
+                          <th>Categoria</th>
+                          <th>Tipo</th>
+                          <th>Status</th>
+                          <th>Ações</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {publicacoesFiltradas.map((item) => (
+                          <tr key={item.id}>
+                            <td>
+                              <div className="admin-product-info">
+                                {item.imagem ? (
+                                  <img src={item.imagem} alt="" />
+                                ) : (
+                                  <div className="admin-product-placeholder">
+                                    {item.tipo === "video" ? (
+                                      <Play size={22} />
+                                    ) : (
+                                      <ImageIcon size={22} />
+                                    )}
+                                  </div>
+                                )}
+
+                                <div>
+                                  <strong>{item.titulo}</strong>
+                                  <span>{item.descricao}</span>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td>{item.categoria}</td>
+                            <td>
+                              {item.tipo === "video" ? "Vídeo" : "Foto"}
+                            </td>
+                            <td>
+                              {renderizarStatus("galeria", item)}
+                            </td>
+                            <td>
+                              {renderizarAcoes("galeria", item)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {publicacoesFiltradas.length === 0 && (
+                      <p className="admin-no-results">
+                        Nenhuma publicação encontrada.
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </section>
@@ -726,6 +815,7 @@ export default function Admin({ admin, onLogout }) {
                 type="button"
                 aria-label="Fechar formulário"
                 onClick={fecharFormulario}
+                disabled={processando}
               >
                 <X size={21} />
               </button>
@@ -779,7 +869,14 @@ export default function Admin({ admin, onLogout }) {
                     }
                   >
                     {categoriasGaleria
-                      .filter((categoria) => categoria !== "Todos")
+                      .filter((categoria) =>
+                        [
+                          "Produtos",
+                          "Novidades",
+                          "Eventos",
+                          "Bastidores"
+                        ].includes(categoria)
+                      )
                       .map((categoria) => (
                         <option key={categoria} value={categoria}>
                           {categoria}
@@ -799,7 +896,7 @@ export default function Admin({ admin, onLogout }) {
                       atualizarCampo("tipo", evento.target.value)
                     }
                   >
-                    <option value="foto">Fotografia</option>
+                    <option value="imagem">Fotografia</option>
                     <option value="video">Vídeo</option>
                   </select>
                 </label>
@@ -839,16 +936,19 @@ export default function Admin({ admin, onLogout }) {
                   />
                 </label>
 
-                {formulario.imagem && (
+                {(imagemPreview || formulario.imagem) && (
                   <div className="admin-image-preview">
                     <img
-                      src={formulario.imagem}
+                      src={imagemPreview || formulario.imagem}
                       alt="Prévia da imagem selecionada"
                     />
 
                     <button
                       type="button"
-                      onClick={() => atualizarCampo("imagem", "")}
+                      onClick={() => {
+                        setArquivoImagem(null);
+                        atualizarCampo("imagem", "");
+                      }}
                     >
                       <Trash2 size={16} />
                       Remover imagem
@@ -864,10 +964,11 @@ export default function Admin({ admin, onLogout }) {
 
                     <input
                       type="url"
+                      required
                       placeholder="https://www.youtube.com/watch?v=..."
-                      value={formulario.video}
+                      value={formulario.videoUrl || ""}
                       onChange={(evento) =>
-                        atualizarCampo("video", evento.target.value)
+                        atualizarCampo("videoUrl", evento.target.value)
                       }
                     />
                   </label>
@@ -905,6 +1006,7 @@ export default function Admin({ admin, onLogout }) {
                   type="button"
                   className="admin-secondary-button"
                   onClick={fecharFormulario}
+                  disabled={processando}
                 >
                   Cancelar
                 </button>
@@ -912,10 +1014,13 @@ export default function Admin({ admin, onLogout }) {
                 <button
                   type="submit"
                   className="admin-primary-button"
+                  disabled={processando}
                 >
-                  {tipoFormulario === "produto"
-                    ? "Salvar produto"
-                    : "Salvar publicação"}
+                  {processando
+                    ? "Salvando..."
+                    : tipoFormulario === "produto"
+                      ? "Salvar produto"
+                      : "Salvar publicação"}
                 </button>
               </div>
             </form>
