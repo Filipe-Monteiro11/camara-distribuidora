@@ -15,7 +15,13 @@ import {
   Pencil,
   Trash2,
   ImageIcon,
-  Play
+  Play,
+  TrendingUp,
+  Flame,
+  SlidersHorizontal,
+  Upload,
+  Save,
+  Check
 } from "lucide-react";
 
 import AdminReceitas from "../components/AdminReceitas";
@@ -59,6 +65,13 @@ const categoriasPublicacao = categoriasGaleria.filter((categoria) =>
   ["Produtos", "Novidades", "Eventos", "Bastidores"].includes(categoria)
 );
 
+const posicoesDestaque = [
+  { valor: 0, titulo: "Ordem automática", descricao: "Sem posição fixa na Home" },
+  { valor: 1, titulo: "1º destaque", descricao: "Primeiro produto da Home" },
+  { valor: 2, titulo: "2º destaque", descricao: "Segundo produto da Home" },
+  { valor: 3, titulo: "3º destaque", descricao: "Terceiro produto da Home" }
+];
+
 function normalizarLista(dados, propriedade) {
   return Array.isArray(dados) ? dados : dados?.[propriedade] ?? [];
 }
@@ -98,11 +111,10 @@ export default function Admin({ admin, onLogout }) {
     let ativo = true;
 
     async function carregarDados() {
-      const [resultadoProdutos, resultadoGaleria] =
-        await Promise.allSettled([
-          produtosApi.listarTodos(),
-          galeriaApi.listarTodos()
-        ]);
+      const [resultadoProdutos, resultadoGaleria] = await Promise.allSettled([
+        produtosApi.listarTodos(),
+        galeriaApi.listarTodos()
+      ]);
 
       if (!ativo) return;
 
@@ -181,21 +193,9 @@ export default function Admin({ admin, onLogout }) {
   );
 
   const resumo = [
-    {
-      label: "Produtos cadastrados",
-      value: produtos.length,
-      icon: Package
-    },
-    {
-      label: "Publicações",
-      value: publicacoes.length,
-      icon: Images
-    },
-    {
-      label: "Currículos recebidos",
-      value: "—",
-      icon: FileText
-    }
+    { label: "Produtos cadastrados", value: produtos.length, icon: Package },
+    { label: "Publicações", value: publicacoes.length, icon: Images },
+    { label: "Currículos recebidos", value: "—", icon: FileText }
   ];
 
   function fecharFormulario() {
@@ -281,9 +281,9 @@ export default function Admin({ admin, onLogout }) {
         if (
           !Number.isInteger(dados.prioridade) ||
           dados.prioridade < 0 ||
-          dados.prioridade > 9999
+          dados.prioridade > 3
         ) {
-          throw new Error("A prioridade deve estar entre 0 e 9999.");
+          throw new Error("Selecione uma posição de destaque válida.");
         }
 
         if (arquivoImagem) {
@@ -357,13 +357,11 @@ export default function Admin({ admin, onLogout }) {
     try {
       if (tipo === "produto") {
         await produtosApi.excluir(item.id);
-
         setProdutos((atuais) =>
           atuais.filter((produto) => produto.id !== item.id)
         );
       } else {
         await galeriaApi.excluir(item.id);
-
         setPublicacoes((atuais) =>
           atuais.filter((publicacao) => publicacao.id !== item.id)
         );
@@ -391,11 +389,8 @@ export default function Admin({ admin, onLogout }) {
           ativo
         });
 
-        setProdutos((atuais) =>
-          atuais.map((produto) =>
-            produto.id === item.id ? { ...produto, ativo } : produto
-          )
-        );
+        const atualizados = await produtosApi.listarTodos();
+        setProdutos(normalizarLista(atualizados, "produtos"));
       } else {
         await galeriaApi.atualizar(item.id, {
           titulo: item.titulo,
@@ -409,9 +404,7 @@ export default function Admin({ admin, onLogout }) {
 
         setPublicacoes((atuais) =>
           atuais.map((publicacao) =>
-            publicacao.id === item.id
-              ? { ...publicacao, ativo }
-              : publicacao
+            publicacao.id === item.id ? { ...publicacao, ativo } : publicacao
           )
         );
       }
@@ -430,6 +423,7 @@ export default function Admin({ admin, onLogout }) {
         <button
           type="button"
           aria-label={`Editar ${nome}`}
+          title="Editar"
           onClick={() => abrirFormulario(tipo, item)}
         >
           <Pencil size={17} />
@@ -439,6 +433,7 @@ export default function Admin({ admin, onLogout }) {
           type="button"
           className="delete"
           aria-label={`Excluir ${nome}`}
+          title="Excluir"
           onClick={() => excluirItem(tipo, item)}
         >
           <Trash2 size={17} />
@@ -476,17 +471,11 @@ export default function Admin({ admin, onLogout }) {
 
       <aside className={`admin-sidebar${menuAberto ? " open" : ""}`}>
         <div className="admin-brand">
-          <img
-            src="/images/logo-camara.png"
-            alt="Camará Distribuidora"
-          />
+          <img src="/images/logo-camara.png" alt="Camará Distribuidora" />
           <span>PAINEL ADMINISTRATIVO</span>
         </div>
 
-        <nav
-          className="admin-navigation"
-          aria-label="Menu administrativo"
-        >
+        <nav className="admin-navigation" aria-label="Menu administrativo">
           {menuItems.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -509,23 +498,17 @@ export default function Admin({ admin, onLogout }) {
           <div className="admin-user">
             <div className="admin-avatar">A</div>
 
-            <div>
+            <div className="admin-user-details">
               <strong>Administrador</strong>
               <span>{admin?.email || "Conta administrativa"}</span>
             </div>
 
             <button
               type="button"
+              className="admin-logout"
               onClick={onLogout}
               aria-label="Sair do painel"
               title="Sair"
-              style={{
-                border: 0,
-                background: "transparent",
-                color: "inherit",
-                cursor: "pointer",
-                padding: 4
-              }}
             >
               <LogOut size={18} />
             </button>
@@ -558,7 +541,7 @@ export default function Admin({ admin, onLogout }) {
 
         <main className="admin-content">
           {erroPagina && (
-            <p role="alert" style={{ color: "#b42318" }}>
+            <p className="admin-page-error" role="alert">
               {erroPagina}
             </p>
           )}
@@ -588,10 +571,8 @@ export default function Admin({ admin, onLogout }) {
 
               <section className="admin-panel">
                 <div className="admin-panel-heading">
-                  <div>
-                    <span>GERENCIAMENTO</span>
-                    <h2>Acesso rápido</h2>
-                  </div>
+                  <span>GERENCIAMENTO</span>
+                  <h2>Acesso rápido</h2>
                 </div>
 
                 <div className="admin-shortcuts">
@@ -649,9 +630,7 @@ export default function Admin({ admin, onLogout }) {
 
               <div className="admin-table-wrapper">
                 {carregando ? (
-                  <p className="admin-no-results">
-                    Carregando produtos...
-                  </p>
+                  <p className="admin-no-results">Carregando produtos...</p>
                 ) : (
                   <>
                     <table className="admin-table">
@@ -689,27 +668,32 @@ export default function Admin({ admin, onLogout }) {
                             <td>{produto.categoria}</td>
 
                             <td>
-                              {[
-                                produto.maisVendido && "Mais vendido",
-                                produto.maisProcurado && "Mais procurado"
-                              ]
-                                .filter(Boolean)
-                                .join(" / ") || "Normal"}
+                              <div className="admin-classification-list">
+                                {produto.maisVendido && (
+                                  <span className="admin-classification-badge">
+                                    Mais vendido
+                                  </span>
+                                )}
+
+                                {produto.maisProcurado && (
+                                  <span className="admin-classification-badge">
+                                    Mais procurado
+                                  </span>
+                                )}
+
+                                {!produto.maisVendido &&
+                                  !produto.maisProcurado && "Normal"}
+                              </div>
                             </td>
 
                             <td>
                               {produto.prioridade > 0
-                                ? produto.prioridade
-                                : "—"}
+                                ? `${produto.prioridade}º destaque`
+                                : "Automática"}
                             </td>
 
-                            <td>
-                              {renderizarStatus("produto", produto)}
-                            </td>
-
-                            <td>
-                              {renderizarAcoes("produto", produto)}
-                            </td>
+                            <td>{renderizarStatus("produto", produto)}</td>
+                            <td>{renderizarAcoes("produto", produto)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -730,9 +714,7 @@ export default function Admin({ admin, onLogout }) {
             <section className="admin-panel">
               <div className="admin-products-heading">
                 <div>
-                  <span className="admin-section-label">
-                    PUBLICAÇÕES
-                  </span>
+                  <span className="admin-section-label">PUBLICAÇÕES</span>
                   <h2>Gerenciar galeria</h2>
                   <p>
                     Organize fotos, vídeos, novidades e eventos da Camará.
@@ -804,9 +786,7 @@ export default function Admin({ admin, onLogout }) {
                             </td>
 
                             <td>{item.categoria}</td>
-                            <td>
-                              {item.tipo === "video" ? "Vídeo" : "Foto"}
-                            </td>
+                            <td>{item.tipo === "video" ? "Vídeo" : "Foto"}</td>
                             <td>{renderizarStatus("galeria", item)}</td>
                             <td>{renderizarAcoes("galeria", item)}</td>
                           </tr>
@@ -852,15 +832,30 @@ export default function Admin({ admin, onLogout }) {
             aria-labelledby="admin-form-title"
           >
             <div className="admin-modal-heading">
-              <h2 id="admin-form-title">
-                {editandoId !== null ? "Editar" : "Novo"}
-                {tipoFormulario === "produto"
-                  ? " produto"
-                  : " publicação"}
-              </h2>
+              <div>
+                <span className="admin-modal-eyebrow">
+                  {tipoFormulario === "produto"
+                    ? "GERENCIAMENTO DE PRODUTOS"
+                    : "GERENCIAMENTO DE GALERIA"}
+                </span>
+
+                <h2 id="admin-form-title">
+                  {editandoId ? "Editar" : "Novo"}
+                  {tipoFormulario === "produto"
+                    ? " produto"
+                    : " publicação"}
+                </h2>
+
+                <p>
+                  {editandoId
+                    ? "Atualize as informações e salve as alterações."
+                    : "Preencha os dados para adicionar um novo item."}
+                </p>
+              </div>
 
               <button
                 type="button"
+                className="admin-modal-close"
                 aria-label="Fechar formulário"
                 onClick={fecharFormulario}
                 disabled={processando}
@@ -873,230 +868,379 @@ export default function Admin({ admin, onLogout }) {
               onSubmit={salvarFormulario}
               className="admin-product-form"
             >
-              <label>
-                {tipoFormulario === "produto"
-                  ? "Nome do produto"
-                  : "Título da publicação"}
+              <div className="admin-modal-body">
+                <section className="admin-form-section">
+                  <div className="admin-form-section-heading">
+                    <Package size={19} />
+                    <div>
+                      <h3>Informações principais</h3>
+                      <p>Dados que serão exibidos no site.</p>
+                    </div>
+                  </div>
 
-                <input
-                  required
-                  maxLength={120}
-                  value={
-                    tipoFormulario === "produto"
-                      ? formulario.nome
-                      : formulario.titulo
-                  }
-                  onChange={(evento) =>
-                    atualizarCampo(
-                      tipoFormulario === "produto"
-                        ? "nome"
-                        : "titulo",
-                      evento.target.value
-                    )
-                  }
-                />
-              </label>
+                  <div className="admin-form-grid">
+                    <label className="admin-form-field">
+                      <span>
+                        {tipoFormulario === "produto"
+                          ? "Nome do produto"
+                          : "Título da publicação"}
+                      </span>
 
-              <label>
-                Categoria
+                      <input
+                        required
+                        maxLength={120}
+                        placeholder={
+                          tipoFormulario === "produto"
+                            ? "Ex.: Cupim Frinense 10kg"
+                            : "Título da publicação"
+                        }
+                        value={
+                          tipoFormulario === "produto"
+                            ? formulario.nome
+                            : formulario.titulo
+                        }
+                        onChange={(evento) =>
+                          atualizarCampo(
+                            tipoFormulario === "produto"
+                              ? "nome"
+                              : "titulo",
+                            evento.target.value
+                          )
+                        }
+                      />
+                    </label>
 
-                {tipoFormulario === "produto" ? (
-                  <input
-                    required
-                    maxLength={80}
-                    value={formulario.categoria}
-                    onChange={(evento) =>
-                      atualizarCampo("categoria", evento.target.value)
-                    }
-                  />
-                ) : (
-                  <select
-                    value={formulario.categoria}
-                    onChange={(evento) =>
-                      atualizarCampo("categoria", evento.target.value)
-                    }
-                  >
-                    {categoriasPublicacao.map((categoria) => (
-                      <option key={categoria} value={categoria}>
-                        {categoria}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </label>
+                    <label className="admin-form-field">
+                      <span>Categoria</span>
 
-              {tipoFormulario === "produto" && (
-                <>
-                  <label>
-                    Prioridade de exibição
+                      {tipoFormulario === "produto" ? (
+                        <input
+                          required
+                          maxLength={80}
+                          placeholder="Ex.: Charque"
+                          value={formulario.categoria}
+                          onChange={(evento) =>
+                            atualizarCampo(
+                              "categoria",
+                              evento.target.value
+                            )
+                          }
+                        />
+                      ) : (
+                        <select
+                          value={formulario.categoria}
+                          onChange={(evento) =>
+                            atualizarCampo(
+                              "categoria",
+                              evento.target.value
+                            )
+                          }
+                        >
+                          {categoriasPublicacao.map((categoria) => (
+                            <option key={categoria} value={categoria}>
+                              {categoria}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </label>
+                  </div>
 
-                    <input
-                      type="number"
-                      min="0"
-                      max="9999"
-                      step="1"
+                  {tipoFormulario === "galeria" && (
+                    <label className="admin-form-field">
+                      <span>Tipo de publicação</span>
+                      <select
+                        value={formulario.tipo}
+                        onChange={(evento) =>
+                          atualizarCampo("tipo", evento.target.value)
+                        }
+                      >
+                        <option value="imagem">Imagem</option>
+                        <option value="video">Vídeo</option>
+                      </select>
+                    </label>
+                  )}
+
+                  <label className="admin-form-field">
+                    <span>Descrição</span>
+                    <textarea
                       required
-                      value={formulario.prioridade ?? 0}
+                      rows={4}
+                      maxLength={1000}
+                      placeholder="Descreva as principais informações..."
+                      value={formulario.descricao}
                       onChange={(evento) =>
-                        atualizarCampo(
-                          "prioridade",
-                          evento.target.value
-                        )
+                        atualizarCampo("descricao", evento.target.value)
                       }
                     />
                     <small>
-                      1 aparece primeiro, 2 em segundo.
-                      Use 0 para deixar sem prioridade.
+                      {formulario.descricao.length}/1000 caracteres
                     </small>
                   </label>
+                </section>
 
-                  <label className="admin-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={formulario.maisVendido === true}
-                      onChange={(evento) =>
-                        atualizarCampo(
-                          "maisVendido",
-                          evento.target.checked
-                        )
-                      }
-                    />
-                    Mais vendido
-                  </label>
+                {tipoFormulario === "produto" && (
+                  <section className="admin-form-section">
+                    <div className="admin-form-section-heading">
+                      <SlidersHorizontal size={19} />
+                      <div>
+                        <h3>Classificação e destaque</h3>
+                        <p>
+                          Defina como o produto será apresentado
+                          no catálogo.
+                        </p>
+                      </div>
+                    </div>
 
-                  <label className="admin-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={formulario.maisProcurado === true}
-                      onChange={(evento) =>
-                        atualizarCampo(
-                          "maisProcurado",
-                          evento.target.checked
-                        )
-                      }
-                    />
-                    Mais procurado
-                  </label>
-                </>
-              )}
+                    <div className="admin-classification-grid">
+                      <label
+                        className={`admin-classification-option ${
+                          formulario.maisVendido ? "selected" : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formulario.maisVendido === true}
+                          onChange={(evento) =>
+                            atualizarCampo(
+                              "maisVendido",
+                              evento.target.checked
+                            )
+                          }
+                        />
 
-              {tipoFormulario === "galeria" && (
-                <label>
-                  Tipo de publicação
+                        <div className="admin-classification-icon">
+                          <TrendingUp size={20} />
+                        </div>
 
-                  <select
-                    value={formulario.tipo}
-                    onChange={(evento) =>
-                      atualizarCampo("tipo", evento.target.value)
-                    }
-                  >
-                    <option value="imagem">Fotografia</option>
-                    <option value="video">Vídeo</option>
-                  </select>
-                </label>
-              )}
+                        <div className="admin-classification-text">
+                          <strong>Mais vendido</strong>
+                          <span>Destacar como mais vendido</span>
+                        </div>
 
-              <label>
-                Descrição
+                        <span className="admin-classification-check">
+                          {formulario.maisVendido && <Check size={14} />}
+                        </span>
+                      </label>
 
-                <textarea
-                  required
-                  rows={4}
-                  maxLength={1000}
-                  value={formulario.descricao}
-                  onChange={(evento) =>
-                    atualizarCampo("descricao", evento.target.value)
-                  }
-                />
-              </label>
+                      <label
+                        className={`admin-classification-option ${
+                          formulario.maisProcurado ? "selected" : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formulario.maisProcurado === true}
+                          onChange={(evento) =>
+                            atualizarCampo(
+                              "maisProcurado",
+                              evento.target.checked
+                            )
+                          }
+                        />
 
-              <div className="admin-image-field">
-                <span>
-                  {tipoFormulario === "galeria" &&
-                  formulario.tipo === "video"
-                    ? "Imagem de capa"
-                    : "Imagem"}
-                </span>
+                        <div className="admin-classification-icon">
+                          <Flame size={20} />
+                        </div>
 
-                <label className="admin-image-upload">
-                  <ImageIcon size={28} />
-                  <strong>Selecionar imagem</strong>
-                  <span>JPG, PNG ou WebP • Máximo 20 MB</span>
+                        <div className="admin-classification-text">
+                          <strong>Mais procurado</strong>
+                          <span>Destacar como mais procurado</span>
+                        </div>
 
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={selecionarImagem}
-                  />
-                </label>
+                        <span className="admin-classification-check">
+                          {formulario.maisProcurado && <Check size={14} />}
+                        </span>
+                      </label>
+                    </div>
 
-                {(imagemPreview || formulario.imagem) && (
-                  <div className="admin-image-preview">
-                    <img
-                      src={imagemPreview || formulario.imagem}
-                      alt="Prévia da imagem selecionada"
-                    />
+                    <div className="admin-priority-field">
+                      <span className="admin-priority-title">
+                        Posição na página inicial
+                      </span>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setArquivoImagem(null);
-                        atualizarCampo("imagem", "");
-                      }}
-                    >
-                      <Trash2 size={16} />
-                      Remover imagem
-                    </button>
+                      <p>
+                        Escolha se este produto terá uma posição fixa
+                        entre os três destaques da Home.
+                      </p>
+
+                      <div
+                        className="admin-priority-options"
+                        role="radiogroup"
+                        aria-label="Posição na página inicial"
+                      >
+                        {posicoesDestaque.map((posicao) => {
+                          const selecionada =
+                            Number(formulario.prioridade) === posicao.valor;
+
+                          const ocupado = produtos.find(
+                            (produto) =>
+                              produto.id !== editandoId &&
+                              produto.prioridade === posicao.valor &&
+                              posicao.valor !== 0
+                          );
+
+                          return (
+                            <label
+                              key={posicao.valor}
+                              className={`admin-priority-option ${
+                                selecionada ? "selected" : ""
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="prioridade"
+                                value={posicao.valor}
+                                checked={selecionada}
+                                onChange={() =>
+                                  atualizarCampo(
+                                    "prioridade",
+                                    posicao.valor
+                                  )
+                                }
+                              />
+
+                              <span className="admin-priority-radio" />
+
+                              <span className="admin-priority-content">
+                                <strong>{posicao.titulo}</strong>
+                                <small>
+                                  {ocupado
+                                    ? `Atualmente: ${ocupado.nome}`
+                                    : posicao.descricao}
+                                </small>
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+
+                      <small className="admin-priority-hint">
+                        Ao selecionar uma posição ocupada, o produto
+                        anterior volta para a ordem automática.
+                      </small>
+                    </div>
+                  </section>
+                )}
+
+                <section className="admin-form-section">
+                  <div className="admin-form-section-heading">
+                    <ImageIcon size={19} />
+                    <div>
+                      <h3>
+                        {tipoFormulario === "produto"
+                          ? "Imagem do produto"
+                          : "Imagem da publicação"}
+                      </h3>
+                      <p>JPG, PNG ou WebP. Tamanho máximo de 20 MB.</p>
+                    </div>
                   </div>
+
+                  <div className="admin-image-field">
+                    {imagemPreview || formulario.imagem ? (
+                      <div className="admin-image-preview">
+                        <img
+                          src={imagemPreview || formulario.imagem}
+                          alt="Prévia da imagem"
+                        />
+
+                        <div className="admin-image-preview-details">
+                          <strong>Imagem selecionada</strong>
+                          <span>
+                            {arquivoImagem
+                              ? arquivoImagem.name
+                              : "Imagem atual do cadastro"}
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setArquivoImagem(null);
+                              atualizarCampo("imagem", "");
+                            }}
+                          >
+                            <Trash2 size={15} />
+                            Remover imagem
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="admin-image-placeholder">
+                        <ImageIcon size={27} />
+                        <span>Nenhuma imagem selecionada</span>
+                      </div>
+                    )}
+
+                    <label className="admin-image-upload">
+                      <Upload size={17} />
+                      <strong>
+                        {imagemPreview || formulario.imagem
+                          ? "Substituir imagem"
+                          : "Selecionar imagem"}
+                      </strong>
+
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={selecionarImagem}
+                        disabled={processando}
+                      />
+                    </label>
+                  </div>
+
+                  {tipoFormulario === "galeria" &&
+                    formulario.tipo === "video" && (
+                      <label className="admin-form-field">
+                        <span>URL do vídeo</span>
+                        <input
+                          type="url"
+                          required
+                          placeholder="https://..."
+                          value={formulario.videoUrl || ""}
+                          onChange={(evento) =>
+                            atualizarCampo(
+                              "videoUrl",
+                              evento.target.value
+                            )
+                          }
+                        />
+                      </label>
+                    )}
+                </section>
+
+                <section className="admin-form-section admin-publication-section">
+                  <div>
+                    <h3>
+                      {tipoFormulario === "produto"
+                        ? "Produto ativo"
+                        : "Publicação ativa"}
+                    </h3>
+                    <p>
+                      {formulario.ativo
+                        ? "Este item ficará visível no site."
+                        : "Este item ficará oculto no site."}
+                    </p>
+                  </div>
+
+                  <label className="admin-switch">
+                    <input
+                      type="checkbox"
+                      checked={formulario.ativo !== false}
+                      onChange={(evento) =>
+                        atualizarCampo("ativo", evento.target.checked)
+                      }
+                      aria-label="Ativar ou desativar item"
+                    />
+                    <span className="admin-switch-track" />
+                  </label>
+                </section>
+
+                {erro && (
+                  <p className="admin-form-error" role="alert">
+                    {erro}
+                  </p>
                 )}
               </div>
-
-              {tipoFormulario === "galeria" &&
-                formulario.tipo === "video" && (
-                  <label>
-                    URL do vídeo do YouTube
-
-                    <input
-                      type="url"
-                      required
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      value={formulario.videoUrl || ""}
-                      onChange={(evento) =>
-                        atualizarCampo(
-                          "videoUrl",
-                          evento.target.value
-                        )
-                      }
-                    />
-                  </label>
-                )}
-
-              <label className="admin-checkbox">
-                <input
-                  type="checkbox"
-                  checked={formulario.ativo !== false}
-                  onChange={(evento) =>
-                    atualizarCampo("ativo", evento.target.checked)
-                  }
-                />
-
-                {tipoFormulario === "produto"
-                  ? "Produto ativo"
-                  : "Publicação ativa"}
-              </label>
-
-              {erro && (
-                <p
-                  role="alert"
-                  style={{
-                    color: "#b42318",
-                    fontSize: "13px",
-                    fontWeight: 600
-                  }}
-                >
-                  {erro}
-                </p>
-              )}
 
               <div className="admin-form-actions">
                 <button
@@ -1113,11 +1257,12 @@ export default function Admin({ admin, onLogout }) {
                   className="admin-primary-button"
                   disabled={processando}
                 >
+                  <Save size={17} />
                   {processando
                     ? "Salvando..."
-                    : tipoFormulario === "produto"
-                      ? "Salvar produto"
-                      : "Salvar publicação"}
+                    : editandoId
+                      ? "Salvar alterações"
+                      : "Cadastrar"}
                 </button>
               </div>
             </form>

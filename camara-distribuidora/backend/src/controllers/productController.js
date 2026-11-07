@@ -36,12 +36,8 @@ function validarProduto(body) {
 
   const prioridade = body.prioridade ?? 0;
 
-  if (
-    !Number.isSafeInteger(prioridade) ||
-    prioridade < 0 ||
-    prioridade > 9999
-  ) {
-    return { erro: "A prioridade deve ser um inteiro entre 0 e 9999." };
+  if (!Number.isInteger(prioridade) || prioridade < 0 || prioridade > 3) {
+    return { erro: "Selecione uma prioridade entre 0 e 3." };
   }
 
   return {
@@ -56,6 +52,42 @@ function validarProduto(body) {
       prioridade
     }
   };
+}
+
+async function salvarProdutoComPrioridade(dados, id = null) {
+  return prisma.$transaction(async (tx) => {
+    if (id) {
+      const existente = await tx.product.findUnique({
+        where: { id },
+        select: { id: true }
+      });
+
+      if (!existente) {
+        const error = new Error("Produto não encontrado.");
+        error.status = 404;
+        throw error;
+      }
+    }
+
+    if (dados.prioridade > 0) {
+      await tx.product.updateMany({
+        where: {
+          prioridade: dados.prioridade,
+          ...(id ? { id: { not: id } } : {})
+        },
+        data: { prioridade: 0 }
+      });
+    }
+
+    if (id) {
+      return tx.product.update({
+        where: { id },
+        data: dados
+      });
+    }
+
+    return tx.product.create({ data: dados });
+  });
 }
 
 export async function listarProdutos(req, res) {
@@ -107,7 +139,7 @@ export async function criarProduto(req, res) {
   }
 
   try {
-    const produto = await prisma.product.create({ data: dados });
+    const produto = await salvarProdutoComPrioridade(dados);
     res.status(201).json(produto);
   } catch {
     res.status(500).json({ error: "Erro ao cadastrar produto." });
@@ -122,14 +154,10 @@ export async function atualizarProduto(req, res) {
   }
 
   try {
-    const produto = await prisma.product.update({
-      where: { id: req.params.id },
-      data: dados
-    });
-
+    const produto = await salvarProdutoComPrioridade(dados, req.params.id);
     res.json(produto);
   } catch (error) {
-    if (error.code === "P2025") {
+    if (error.status === 404 || error.code === "P2025") {
       return res.status(404).json({ error: "Produto não encontrado." });
     }
 

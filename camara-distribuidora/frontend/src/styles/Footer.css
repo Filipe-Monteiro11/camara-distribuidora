@@ -1,7 +1,7 @@
 .site-footer {
+  padding: 75px 0 25px;
   background: #1d1d1d;
   color: #fff;
-  padding: 75px 0 25px;
 }
 
 .footer-grid {
@@ -28,17 +28,24 @@
 .footer-grid p,
 .footer-grid a {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   margin: 0 0 14px;
   color: #aaa;
   font-size: 13px;
   line-height: 1.8;
   text-decoration: none;
+  overflow-wrap: anywhere;
 }
 
-.footer-grid a:hover {
+.footer-grid a:hover,
+.footer-grid a:focus-visible {
   color: var(--yellow);
+}
+
+.footer-grid a svg {
+  flex-shrink: 0;
+  margin-top: 4px;
 }
 
 .footer-bottom {

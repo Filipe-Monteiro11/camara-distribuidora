@@ -590,6 +590,23 @@
   font-size: 13px;
 }
 
+.location-map-link {
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.location-map-link:hover,
+.location-map-link:focus-visible {
+  border-color: var(--red);
+  background: #f4eae2;
+}
+
+.location-map-link span:last-child {
+  margin-top: 8px;
+  color: var(--red);
+  font-weight: 800;
+}
+
 /* CHAMADA FINAL */
 
 .home-cta {

@@ -429,9 +429,9 @@ export default function Home() {
               </h2>
 
               <p>
-                Em breve, disponibilizaremos o endereço
-                oficial e mais informações de contato
-                da Camará Distribuidora.
+                Visite a Camará Distribuidora na Rua Manoel Honorato
+                da Costa, nº 556, Vila da Fábrica, Camaragibe – PE,
+                CEP 54759-475.
               </p>
 
               <a href="#contato" className="btn btn-red">
@@ -440,11 +440,19 @@ export default function Home() {
               </a>
             </div>
 
-            <div className="location-placeholder">
+            <a
+              className="location-placeholder location-map-link"
+              href="https://www.google.com/maps/search/?api=1&query=Rua%20Manoel%20Honorato%20da%20Costa%20556%20Vila%20da%20F%C3%A1brica%20Camaragibe%20PE%2054759-475"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Ver endereço da Camará Distribuidora no Google Maps"
+            >
               <MapPin size={45} strokeWidth={1.5} />
               <strong>Camará Distribuidora</strong>
-              <span>Localização oficial em breve</span>
-            </div>
+              <span>Rua Manoel Honorato da Costa, 556</span>
+              <span>Vila da Fábrica, Camaragibe – PE</span>
+              <span>Ver no Google Maps ↗</span>
+            </a>
           </div>
         </section>
 
