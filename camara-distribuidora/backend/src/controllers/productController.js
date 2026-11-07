@@ -2,9 +2,15 @@ import { prisma } from "../lib/prisma.js";
 
 function validarProduto(body) {
   const nome = typeof body.nome === "string" ? body.nome.trim() : "";
-  const descricao = typeof body.descricao === "string" ? body.descricao.trim() : null;
-  const categoria = typeof body.categoria === "string" ? body.categoria.trim() : null;
-  const imagem = typeof body.imagem === "string" ? body.imagem.trim() : null;
+  const descricao = typeof body.descricao === "string"
+    ? body.descricao.trim()
+    : null;
+  const categoria = typeof body.categoria === "string"
+    ? body.categoria.trim()
+    : null;
+  const imagem = typeof body.imagem === "string"
+    ? body.imagem.trim()
+    : null;
 
   if (!nome || nome.length > 150) {
     return { erro: "O nome deve ter entre 1 e 150 caracteres." };
@@ -22,8 +28,20 @@ function validarProduto(body) {
     return { erro: "Informe uma URL válida para a imagem." };
   }
 
-  if (body.ativo !== undefined && typeof body.ativo !== "boolean") {
-    return { erro: "O campo ativo deve ser verdadeiro ou falso." };
+  for (const campo of ["ativo", "maisVendido", "maisProcurado"]) {
+    if (body[campo] !== undefined && typeof body[campo] !== "boolean") {
+      return { erro: `O campo ${campo} deve ser verdadeiro ou falso.` };
+    }
+  }
+
+  const prioridade = body.prioridade ?? 0;
+
+  if (
+    !Number.isSafeInteger(prioridade) ||
+    prioridade < 0 ||
+    prioridade > 9999
+  ) {
+    return { erro: "A prioridade deve ser um inteiro entre 0 e 9999." };
   }
 
   return {
@@ -32,7 +50,10 @@ function validarProduto(body) {
       descricao,
       categoria,
       imagem,
-      ativo: body.ativo ?? true
+      ativo: body.ativo ?? true,
+      maisVendido: body.maisVendido ?? false,
+      maisProcurado: body.maisProcurado ?? false,
+      prioridade
     }
   };
 }
@@ -86,10 +107,7 @@ export async function criarProduto(req, res) {
   }
 
   try {
-    const produto = await prisma.product.create({
-      data: dados
-    });
-
+    const produto = await prisma.product.create({ data: dados });
     res.status(201).json(produto);
   } catch {
     res.status(500).json({ error: "Erro ao cadastrar produto." });

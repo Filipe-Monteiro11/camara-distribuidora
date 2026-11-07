@@ -39,6 +39,9 @@ const produtoVazio = {
   descricao: "",
   categoria: "",
   imagem: "",
+  maisVendido: false,
+  maisProcurado: false,
+  prioridade: 0,
   ativo: true
 };
 
@@ -60,19 +63,30 @@ function normalizarLista(dados, propriedade) {
   return Array.isArray(dados) ? dados : dados?.[propriedade] ?? [];
 }
 
+function ordenarProdutos(lista) {
+  return [...lista].sort((a, b) => {
+    const prioridadeA = a.prioridade > 0 ? a.prioridade : Infinity;
+    const prioridadeB = b.prioridade > 0 ? b.prioridade : Infinity;
+
+    return (
+      prioridadeA - prioridadeB ||
+      Number(b.maisVendido === true) - Number(a.maisVendido === true) ||
+      Number(b.maisProcurado === true) - Number(a.maisProcurado === true) ||
+      a.nome.localeCompare(b.nome, "pt-BR")
+    );
+  });
+}
+
 export default function Admin({ admin, onLogout }) {
   const [pagina, setPagina] = useState("dashboard");
   const [menuAberto, setMenuAberto] = useState(false);
-
   const [produtos, setProdutos] = useState([]);
   const [publicacoes, setPublicacoes] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState(false);
   const [erroPagina, setErroPagina] = useState("");
-
   const [busca, setBusca] = useState("");
   const [buscaGaleria, setBuscaGaleria] = useState("");
-
   const [formulario, setFormulario] = useState(null);
   const [tipoFormulario, setTipoFormulario] = useState(null);
   const [editandoId, setEditandoId] = useState(null);
@@ -84,30 +98,30 @@ export default function Admin({ admin, onLogout }) {
     let ativo = true;
 
     async function carregarDados() {
-      const resultados = await Promise.allSettled([
-        produtosApi.listarTodos(),
-        galeriaApi.listarTodos()
-      ]);
+      const [resultadoProdutos, resultadoGaleria] =
+        await Promise.allSettled([
+          produtosApi.listarTodos(),
+          galeriaApi.listarTodos()
+        ]);
 
       if (!ativo) return;
 
-      const [resultadoProdutos, resultadoGaleria] = resultados;
       const erros = [];
 
       if (resultadoProdutos.status === "fulfilled") {
-        setProdutos(
-          normalizarLista(resultadoProdutos.value, "produtos")
-        );
+        setProdutos(normalizarLista(resultadoProdutos.value, "produtos"));
       } else {
-        erros.push(`Produtos: ${resultadoProdutos.reason.message}`);
+        erros.push(
+          `Produtos: ${resultadoProdutos.reason?.message || "Erro ao carregar."}`
+        );
       }
 
       if (resultadoGaleria.status === "fulfilled") {
-        setPublicacoes(
-          normalizarLista(resultadoGaleria.value, "publicacoes")
-        );
+        setPublicacoes(normalizarLista(resultadoGaleria.value, "publicacoes"));
       } else {
-        erros.push(`Galeria: ${resultadoGaleria.reason.message}`);
+        erros.push(
+          `Galeria: ${resultadoGaleria.reason?.message || "Erro ao carregar."}`
+        );
       }
 
       setErroPagina(erros.join(" | "));
@@ -156,8 +170,10 @@ export default function Admin({ admin, onLogout }) {
   const paginaAtual = menuItems.find((item) => item.id === pagina);
   const IconePagina = paginaAtual.icon;
 
-  const produtosFiltrados = produtos.filter((produto) =>
-    produto.nome.toLowerCase().includes(busca.toLowerCase())
+  const produtosFiltrados = ordenarProdutos(
+    produtos.filter((produto) =>
+      produto.nome.toLowerCase().includes(busca.toLowerCase())
+    )
   );
 
   const publicacoesFiltradas = publicacoes.filter((item) =>
@@ -252,11 +268,22 @@ export default function Admin({ admin, onLogout }) {
           descricao: formulario.descricao.trim(),
           categoria: formulario.categoria.trim(),
           imagem: formulario.imagem || "",
+          maisVendido: formulario.maisVendido === true,
+          maisProcurado: formulario.maisProcurado === true,
+          prioridade: Number(formulario.prioridade),
           ativo: formulario.ativo !== false
         };
 
         if (!dados.nome || !dados.descricao || !dados.categoria) {
           throw new Error("Preencha todos os campos obrigatórios.");
+        }
+
+        if (
+          !Number.isInteger(dados.prioridade) ||
+          dados.prioridade < 0 ||
+          dados.prioridade > 9999
+        ) {
+          throw new Error("A prioridade deve estar entre 0 e 9999.");
         }
 
         if (arquivoImagem) {
@@ -308,9 +335,7 @@ export default function Admin({ admin, onLogout }) {
         }
 
         const atualizadas = await galeriaApi.listarTodos();
-        setPublicacoes(
-          normalizarLista(atualizadas, "publicacoes")
-        );
+        setPublicacoes(normalizarLista(atualizadas, "publicacoes"));
       }
 
       setFormulario(null);
@@ -332,11 +357,13 @@ export default function Admin({ admin, onLogout }) {
     try {
       if (tipo === "produto") {
         await produtosApi.excluir(item.id);
+
         setProdutos((atuais) =>
           atuais.filter((produto) => produto.id !== item.id)
         );
       } else {
         await galeriaApi.excluir(item.id);
+
         setPublicacoes((atuais) =>
           atuais.filter((publicacao) => publicacao.id !== item.id)
         );
@@ -344,7 +371,7 @@ export default function Admin({ admin, onLogout }) {
 
       setErroPagina("");
     } catch (error) {
-      setErroPagina(error.message);
+      setErroPagina(error.message || "Não foi possível excluir.");
     }
   }
 
@@ -358,6 +385,9 @@ export default function Admin({ admin, onLogout }) {
           descricao: item.descricao,
           categoria: item.categoria,
           imagem: item.imagem,
+          maisVendido: item.maisVendido === true,
+          maisProcurado: item.maisProcurado === true,
+          prioridade: item.prioridade ?? 0,
           ativo
         });
 
@@ -388,7 +418,7 @@ export default function Admin({ admin, onLogout }) {
 
       setErroPagina("");
     } catch (error) {
-      setErroPagina(error.message);
+      setErroPagina(error.message || "Não foi possível alterar o status.");
     }
   }
 
@@ -592,7 +622,8 @@ export default function Admin({ admin, onLogout }) {
                   <span className="admin-section-label">CATÁLOGO</span>
                   <h2>Gerenciar produtos</h2>
                   <p>
-                    Cadastre e organize os produtos da distribuidora.
+                    Cadastre, classifique e organize os produtos
+                    da distribuidora.
                   </p>
                 </div>
 
@@ -628,6 +659,8 @@ export default function Admin({ admin, onLogout }) {
                         <tr>
                           <th>Produto</th>
                           <th>Categoria</th>
+                          <th>Classificação</th>
+                          <th>Prioridade</th>
                           <th>Status</th>
                           <th>Ações</th>
                         </tr>
@@ -654,8 +687,29 @@ export default function Admin({ admin, onLogout }) {
                             </td>
 
                             <td>{produto.categoria}</td>
-                            <td>{renderizarStatus("produto", produto)}</td>
-                            <td>{renderizarAcoes("produto", produto)}</td>
+
+                            <td>
+                              {[
+                                produto.maisVendido && "Mais vendido",
+                                produto.maisProcurado && "Mais procurado"
+                              ]
+                                .filter(Boolean)
+                                .join(" / ") || "Normal"}
+                            </td>
+
+                            <td>
+                              {produto.prioridade > 0
+                                ? produto.prioridade
+                                : "—"}
+                            </td>
+
+                            <td>
+                              {renderizarStatus("produto", produto)}
+                            </td>
+
+                            <td>
+                              {renderizarAcoes("produto", produto)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -871,6 +925,61 @@ export default function Admin({ admin, onLogout }) {
                 )}
               </label>
 
+              {tipoFormulario === "produto" && (
+                <>
+                  <label>
+                    Prioridade de exibição
+
+                    <input
+                      type="number"
+                      min="0"
+                      max="9999"
+                      step="1"
+                      required
+                      value={formulario.prioridade ?? 0}
+                      onChange={(evento) =>
+                        atualizarCampo(
+                          "prioridade",
+                          evento.target.value
+                        )
+                      }
+                    />
+                    <small>
+                      1 aparece primeiro, 2 em segundo.
+                      Use 0 para deixar sem prioridade.
+                    </small>
+                  </label>
+
+                  <label className="admin-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={formulario.maisVendido === true}
+                      onChange={(evento) =>
+                        atualizarCampo(
+                          "maisVendido",
+                          evento.target.checked
+                        )
+                      }
+                    />
+                    Mais vendido
+                  </label>
+
+                  <label className="admin-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={formulario.maisProcurado === true}
+                      onChange={(evento) =>
+                        atualizarCampo(
+                          "maisProcurado",
+                          evento.target.checked
+                        )
+                      }
+                    />
+                    Mais procurado
+                  </label>
+                </>
+              )}
+
               {tipoFormulario === "galeria" && (
                 <label>
                   Tipo de publicação
@@ -953,7 +1062,10 @@ export default function Admin({ admin, onLogout }) {
                       placeholder="https://www.youtube.com/watch?v=..."
                       value={formulario.videoUrl || ""}
                       onChange={(evento) =>
-                        atualizarCampo("videoUrl", evento.target.value)
+                        atualizarCampo(
+                          "videoUrl",
+                          evento.target.value
+                        )
                       }
                     />
                   </label>

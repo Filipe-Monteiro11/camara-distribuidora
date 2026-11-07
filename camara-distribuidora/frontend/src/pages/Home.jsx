@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -12,16 +12,38 @@ import {
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import ProdutoModal from "../components/ProdutoModal";
 import { produtosApi, receitasApi } from "../services/api";
 import "../styles/Home.css";
+
+function ordenarDestaques(lista) {
+  return [...lista].sort((a, b) => {
+    const prioridadeA = a.prioridade > 0 ? a.prioridade : Infinity;
+    const prioridadeB = b.prioridade > 0 ? b.prioridade : Infinity;
+
+    return (
+      prioridadeA - prioridadeB ||
+      Number(b.maisVendido === true) -
+        Number(a.maisVendido === true) ||
+      Number(b.maisProcurado === true) -
+        Number(a.maisProcurado === true) ||
+      a.nome.localeCompare(b.nome, "pt-BR")
+    );
+  });
+}
 
 export default function Home() {
   const [produtos, setProdutos] = useState([]);
   const [receitas, setReceitas] = useState([]);
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [carregandoProdutos, setCarregandoProdutos] = useState(true);
   const [carregandoReceitas, setCarregandoReceitas] = useState(true);
   const [erroProdutos, setErroProdutos] = useState(false);
   const [erroReceitas, setErroReceitas] = useState(false);
+
+  const fecharModal = useCallback(() => {
+    setProdutoSelecionado(null);
+  }, []);
 
   useEffect(() => {
     let ativo = true;
@@ -42,7 +64,9 @@ export default function Home() {
           : dados?.produtos ?? [];
 
         setProdutos(
-          lista.filter((item) => item.ativo !== false).slice(0, 3)
+          ordenarDestaques(
+            lista.filter((item) => item.ativo !== false)
+          ).slice(0, 3)
         );
       } else {
         setErroProdutos(true);
@@ -209,13 +233,14 @@ export default function Home() {
                       </div>
                     )}
 
-                    <Link
-                      to="/produtos"
+                    <button
+                      type="button"
                       className="product-overlay"
-                      aria-label={`Conhecer ${produto.nome}`}
+                      onClick={() => setProdutoSelecionado(produto)}
+                      aria-label={`Ver detalhes de ${produto.nome}`}
                     >
                       <ArrowUpRight size={23} />
-                    </Link>
+                    </button>
                   </div>
 
                   <div className="product-info">
@@ -224,12 +249,19 @@ export default function Home() {
                     </span>
 
                     <h3>{produto.nome}</h3>
-                    <p>{produto.descricao}</p>
 
-                    <Link to="/produtos">
+                    <p>
+                      {produto.descricao || "Descrição não disponível."}
+                    </p>
+
+                    <button
+                      type="button"
+                      className="product-details-button"
+                      onClick={() => setProdutoSelecionado(produto)}
+                    >
                       Conhecer produto
                       <ArrowUpRight size={17} />
-                    </Link>
+                    </button>
                   </div>
                 </article>
               ))}
@@ -336,10 +368,7 @@ export default function Home() {
 
             <div className="recipes-grid">
               {receitas.map((receita, index) => (
-                <article
-                  className="recipe-card"
-                  key={receita.id}
-                >
+                <article className="recipe-card" key={receita.id}>
                   {receita.imagem && (
                     <img
                       src={receita.imagem}
@@ -391,9 +420,7 @@ export default function Home() {
         <section className="location-section" id="localizacao">
           <div className="container location-content">
             <div className="location-text">
-              <span className="eyebrow">
-                LOCALIZAÇÃO
-              </span>
+              <span className="eyebrow">LOCALIZAÇÃO</span>
 
               <h2>
                 Estamos prontos
@@ -449,6 +476,11 @@ export default function Home() {
       </main>
 
       <Footer />
+
+      <ProdutoModal
+        produto={produtoSelecionado}
+        onClose={fecharModal}
+      />
     </>
   );
 }

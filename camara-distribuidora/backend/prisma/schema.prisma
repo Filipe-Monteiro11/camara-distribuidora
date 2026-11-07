@@ -8,26 +8,29 @@ datasource db {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  nome        String
-  descricao   String?
-  categoria   String?
-  imagem      String?
-  ativo       Boolean  @default(true)
-  criadoEm    DateTime @default(now())
+  id           String   @id @default(uuid())
+  nome         String
+  descricao    String?
+  categoria    String?
+  imagem       String?
+  maisVendido  Boolean  @default(false)
+  maisProcurado Boolean  @default(false)
+  prioridade   Int      @default(0)
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 }
 
 model Gallery {
-  id          String   @id @default(uuid())
-  titulo      String
-  descricao   String?
-  categoria   String?
-  tipo        String   @default("imagem")
-  imagem      String?
-  videoUrl    String?
-  ativo       Boolean  @default(true)
-  criadoEm    DateTime @default(now())
+  id           String   @id @default(uuid())
+  titulo       String
+  descricao    String?
+  categoria    String?
+  tipo         String   @default("imagem")
+  imagem       String?
+  videoUrl     String?
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now())
   atualizadoEm DateTime @updatedAt
 }
 
