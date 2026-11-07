@@ -8,7 +8,9 @@ import {
   Trash2,
   X
 } from "lucide-react";
+
 import { receitasApi, uploadApi } from "../services/api";
+import "../styles/AdminReceitas.css";
 
 const LIMITE_IMAGEM = 20 * 1024 * 1024;
 
@@ -16,7 +18,7 @@ const receitaVazia = {
   titulo: "",
   descricao: "",
   imagem: "",
-  ingredientes: [],
+  ingredientesTexto: "",
   preparo: "",
   ativo: true
 };
@@ -39,9 +41,13 @@ export default function AdminReceitas() {
     async function carregar() {
       try {
         const dados = await receitasApi.listarTodos();
-        if (ativo) setReceitas(Array.isArray(dados) ? dados : []);
+        if (ativo) {
+          setReceitas(Array.isArray(dados) ? dados : dados?.receitas ?? []);
+        }
       } catch (error) {
-        if (ativo) setErroPagina(error.message);
+        if (ativo) {
+          setErroPagina(error.message || "Erro ao carregar receitas.");
+        }
       } finally {
         if (ativo) setCarregando(false);
       }
@@ -75,6 +81,7 @@ export default function AdminReceitas() {
     function aoPressionarTecla(evento) {
       if (evento.key === "Escape" && !processando) {
         setFormulario(null);
+        setEditandoId(null);
         setArquivoImagem(null);
         setErroFormulario("");
       }
@@ -97,7 +104,9 @@ export default function AdminReceitas() {
     setFormulario({
       ...receitaVazia,
       ...receita,
-      ingredientesTexto: receita?.ingredientes?.join("\n") ?? ""
+      ingredientesTexto: Array.isArray(receita?.ingredientes)
+        ? receita.ingredientes.join("\n")
+        : ""
     });
     setArquivoImagem(null);
     setErroFormulario("");
@@ -177,13 +186,20 @@ export default function AdminReceitas() {
       }
 
       const atualizadas = await receitasApi.listarTodos();
-      setReceitas(Array.isArray(atualizadas) ? atualizadas : []);
-      fecharFormulario();
+      setReceitas(
+        Array.isArray(atualizadas)
+          ? atualizadas
+          : atualizadas?.receitas ?? []
+      );
+
       setFormulario(null);
-      setArquivoImagem(null);
       setEditandoId(null);
+      setArquivoImagem(null);
+      setErroPagina("");
     } catch (error) {
-      setErroFormulario(error.message || "Não foi possível salvar a receita.");
+      setErroFormulario(
+        error.message || "Não foi possível salvar a receita."
+      );
     } finally {
       setProcessando(false);
     }
@@ -199,7 +215,7 @@ export default function AdminReceitas() {
       );
       setErroPagina("");
     } catch (error) {
-      setErroPagina(error.message);
+      setErroPagina(error.message || "Erro ao excluir receita.");
     }
   }
 
@@ -221,9 +237,10 @@ export default function AdminReceitas() {
           item.id === receita.id ? { ...item, ativo } : item
         )
       );
+
       setErroPagina("");
     } catch (error) {
-      setErroPagina(error.message);
+      setErroPagina(error.message || "Erro ao atualizar receita.");
     }
   }
 
@@ -248,7 +265,7 @@ export default function AdminReceitas() {
         </div>
 
         {erroPagina && (
-          <p role="alert" style={{ color: "#b42318" }}>
+          <p className="admin-recipe-error" role="alert">
             {erroPagina}
           </p>
         )}
@@ -298,7 +315,7 @@ export default function AdminReceitas() {
                         </div>
                       </td>
 
-                      <td>{receita.ingredientes.length}</td>
+                      <td>{receita.ingredientes?.length ?? 0}</td>
 
                       <td>
                         <button
@@ -353,7 +370,7 @@ export default function AdminReceitas() {
       {formulario && (
         <div className="admin-modal-backdrop">
           <section
-            className="admin-modal"
+            className="admin-modal admin-recipe-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="admin-recipe-title"
@@ -373,21 +390,26 @@ export default function AdminReceitas() {
               </button>
             </div>
 
-            <form onSubmit={salvar} className="admin-product-form">
-              <label>
-                Título da receita
+            <form
+              onSubmit={salvar}
+              className="admin-recipe-form"
+            >
+              <label className="admin-recipe-field">
+                <span>Título da receita</span>
                 <input
+                  type="text"
                   required
                   maxLength={150}
                   value={formulario.titulo}
                   onChange={(evento) =>
                     atualizarCampo("titulo", evento.target.value)
                   }
+                  placeholder="Ex.: Escondidinho de charque"
                 />
               </label>
 
-              <label>
-                Descrição
+              <label className="admin-recipe-field">
+                <span>Descrição</span>
                 <textarea
                   rows={3}
                   maxLength={2000}
@@ -395,11 +417,12 @@ export default function AdminReceitas() {
                   onChange={(evento) =>
                     atualizarCampo("descricao", evento.target.value)
                   }
+                  placeholder="Descreva brevemente a receita"
                 />
               </label>
 
-              <label>
-                Ingredientes (um por linha)
+              <label className="admin-recipe-field">
+                <span>Ingredientes (um por linha)</span>
                 <textarea
                   required
                   rows={6}
@@ -407,12 +430,14 @@ export default function AdminReceitas() {
                   onChange={(evento) =>
                     atualizarCampo("ingredientesTexto", evento.target.value)
                   }
-                  placeholder={"500 g de charque\n1 cebola\n2 dentes de alho"}
+                  placeholder={
+                    "500 g de charque\n1 cebola\n2 dentes de alho"
+                  }
                 />
               </label>
 
-              <label>
-                Modo de preparo (uma etapa por linha)
+              <label className="admin-recipe-field">
+                <span>Modo de preparo (uma etapa por linha)</span>
                 <textarea
                   required
                   rows={7}
@@ -427,13 +452,13 @@ export default function AdminReceitas() {
                 />
               </label>
 
-              <div className="admin-image-field">
-                <span>Imagem</span>
+              <div className="admin-recipe-image-field">
+                <span>Imagem da receita</span>
 
-                <label className="admin-image-upload">
-                  <ImageIcon size={28} />
+                <label className="admin-recipe-upload">
+                  <ImageIcon size={25} />
                   <strong>Selecionar imagem</strong>
-                  <span>JPG, PNG ou WebP • Máximo 20 MB</span>
+                  <small>JPG, PNG ou WebP • Máximo 20 MB</small>
 
                   <input
                     type="file"
@@ -443,7 +468,7 @@ export default function AdminReceitas() {
                 </label>
 
                 {(imagemPreview || formulario.imagem) && (
-                  <div className="admin-image-preview">
+                  <div className="admin-recipe-preview">
                     <img
                       src={imagemPreview || formulario.imagem}
                       alt="Prévia da imagem selecionada"
@@ -463,7 +488,7 @@ export default function AdminReceitas() {
                 )}
               </div>
 
-              <label className="admin-checkbox">
+              <label className="admin-recipe-checkbox">
                 <input
                   type="checkbox"
                   checked={formulario.ativo}
@@ -475,12 +500,12 @@ export default function AdminReceitas() {
               </label>
 
               {erroFormulario && (
-                <p role="alert" style={{ color: "#b42318" }}>
+                <p className="admin-recipe-error" role="alert">
                   {erroFormulario}
                 </p>
               )}
 
-              <div className="admin-form-actions">
+              <div className="admin-recipe-actions">
                 <button
                   type="button"
                   className="admin-secondary-button"

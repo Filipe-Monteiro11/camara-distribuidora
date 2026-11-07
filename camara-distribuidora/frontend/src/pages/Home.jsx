@@ -456,31 +456,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="home-cta">
-          <div className="container home-cta-content">
-            <div>
-              <span className="eyebrow">
-                CAMARÁ DISTRIBUIDORA
-              </span>
-
-              <h2>
-                Conheça nossa linha
-                <br />
-                de produtos.
-              </h2>
-
-              <p>
-                Explore nosso catálogo e descubra mais
-                sobre a Camará.
-              </p>
-            </div>
-
-            <Link to="/produtos" className="btn btn-yellow">
-              Acessar catálogo
-              <ArrowUpRight size={18} />
-            </Link>
-          </div>
-        </section>
       </main>
 
       <Footer />
