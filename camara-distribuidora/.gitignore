@@ -1,2 +1,32 @@
+# Dependências
 node_modules/
+**/node_modules/
+
+# Variáveis de ambiente
 .env
+.env.*
+!.env.example
+
+# Arquivos privados
+backend/private/
+
+# Uploads locais
+backend/uploads/
+
+# Builds
+dist/
+build/
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Sistema e editor
+.DS_Store
+Thumbs.db
+.vscode/

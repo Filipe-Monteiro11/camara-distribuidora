@@ -1,0 +1,142 @@
+.admin-curriculos-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 18px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-curriculos-refresh:hover {
+  border-color: #540101;
+  color: #540101;
+}
+
+.admin-curriculos-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-curriculos-filters {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 25px 0;
+}
+
+.admin-curriculos-filters .admin-search {
+  flex: 1;
+  margin: 0;
+}
+
+.admin-curriculos-filters > select {
+  min-height: 45px;
+  padding: 0 14px;
+  border: 1px solid #e2e2e2;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font: inherit;
+  font-size: 13px;
+}
+
+.admin-curriculos-candidato {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.admin-curriculos-candidato strong {
+  color: #252525;
+  font-size: 13px;
+}
+
+.admin-curriculos-candidato a,
+.admin-curriculos-phone {
+  color: #777;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.admin-curriculos-candidato a:hover,
+.admin-curriculos-phone:hover {
+  color: #540101;
+}
+
+.admin-curriculos-status {
+  min-width: 125px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-curriculos-status.novo {
+  background: #eaf2ff;
+  color: #2456a5;
+}
+
+.admin-curriculos-status.em_analise {
+  background: #fff4dc;
+  color: #946000;
+}
+
+.admin-curriculos-status.finalizado {
+  background: #e8f5ed;
+  color: #257345;
+}
+
+.admin-curriculos-status:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.admin-curriculos-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 65px 20px;
+  color: #999;
+  text-align: center;
+}
+
+.admin-curriculos-empty strong {
+  color: #333;
+  font-size: 16px;
+}
+
+.admin-curriculos-empty span {
+  font-size: 13px;
+}
+
+.admin-curriculos-count {
+  margin: 18px 0 0;
+  color: #888;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .admin-curriculos-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-curriculos-filters > select {
+    width: 100%;
+  }
+
+  .admin-curriculos-table {
+    min-width: 780px;
+  }
+}

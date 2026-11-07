@@ -9,17 +9,17 @@ async function requisicao(caminho, opcoes = {}) {
   const resposta = await fetch(`${API_URL}${caminho}`, {
     ...configuracao,
     headers: {
-      ...(body instanceof FormData
-        ? {}
-        : body !== undefined
-          ? { "Content-Type": "application/json" }
-          : {}),
+      ...(body !== undefined && !(body instanceof FormData)
+        ? { "Content-Type": "application/json" }
+        : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers
     },
     ...(body !== undefined
       ? {
-          body: body instanceof FormData ? body : JSON.stringify(body)
+          body: body instanceof FormData
+            ? body
+            : JSON.stringify(body)
         }
       : {})
   });
@@ -33,8 +33,8 @@ async function requisicao(caminho, opcoes = {}) {
 
     throw new Error(
       dados?.error ||
-        dados?.message ||
-        `Erro na requisição (${resposta.status}).`
+      dados?.message ||
+      `Erro na requisição (${resposta.status}).`
     );
   }
 
@@ -90,5 +90,66 @@ export const uploadApi = {
       method: "POST",
       body: formulario
     });
+  }
+};
+
+export const curriculosApi = {
+  enviar(dados) {
+    return requisicao("/curriculos", {
+      method: "POST",
+      body: dados
+    });
+  },
+
+  listarTodos() {
+    return requisicao("/curriculos/admin/all");
+  },
+
+  atualizarStatus(id, status) {
+    return requisicao(
+      `/curriculos/${encodeURIComponent(id)}/status`,
+      {
+        method: "PATCH",
+        body: { status }
+      }
+    );
+  },
+
+  excluir(id) {
+    return requisicao(
+      `/curriculos/${encodeURIComponent(id)}`,
+      {
+        method: "DELETE"
+      }
+    );
+  },
+
+  async baixar(id) {
+    const token = obterToken();
+
+    if (!token) {
+      throw new Error("Faça login para baixar currículos.");
+    }
+
+    const resposta = await fetch(
+      `${API_URL}/curriculos/${encodeURIComponent(id)}/download`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (!resposta.ok) {
+      if (resposta.status === 401) sair();
+
+      const dados = await resposta.json().catch(() => null);
+
+      throw new Error(
+        dados?.error || "Não foi possível baixar o currículo."
+      );
+    }
+
+    return resposta.blob();
   }
 };

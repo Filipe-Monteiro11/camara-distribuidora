@@ -8,11 +8,12 @@ import {
   ShieldCheck,
   Upload,
   Users,
-  X,
+  X
 } from "lucide-react";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { curriculosApi } from "../services/api";
 import "../styles/TrabalheConosco.css";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -22,7 +23,7 @@ const initialForm = {
   email: "",
   telefone: "",
   area: "",
-  mensagem: "",
+  mensagem: ""
 };
 
 const areas = [
@@ -31,7 +32,7 @@ const areas = [
   "Logística",
   "Estoque",
   "Operacional",
-  "Outras áreas",
+  "Outras áreas"
 ];
 
 const destaques = [
@@ -39,26 +40,29 @@ const destaques = [
     icon: Users,
     titulo: "Faça parte da equipe",
     descricao:
-      "Conheça nosso espaço dedicado a profissionais interessados em fazer parte da Camará.",
+      "Conheça nosso espaço dedicado a profissionais interessados em fazer parte da Camará."
   },
   {
     icon: BriefcaseBusiness,
     titulo: "Sua área de interesse",
     descricao:
-      "Informe a área em que deseja atuar e apresente suas experiências profissionais.",
+      "Informe a área em que deseja atuar e apresente suas experiências profissionais."
   },
   {
     icon: FileText,
     titulo: "Apresente seu currículo",
     descricao:
-      "Prepare seu currículo em PDF para futuras oportunidades na distribuidora.",
-  },
+      "Envie seu currículo em PDF para futuras oportunidades na distribuidora."
+  }
 ];
 
 export default function TrabalheConosco() {
   const [form, setForm] = useState(initialForm);
   const [curriculo, setCurriculo] = useState(null);
   const [erro, setErro] = useState("");
+  const [sucesso, setSucesso] = useState("");
+  const [enviando, setEnviando] = useState(false);
+
   const fileInputRef = useRef(null);
 
   function handleChange(event) {
@@ -66,24 +70,28 @@ export default function TrabalheConosco() {
 
     setForm((previous) => ({
       ...previous,
-      [name]: value,
+      [name]: value
     }));
+
+    setErro("");
+    setSucesso("");
   }
 
   function handleFile(event) {
     const file = event.target.files?.[0];
+
     setErro("");
+    setSucesso("");
 
     if (!file) {
       setCurriculo(null);
       return;
     }
 
-    const isPdf =
-      file.type === "application/pdf" ||
-      file.name.toLowerCase().endsWith(".pdf");
-
-    if (!isPdf) {
+    if (
+      file.type !== "application/pdf" ||
+      !file.name.toLowerCase().endsWith(".pdf")
+    ) {
       setErro("Selecione um currículo em formato PDF.");
       event.target.value = "";
       setCurriculo(null);
@@ -103,24 +111,55 @@ export default function TrabalheConosco() {
   function removeFile() {
     setCurriculo(null);
     setErro("");
+    setSucesso("");
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+
+    if (enviando) return;
+
     setErro("");
+    setSucesso("");
 
     if (!curriculo) {
       setErro("Anexe seu currículo para continuar.");
       return;
     }
 
-    setErro(
-      "O formulário está em preparação. O envio de currículos será disponibilizado em breve."
-    );
+    const dados = new FormData();
+
+    dados.append("nome", form.nome.trim());
+    dados.append("email", form.email.trim());
+    dados.append("telefone", form.telefone.trim());
+    dados.append("curriculo", curriculo);
+
+    setEnviando(true);
+
+    try {
+      const resposta = await curriculosApi.enviar(dados);
+
+      setSucesso(
+        resposta?.message || "Currículo enviado com sucesso!"
+      );
+
+      setForm(initialForm);
+      setCurriculo(null);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      setErro(
+        error.message || "Não foi possível enviar seu currículo."
+      );
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -146,8 +185,11 @@ export default function TrabalheConosco() {
               fazer parte da Camará Distribuidora.
             </p>
 
-            <a href="#candidatura" className="careers-hero-link">
-              Conhecer o cadastro
+            <a
+              href="#candidatura"
+              className="careers-hero-link"
+            >
+              Enviar candidatura
               <ArrowUpRight size={19} aria-hidden="true" />
             </a>
           </div>
@@ -169,15 +211,14 @@ export default function TrabalheConosco() {
 
             <div className="careers-intro-text">
               <p>
-                A Camará Distribuidora está preparando um
-                espaço dedicado a profissionais interessados
-                em futuras oportunidades.
+                A Camará Distribuidora valoriza profissionais
+                comprometidos e interessados em crescer junto
+                com a nossa equipe.
               </p>
 
               <p>
-                Em breve, será possível apresentar suas
-                experiências e encaminhar seu currículo
-                para avaliação da equipe responsável.
+                Cadastre seus dados e envie seu currículo para
+                avaliação em futuras oportunidades.
               </p>
             </div>
           </div>
@@ -198,21 +239,30 @@ export default function TrabalheConosco() {
             </div>
 
             <div className="careers-features-grid">
-              {destaques.map(({ icon: Icon, titulo, descricao }) => (
-                <article key={titulo}>
-                  <div className="careers-feature-icon">
-                    <Icon size={26} strokeWidth={1.7} aria-hidden="true" />
-                  </div>
+              {destaques.map(
+                ({ icon: Icon, titulo, descricao }) => (
+                  <article key={titulo}>
+                    <div className="careers-feature-icon">
+                      <Icon
+                        size={26}
+                        strokeWidth={1.7}
+                        aria-hidden="true"
+                      />
+                    </div>
 
-                  <h3>{titulo}</h3>
-                  <p>{descricao}</p>
-                </article>
-              ))}
+                    <h3>{titulo}</h3>
+                    <p>{descricao}</p>
+                  </article>
+                )
+              )}
             </div>
           </div>
         </section>
 
-        <section className="careers-application" id="candidatura">
+        <section
+          className="careers-application"
+          id="candidatura"
+        >
           <div className="container careers-application-grid">
             <div className="careers-application-info">
               <span className="careers-section-label">
@@ -226,10 +276,9 @@ export default function TrabalheConosco() {
               </h2>
 
               <p>
-                Prepare seus dados e seu currículo para
-                futuras oportunidades. O recebimento das
-                candidaturas será disponibilizado após
-                a integração do formulário.
+                Preencha seus dados e encaminhe seu currículo
+                para futuras oportunidades na Camará
+                Distribuidora.
               </p>
 
               <div className="careers-info-list">
@@ -243,7 +292,10 @@ export default function TrabalheConosco() {
                 </div>
 
                 <div>
-                  <BriefcaseBusiness size={21} aria-hidden="true" />
+                  <BriefcaseBusiness
+                    size={21}
+                    aria-hidden="true"
+                  />
 
                   <span>
                     <strong>Área de interesse</strong>
@@ -252,7 +304,10 @@ export default function TrabalheConosco() {
                 </div>
 
                 <div>
-                  <CheckCircle2 size={21} aria-hidden="true" />
+                  <CheckCircle2
+                    size={21}
+                    aria-hidden="true"
+                  />
 
                   <span>
                     <strong>Currículo em PDF</strong>
@@ -262,22 +317,31 @@ export default function TrabalheConosco() {
               </div>
 
               <div className="careers-info-notice">
-                <ShieldCheck size={22} aria-hidden="true" />
+                <ShieldCheck
+                  size={22}
+                  aria-hidden="true"
+                />
+
                 <p>
-                  Este formulário é uma demonstração.
-                  Nenhum dado pessoal será enviado
-                  ou armazenado nesta etapa.
+                  Seus dados de contato e currículo serão
+                  utilizados para análise de candidaturas
+                  pela equipe responsável da Camará.
                 </p>
               </div>
             </div>
 
-            <form className="careers-form" onSubmit={handleSubmit}>
+            <form
+              className="careers-form"
+              onSubmit={handleSubmit}
+            >
               <div className="careers-form-header">
                 <span>FORMULÁRIO DE CANDIDATURA</span>
+
                 <h3>Seus dados profissionais</h3>
+
                 <p>
                   Preencha as informações abaixo para
-                  preparar sua candidatura.
+                  enviar sua candidatura.
                 </p>
               </div>
 
@@ -292,9 +356,11 @@ export default function TrabalheConosco() {
                   type="text"
                   placeholder="Digite seu nome completo"
                   autoComplete="name"
+                  minLength={3}
                   maxLength={120}
                   value={form.nome}
                   onChange={handleChange}
+                  disabled={enviando}
                   required
                 />
               </div>
@@ -314,6 +380,7 @@ export default function TrabalheConosco() {
                     maxLength={254}
                     value={form.email}
                     onChange={handleChange}
+                    disabled={enviando}
                     required
                   />
                 </div>
@@ -332,6 +399,7 @@ export default function TrabalheConosco() {
                     maxLength={20}
                     value={form.telefone}
                     onChange={handleChange}
+                    disabled={enviando}
                     required
                   />
                 </div>
@@ -347,9 +415,12 @@ export default function TrabalheConosco() {
                   name="area"
                   value={form.area}
                   onChange={handleChange}
+                  disabled={enviando}
                   required
                 >
-                  <option value="">Selecione uma área</option>
+                  <option value="">
+                    Selecione uma área
+                  </option>
 
                   {areas.map((area) => (
                     <option key={area} value={area}>
@@ -372,6 +443,7 @@ export default function TrabalheConosco() {
                   placeholder="Conte um pouco sobre sua experiência profissional..."
                   value={form.mensagem}
                   onChange={handleChange}
+                  disabled={enviando}
                 />
               </div>
 
@@ -384,7 +456,11 @@ export default function TrabalheConosco() {
                   htmlFor="careers-curriculo"
                   className="careers-upload"
                 >
-                  <Upload size={27} strokeWidth={1.7} aria-hidden="true" />
+                  <Upload
+                    size={27}
+                    strokeWidth={1.7}
+                    aria-hidden="true"
+                  />
 
                   <strong>
                     Clique para selecionar seu currículo
@@ -400,39 +476,79 @@ export default function TrabalheConosco() {
                   type="file"
                   accept=".pdf,application/pdf"
                   onChange={handleFile}
+                  disabled={enviando}
                   required={!curriculo}
                 />
 
                 {curriculo && (
                   <div className="careers-selected-file">
-                    <FileText size={19} aria-hidden="true" />
+                    <FileText
+                      size={19}
+                      aria-hidden="true"
+                    />
+
                     <span>{curriculo.name}</span>
 
                     <button
                       type="button"
                       onClick={removeFile}
+                      disabled={enviando}
                       aria-label="Remover currículo"
                     >
-                      <X size={18} aria-hidden="true" />
+                      <X
+                        size={18}
+                        aria-hidden="true"
+                      />
                     </button>
                   </div>
                 )}
               </div>
 
               {erro && (
-                <p className="careers-form-error" role="status">
+                <p
+                  className="careers-form-error"
+                  role="alert"
+                >
                   {erro}
                 </p>
               )}
 
-              <button type="submit" className="careers-submit">
-                Enviar candidatura
-                <ArrowUpRight size={19} aria-hidden="true" />
+              {sucesso && (
+                <p
+                  className="careers-form-success"
+                  role="status"
+                  style={{
+                    color: "#257345",
+                    background: "#e8f5ed",
+                    padding: "12px",
+                    borderRadius: "6px"
+                  }}
+                >
+                  {sucesso}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                className="careers-submit"
+                disabled={enviando}
+              >
+                {enviando
+                  ? "Enviando candidatura..."
+                  : "Enviar candidatura"}
+
+                {!enviando && (
+                  <ArrowUpRight
+                    size={19}
+                    aria-hidden="true"
+                  />
+                )}
               </button>
 
               <p className="careers-form-note">
-                Formulário demonstrativo. O envio de currículos
-                estará disponível após a integração com o backend.
+                Ao enviar, você autoriza o uso dos dados
+                fornecidos para análise de sua candidatura.
+                O envio não garante contratação.
               </p>
             </form>
           </div>

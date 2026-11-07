@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 
 import AdminReceitas from "../components/AdminReceitas";
+import AdminCurriculos from "../components/AdminCurriculos";
 import { categoriasGaleria } from "../data/galeria";
 import { produtosApi, galeriaApi, uploadApi } from "../services/api";
 import "../styles/Admin.css";
@@ -95,6 +96,7 @@ export default function Admin({ admin, onLogout }) {
   const [menuAberto, setMenuAberto] = useState(false);
   const [produtos, setProdutos] = useState([]);
   const [publicacoes, setPublicacoes] = useState([]);
+  const [totalCurriculos, setTotalCurriculos] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [processando, setProcessando] = useState(false);
   const [erroPagina, setErroPagina] = useState("");
@@ -195,7 +197,11 @@ export default function Admin({ admin, onLogout }) {
   const resumo = [
     { label: "Produtos cadastrados", value: produtos.length, icon: Package },
     { label: "Publicações", value: publicacoes.length, icon: Images },
-    { label: "Currículos recebidos", value: "—", icon: FileText }
+    {
+      label: "Currículos recebidos",
+      value: totalCurriculos ?? "—",
+      icon: FileText
+    }
   ];
 
   function fecharFormulario() {
@@ -471,11 +477,17 @@ export default function Admin({ admin, onLogout }) {
 
       <aside className={`admin-sidebar${menuAberto ? " open" : ""}`}>
         <div className="admin-brand">
-          <img src="/images/logo-camara.png" alt="Camará Distribuidora" />
+          <img
+            src="/images/logo-camara.png"
+            alt="Camará Distribuidora"
+          />
           <span>PAINEL ADMINISTRATIVO</span>
         </div>
 
-        <nav className="admin-navigation" aria-label="Menu administrativo">
+        <nav
+          className="admin-navigation"
+          aria-label="Menu administrativo"
+        >
           {menuItems.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -596,6 +608,10 @@ export default function Admin({ admin, onLogout }) {
 
           {pagina === "receitas" && <AdminReceitas />}
 
+          {pagina === "curriculos" && (
+            <AdminCurriculos onTotalChange={setTotalCurriculos} />
+          )}
+
           {pagina === "produtos" && (
             <section className="admin-panel">
               <div className="admin-products-heading">
@@ -630,7 +646,9 @@ export default function Admin({ admin, onLogout }) {
 
               <div className="admin-table-wrapper">
                 {carregando ? (
-                  <p className="admin-no-results">Carregando produtos...</p>
+                  <p className="admin-no-results">
+                    Carregando produtos...
+                  </p>
                 ) : (
                   <>
                     <table className="admin-table">
@@ -651,7 +669,10 @@ export default function Admin({ admin, onLogout }) {
                             <td>
                               <div className="admin-product-info">
                                 {produto.imagem ? (
-                                  <img src={produto.imagem} alt="" />
+                                  <img
+                                    src={produto.imagem}
+                                    alt=""
+                                  />
                                 ) : (
                                   <div className="admin-product-placeholder">
                                     <Package size={22} />
@@ -682,7 +703,8 @@ export default function Admin({ admin, onLogout }) {
                                 )}
 
                                 {!produto.maisVendido &&
-                                  !produto.maisProcurado && "Normal"}
+                                  !produto.maisProcurado &&
+                                  "Normal"}
                               </div>
                             </td>
 
@@ -692,8 +714,13 @@ export default function Admin({ admin, onLogout }) {
                                 : "Automática"}
                             </td>
 
-                            <td>{renderizarStatus("produto", produto)}</td>
-                            <td>{renderizarAcoes("produto", produto)}</td>
+                            <td>
+                              {renderizarStatus("produto", produto)}
+                            </td>
+
+                            <td>
+                              {renderizarAcoes("produto", produto)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -714,7 +741,9 @@ export default function Admin({ admin, onLogout }) {
             <section className="admin-panel">
               <div className="admin-products-heading">
                 <div>
-                  <span className="admin-section-label">PUBLICAÇÕES</span>
+                  <span className="admin-section-label">
+                    PUBLICAÇÕES
+                  </span>
                   <h2>Gerenciar galeria</h2>
                   <p>
                     Organize fotos, vídeos, novidades e eventos da Camará.
@@ -767,7 +796,10 @@ export default function Admin({ admin, onLogout }) {
                             <td>
                               <div className="admin-product-info">
                                 {item.imagem ? (
-                                  <img src={item.imagem} alt="" />
+                                  <img
+                                    src={item.imagem}
+                                    alt=""
+                                  />
                                 ) : (
                                   <div className="admin-product-placeholder">
                                     {item.tipo === "video" ? (
@@ -786,9 +818,18 @@ export default function Admin({ admin, onLogout }) {
                             </td>
 
                             <td>{item.categoria}</td>
-                            <td>{item.tipo === "video" ? "Vídeo" : "Foto"}</td>
-                            <td>{renderizarStatus("galeria", item)}</td>
-                            <td>{renderizarAcoes("galeria", item)}</td>
+
+                            <td>
+                              {item.tipo === "video" ? "Vídeo" : "Foto"}
+                            </td>
+
+                            <td>
+                              {renderizarStatus("galeria", item)}
+                            </td>
+
+                            <td>
+                              {renderizarAcoes("galeria", item)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -805,9 +846,13 @@ export default function Admin({ admin, onLogout }) {
             </section>
           )}
 
-          {!["dashboard", "produtos", "receitas", "galeria"].includes(
-            pagina
-          ) && (
+          {![
+            "dashboard",
+            "produtos",
+            "receitas",
+            "galeria",
+            "curriculos"
+          ].includes(pagina) && (
             <section className="admin-panel admin-empty">
               <div className="admin-empty-icon">
                 <IconePagina size={30} />
@@ -937,7 +982,10 @@ export default function Admin({ admin, onLogout }) {
                           }
                         >
                           {categoriasPublicacao.map((categoria) => (
-                            <option key={categoria} value={categoria}>
+                            <option
+                              key={categoria}
+                              value={categoria}
+                            >
                               {categoria}
                             </option>
                           ))}
@@ -949,10 +997,14 @@ export default function Admin({ admin, onLogout }) {
                   {tipoFormulario === "galeria" && (
                     <label className="admin-form-field">
                       <span>Tipo de publicação</span>
+
                       <select
                         value={formulario.tipo}
                         onChange={(evento) =>
-                          atualizarCampo("tipo", evento.target.value)
+                          atualizarCampo(
+                            "tipo",
+                            evento.target.value
+                          )
                         }
                       >
                         <option value="imagem">Imagem</option>
@@ -963,6 +1015,7 @@ export default function Admin({ admin, onLogout }) {
 
                   <label className="admin-form-field">
                     <span>Descrição</span>
+
                     <textarea
                       required
                       rows={4}
@@ -970,9 +1023,13 @@ export default function Admin({ admin, onLogout }) {
                       placeholder="Descreva as principais informações..."
                       value={formulario.descricao}
                       onChange={(evento) =>
-                        atualizarCampo("descricao", evento.target.value)
+                        atualizarCampo(
+                          "descricao",
+                          evento.target.value
+                        )
                       }
                     />
+
                     <small>
                       {formulario.descricao.length}/1000 caracteres
                     </small>
@@ -983,6 +1040,7 @@ export default function Admin({ admin, onLogout }) {
                   <section className="admin-form-section">
                     <div className="admin-form-section-heading">
                       <SlidersHorizontal size={19} />
+
                       <div>
                         <h3>Classificação e destaque</h3>
                         <p>
@@ -1015,11 +1073,15 @@ export default function Admin({ admin, onLogout }) {
 
                         <div className="admin-classification-text">
                           <strong>Mais vendido</strong>
-                          <span>Destacar como mais vendido</span>
+                          <span>
+                            Destacar como mais vendido
+                          </span>
                         </div>
 
                         <span className="admin-classification-check">
-                          {formulario.maisVendido && <Check size={14} />}
+                          {formulario.maisVendido && (
+                            <Check size={14} />
+                          )}
                         </span>
                       </label>
 
@@ -1045,11 +1107,15 @@ export default function Admin({ admin, onLogout }) {
 
                         <div className="admin-classification-text">
                           <strong>Mais procurado</strong>
-                          <span>Destacar como mais procurado</span>
+                          <span>
+                            Destacar como mais procurado
+                          </span>
                         </div>
 
                         <span className="admin-classification-check">
-                          {formulario.maisProcurado && <Check size={14} />}
+                          {formulario.maisProcurado && (
+                            <Check size={14} />
+                          )}
                         </span>
                       </label>
                     </div>
@@ -1060,8 +1126,8 @@ export default function Admin({ admin, onLogout }) {
                       </span>
 
                       <p>
-                        Escolha se este produto terá uma posição fixa
-                        entre os três destaques da Home.
+                        Escolha se este produto terá uma posição
+                        fixa entre os três destaques da Home.
                       </p>
 
                       <div
@@ -1071,12 +1137,14 @@ export default function Admin({ admin, onLogout }) {
                       >
                         {posicoesDestaque.map((posicao) => {
                           const selecionada =
-                            Number(formulario.prioridade) === posicao.valor;
+                            Number(formulario.prioridade) ===
+                            posicao.valor;
 
                           const ocupado = produtos.find(
                             (produto) =>
                               produto.id !== editandoId &&
-                              produto.prioridade === posicao.valor &&
+                              produto.prioridade ===
+                                posicao.valor &&
                               posicao.valor !== 0
                           );
 
@@ -1103,7 +1171,10 @@ export default function Admin({ admin, onLogout }) {
                               <span className="admin-priority-radio" />
 
                               <span className="admin-priority-content">
-                                <strong>{posicao.titulo}</strong>
+                                <strong>
+                                  {posicao.titulo}
+                                </strong>
+
                                 <small>
                                   {ocupado
                                     ? `Atualmente: ${ocupado.nome}`
@@ -1126,13 +1197,16 @@ export default function Admin({ admin, onLogout }) {
                 <section className="admin-form-section">
                   <div className="admin-form-section-heading">
                     <ImageIcon size={19} />
+
                     <div>
                       <h3>
                         {tipoFormulario === "produto"
                           ? "Imagem do produto"
                           : "Imagem da publicação"}
                       </h3>
-                      <p>JPG, PNG ou WebP. Tamanho máximo de 20 MB.</p>
+                      <p>
+                        JPG, PNG ou WebP. Tamanho máximo de 20 MB.
+                      </p>
                     </div>
                   </div>
 
@@ -1140,12 +1214,17 @@ export default function Admin({ admin, onLogout }) {
                     {imagemPreview || formulario.imagem ? (
                       <div className="admin-image-preview">
                         <img
-                          src={imagemPreview || formulario.imagem}
+                          src={
+                            imagemPreview || formulario.imagem
+                          }
                           alt="Prévia da imagem"
                         />
 
                         <div className="admin-image-preview-details">
-                          <strong>Imagem selecionada</strong>
+                          <strong>
+                            Imagem selecionada
+                          </strong>
+
                           <span>
                             {arquivoImagem
                               ? arquivoImagem.name
@@ -1167,12 +1246,15 @@ export default function Admin({ admin, onLogout }) {
                     ) : (
                       <div className="admin-image-placeholder">
                         <ImageIcon size={27} />
-                        <span>Nenhuma imagem selecionada</span>
+                        <span>
+                          Nenhuma imagem selecionada
+                        </span>
                       </div>
                     )}
 
                     <label className="admin-image-upload">
                       <Upload size={17} />
+
                       <strong>
                         {imagemPreview || formulario.imagem
                           ? "Substituir imagem"
@@ -1192,6 +1274,7 @@ export default function Admin({ admin, onLogout }) {
                     formulario.tipo === "video" && (
                       <label className="admin-form-field">
                         <span>URL do vídeo</span>
+
                         <input
                           type="url"
                           required
@@ -1215,6 +1298,7 @@ export default function Admin({ admin, onLogout }) {
                         ? "Produto ativo"
                         : "Publicação ativa"}
                     </h3>
+
                     <p>
                       {formulario.ativo
                         ? "Este item ficará visível no site."
@@ -1227,16 +1311,23 @@ export default function Admin({ admin, onLogout }) {
                       type="checkbox"
                       checked={formulario.ativo !== false}
                       onChange={(evento) =>
-                        atualizarCampo("ativo", evento.target.checked)
+                        atualizarCampo(
+                          "ativo",
+                          evento.target.checked
+                        )
                       }
                       aria-label="Ativar ou desativar item"
                     />
+
                     <span className="admin-switch-track" />
                   </label>
                 </section>
 
                 {erro && (
-                  <p className="admin-form-error" role="alert">
+                  <p
+                    className="admin-form-error"
+                    role="alert"
+                  >
                     {erro}
                   </p>
                 )}
@@ -1258,6 +1349,7 @@ export default function Admin({ admin, onLogout }) {
                   disabled={processando}
                 >
                   <Save size={17} />
+
                   {processando
                     ? "Salvando..."
                     : editandoId

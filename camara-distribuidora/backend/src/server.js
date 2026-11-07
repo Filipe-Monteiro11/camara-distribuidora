@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+
 import { prisma } from "./lib/prisma.js";
 import { uploadDir } from "./middleware/upload.js";
 
@@ -9,6 +10,7 @@ import productRoutes from "./routes/productRoutes.js";
 import galleryRoutes from "./routes/galleryRoutes.js";
 import recipeRoutes from "./routes/recipeRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import curriculoRoutes from "./routes/curriculoRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,7 +18,7 @@ const PORT = process.env.PORT || 3001;
 app.disable("x-powered-by");
 
 app.use(cors({
-  origin: "http://localhost:5173"
+  origin: process.env.FRONTEND_URL || "http://localhost:5173"
 }));
 
 app.use(express.json({ limit: "100kb" }));
@@ -48,7 +50,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/upload", uploadRoutes);
-
+app.use("/api/curriculos", curriculoRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
