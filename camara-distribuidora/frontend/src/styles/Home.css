@@ -607,42 +607,6 @@
   font-weight: 800;
 }
 
-/* CHAMADA FINAL */
-
-.home-cta {
-  padding: 90px 0;
-  background: var(--red);
-  color: #fff;
-}
-
-.home-cta-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 45px;
-}
-
-.home-cta .eyebrow {
-  color: var(--yellow);
-}
-
-.home-cta h2 {
-  margin: 17px 0;
-  font-size: clamp(34px, 3.8vw, 50px);
-  line-height: 1.18;
-  letter-spacing: -1.5px;
-}
-
-.home-cta p {
-  margin: 0;
-  color: #e8d5d5;
-  line-height: 1.85;
-}
-
-.home-cta .btn {
-  flex-shrink: 0;
-}
-
 /* RESPONSIVIDADE */
 
 @media (max-width: 1000px) {

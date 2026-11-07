@@ -206,31 +206,6 @@ export default function Sobre() {
           </div>
         </section>
 
-        <section className="about-cta">
-          <div className="container about-cta-content">
-            <div>
-              <span className="about-eyebrow">
-                CAMARÁ DISTRIBUIDORA
-              </span>
-
-              <h2>
-                Conheça nossa linha
-                <br />
-                de produtos.
-              </h2>
-
-              <p>
-                Explore nosso catálogo e descubra
-                mais sobre a seleção Camará.
-              </p>
-            </div>
-
-            <Link to="/produtos" className="about-cta-button">
-              Explorar produtos
-              <ArrowUpRight size={19} />
-            </Link>
-          </div>
-        </section>
       </main>
 
       <Footer />

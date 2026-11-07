@@ -234,34 +234,6 @@ export default function Receitas() {
           </div>
         </section>
 
-        <section className="recipes-bottom">
-          <div className="container recipes-bottom-content">
-            <div>
-              <span className="recipes-eyebrow">
-                CAMARÁ DISTRIBUIDORA
-              </span>
-
-              <h2>
-                Toda boa receita
-                <br />
-                começa com uma escolha.
-              </h2>
-
-              <p>
-                Conheça os produtos disponíveis
-                no catálogo da Camará Distribuidora.
-              </p>
-            </div>
-
-            <a
-              href="/produtos"
-              className="recipes-bottom-button"
-            >
-              Conhecer produtos
-              <ArrowUpRight size={19} aria-hidden="true" />
-            </a>
-          </div>
-        </section>
 
         {receitaSelecionada && (
           <div

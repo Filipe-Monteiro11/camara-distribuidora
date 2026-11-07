@@ -247,23 +247,6 @@ export default function Galeria() {
         </div>
       </section>
 
-      <section className="gallery-bottom">
-        <div className="container gallery-bottom-content">
-          <div>
-            <span className="gallery-eyebrow">
-              FIQUE POR DENTRO
-            </span>
-
-            <h2>Acompanhe a nossa jornada</h2>
-
-            <p>
-              Em breve, novos registros, produtos
-              e momentos especiais por aqui.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {publicacao && (
         <div
           className="gallery-modal-backdrop"
