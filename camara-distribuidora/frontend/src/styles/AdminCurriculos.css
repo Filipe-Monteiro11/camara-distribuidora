@@ -70,6 +70,17 @@
   color: #540101;
 }
 
+.admin-curriculos-area {
+  display: inline-block;
+  padding: 7px 11px;
+  border-radius: 6px;
+  background: #f7eeee;
+  color: #540101;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .admin-curriculos-status {
   min-width: 125px;
   padding: 9px 10px;
@@ -126,6 +137,190 @@
   font-size: 12px;
 }
 
+.admin-curriculos-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(20, 15, 15, 0.6);
+}
+
+.admin-curriculos-modal {
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.16);
+}
+
+.admin-curriculos-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 30px 32px 24px;
+  border-bottom: 1px solid #eee;
+}
+
+.admin-curriculos-modal-header h2 {
+  margin: 9px 0 0;
+  color: #252525;
+  font-size: 24px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.admin-curriculos-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+}
+
+.admin-curriculos-close:hover {
+  border-color: #540101;
+  color: #540101;
+}
+
+.admin-curriculos-modal-body {
+  padding: 28px 32px 32px;
+}
+
+.admin-curriculos-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 25px 20px;
+}
+
+.admin-curriculos-details > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-curriculos-details > div > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: #540101;
+}
+
+.admin-curriculos-details span {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.admin-curriculos-details small {
+  color: #888;
+  font-size: 12px;
+}
+
+.admin-curriculos-details strong,
+.admin-curriculos-details a {
+  color: #292929;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.admin-curriculos-details a:hover {
+  color: #540101;
+}
+
+.admin-curriculos-presentation {
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid #eee;
+}
+
+.admin-curriculos-presentation h3 {
+  margin: 0 0 12px;
+  color: #252525;
+  font-size: 15px;
+}
+
+.admin-curriculos-presentation p {
+  margin: 0;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-curriculos-document {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 9px;
+  background: #fafafa;
+}
+
+.admin-curriculos-document > svg {
+  flex-shrink: 0;
+  color: #540101;
+}
+
+.admin-curriculos-document > span {
+  flex: 1;
+  min-width: 0;
+  color: #444;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-curriculos-document button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 10px 13px;
+  border: none;
+  border-radius: 7px;
+  background: #540101;
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-curriculos-document button:hover {
+  background: #750909;
+}
+
+.admin-curriculos-document button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .admin-curriculos-table {
+    min-width: 980px;
+  }
+}
+
 @media (max-width: 700px) {
   .admin-curriculos-filters {
     flex-direction: column;
@@ -136,7 +331,32 @@
     width: 100%;
   }
 
-  .admin-curriculos-table {
-    min-width: 780px;
+  .admin-curriculos-modal {
+    max-height: 85vh;
+  }
+
+  .admin-curriculos-modal-header {
+    padding: 24px 20px 20px;
+  }
+
+  .admin-curriculos-modal-header h2 {
+    font-size: 20px;
+  }
+
+  .admin-curriculos-modal-body {
+    padding: 24px 20px;
+  }
+
+  .admin-curriculos-details {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .admin-curriculos-document {
+    flex-wrap: wrap;
+  }
+
+  .admin-curriculos-document button {
+    width: 100%;
   }
 }

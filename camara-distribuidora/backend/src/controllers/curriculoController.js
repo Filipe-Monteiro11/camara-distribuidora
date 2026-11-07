@@ -5,6 +5,15 @@ import { curriculosDir } from "../middleware/curriculoUpload.js";
 
 const STATUS_PERMITIDOS = ["novo", "em_analise", "finalizado"];
 
+const AREAS_PERMITIDAS = [
+  "Administrativo",
+  "Comercial",
+  "Logística",
+  "Estoque",
+  "Operacional",
+  "Outras áreas"
+];
+
 async function removerArquivo(arquivo) {
   if (arquivo) {
     await unlink(arquivo).catch(() => {});
@@ -40,18 +49,28 @@ export async function enviarCurriculo(req, res) {
 
   try {
     const nome =
-      typeof req.body.nome === "string"
+      typeof req.body?.nome === "string"
         ? req.body.nome.trim()
         : "";
 
     const email =
-      typeof req.body.email === "string"
+      typeof req.body?.email === "string"
         ? req.body.email.trim().toLowerCase()
         : "";
 
     const telefone =
-      typeof req.body.telefone === "string"
+      typeof req.body?.telefone === "string"
         ? req.body.telefone.trim()
+        : "";
+
+    const area =
+      typeof req.body?.area === "string"
+        ? req.body.area.trim()
+        : "";
+
+    const mensagem =
+      typeof req.body?.mensagem === "string"
+        ? req.body.mensagem.trim()
         : "";
 
     if (
@@ -68,6 +87,17 @@ export async function enviarCurriculo(req, res) {
       });
     }
 
+    if (
+      (area && !AREAS_PERMITIDAS.includes(area)) ||
+      mensagem.length > 1000
+    ) {
+      await removerArquivo(arquivo);
+
+      return res.status(400).json({
+        error: "Área de interesse ou apresentação inválida."
+      });
+    }
+
     if (!arquivo || !(await pdfValido(arquivo))) {
       await removerArquivo(arquivo);
 
@@ -81,6 +111,8 @@ export async function enviarCurriculo(req, res) {
         nome,
         email,
         telefone,
+        area: area || null,
+        mensagem: mensagem || null,
         arquivo: path.basename(arquivo),
         nomeArquivo: path.basename(req.file.originalname).slice(0, 200)
       }
@@ -107,6 +139,8 @@ export async function listarCurriculos(req, res) {
         nome: true,
         email: true,
         telefone: true,
+        area: true,
+        mensagem: true,
         nomeArquivo: true,
         status: true,
         criadoEm: true,
@@ -150,7 +184,7 @@ export async function baixarCurriculo(req, res) {
     }
 
     const nomeArquivo = curriculo.nomeArquivo
-      .replace(/[\r\n"\\\/]/g, "_")
+      .replace(/[\r\n"\\/]/g, "_")
       .slice(0, 200);
 
     return res.download(

@@ -136,8 +136,9 @@ export default function TrabalheConosco() {
     dados.append("nome", form.nome.trim());
     dados.append("email", form.email.trim());
     dados.append("telefone", form.telefone.trim());
+    dados.append("area", form.area);
+    dados.append("mensagem", form.mensagem.trim());
     dados.append("curriculo", curriculo);
-
     setEnviando(true);
 
     try {

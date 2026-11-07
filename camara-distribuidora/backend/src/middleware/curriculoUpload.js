@@ -20,8 +20,13 @@ const storage = multer.diskStorage({
 function validarArquivo(req, file, callback) {
   const extensao = path.extname(file.originalname).toLowerCase();
 
-  if (file.mimetype !== "application/pdf" || extensao !== ".pdf") {
-    return callback(new Error("Envie apenas arquivos PDF."));
+  if (
+    file.mimetype !== "application/pdf" ||
+    extensao !== ".pdf"
+  ) {
+    return callback(
+      new Error("Envie apenas arquivos PDF.")
+    );
   }
 
   callback(null, true);
@@ -33,6 +38,6 @@ export const uploadCurriculo = multer({
   limits: {
     fileSize: 5 * 1024 * 1024,
     files: 1,
-    fields: 3
+    fields: 5
   }
 }).single("curriculo");

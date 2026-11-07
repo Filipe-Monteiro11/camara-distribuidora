@@ -53,12 +53,13 @@ model Recipe {
   atualizadoEm DateTime @updatedAt
 }
 
-
 model Curriculo {
   id           String   @id @default(uuid())
   nome         String
   email        String
   telefone     String
+  area         String?
+  mensagem     String?
   arquivo      String
   nomeArquivo  String
   status       String   @default("novo")
