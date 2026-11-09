@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import {
   UserRound,
+  ShieldCheck,
+  Mail,
   LockKeyhole,
-  Save,
   Eye,
-  EyeOff
+  EyeOff,
+  Save,
+  CheckCircle2,
+  AlertCircle,
+  Info
 } from "lucide-react";
 import { configuracoesApi } from "../services/api";
 import "../styles/AdminConfiguracoes.css";
@@ -15,8 +20,8 @@ export default function AdminConfiguracoes({ admin, onAtualizar }) {
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [mostrarSenhas, setMostrarSenhas] = useState(false);
-  const [salvando, setSalvando] = useState(false);
   const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
 
@@ -42,7 +47,7 @@ export default function AdminConfiguracoes({ admin, onAtualizar }) {
   async function salvar(evento) {
     evento.preventDefault();
 
-    if (salvando) return;
+    if (salvando || carregando) return;
 
     setErro("");
     setSucesso("");
@@ -66,135 +71,209 @@ export default function AdminConfiguracoes({ admin, onAtualizar }) {
         ...(novaSenha ? { novaSenha } : {})
       });
 
-      if (resposta.token) {
-        localStorage.setItem("adminToken", resposta.token);
-      }
-
-      onAtualizar?.(resposta.admin, resposta.token);
+      onAtualizar?.(resposta.admin);
 
       setEmail(resposta.admin.email);
       setSenhaAtual("");
       setNovaSenha("");
       setConfirmarSenha("");
-      setSucesso(resposta.message);
+      setMostrarSenhas(false);
+      setSucesso(
+        resposta.message || "Configurações atualizadas com sucesso."
+      );
     } catch (error) {
-      setErro(error.message || "Não foi possível salvar.");
+      setErro(error.message || "Não foi possível salvar as alterações.");
     } finally {
       setSalvando(false);
     }
   }
 
+  const desabilitado = carregando || salvando;
+
   return (
     <div className="admin-configuracoes">
       <div className="admin-configuracoes-heading">
-        <span className="admin-section-label">
-          CONFIGURAÇÕES DA CONTA
-        </span>
-        <h2>Gerenciar conta</h2>
-        <p>
-          Atualize os dados de acesso ao painel administrativo.
-        </p>
+        <div>
+          <span className="admin-configuracoes-eyebrow">
+            GERENCIAMENTO DE ACESSO
+          </span>
+          <h2>Configurações da conta</h2>
+          <p>
+            Gerencie suas informações e mantenha seu acesso
+            administrativo protegido.
+          </p>
+        </div>
+
+        <div className="admin-configuracoes-heading-icon">
+          <ShieldCheck size={25} />
+        </div>
       </div>
 
       <form onSubmit={salvar}>
-        <section className="admin-configuracoes-section">
-          <div className="admin-configuracoes-section-title">
-            <UserRound size={20} />
-            <div>
-              <h3>Dados do administrador</h3>
-              <p>Informações utilizadas para acessar o painel.</p>
+        <section className="admin-configuracoes-card">
+          <div className="admin-configuracoes-card-heading">
+            <div className="admin-configuracoes-icon">
+              <UserRound size={21} />
             </div>
-          </div>
 
-          <label className="admin-configuracoes-field">
-            <span>E-mail administrativo</span>
-            <input
-              type="email"
-              value={email}
-              onChange={(evento) => setEmail(evento.target.value)}
-              maxLength={254}
-              autoComplete="email"
-              required
-              disabled={salvando || carregando}
-            />
-          </label>
-        </section>
-
-        <section className="admin-configuracoes-section">
-          <div className="admin-configuracoes-section-title">
-            <LockKeyhole size={20} />
             <div>
-              <h3>Segurança da conta</h3>
+              <h3>Informações da conta</h3>
               <p>
-                Deixe os campos de nova senha vazios se não
-                quiser alterá-la.
+                Dados utilizados para acessar o painel administrativo.
               </p>
             </div>
           </div>
 
-          <label className="admin-configuracoes-field">
-            <span>Senha atual</span>
-            <input
-              type={mostrarSenhas ? "text" : "password"}
-              value={senhaAtual}
-              onChange={(evento) => setSenhaAtual(evento.target.value)}
-              autoComplete="current-password"
-              required
-              disabled={salvando || carregando}
-            />
-          </label>
-
-          <div className="admin-configuracoes-grid">
+          <div className="admin-configuracoes-card-body">
             <label className="admin-configuracoes-field">
-              <span>Nova senha</span>
-              <input
-                type={mostrarSenhas ? "text" : "password"}
-                value={novaSenha}
-                onChange={(evento) => setNovaSenha(evento.target.value)}
-                autoComplete="new-password"
-                disabled={salvando || carregando}
-              />
+              <span>E-mail administrativo</span>
+
+              <div className="admin-configuracoes-input">
+                <Mail size={18} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(evento) => setEmail(evento.target.value)}
+                  placeholder="Digite o e-mail administrativo"
+                  maxLength={254}
+                  autoComplete="email"
+                  required
+                  disabled={desabilitado}
+                />
+              </div>
             </label>
 
-            <label className="admin-configuracoes-field">
-              <span>Confirmar nova senha</span>
-              <input
-                type={mostrarSenhas ? "text" : "password"}
-                value={confirmarSenha}
-                onChange={(evento) => setConfirmarSenha(evento.target.value)}
-                autoComplete="new-password"
-                disabled={salvando || carregando}
-              />
-            </label>
+            <p className="admin-configuracoes-help">
+              Este e-mail será utilizado para entrar no painel.
+            </p>
+          </div>
+        </section>
+
+        <section className="admin-configuracoes-card">
+          <div className="admin-configuracoes-card-heading">
+            <div className="admin-configuracoes-icon">
+              <LockKeyhole size={21} />
+            </div>
+
+            <div>
+              <h3>Segurança e senha</h3>
+              <p>
+                Atualize sua senha para manter a conta protegida.
+              </p>
+            </div>
           </div>
 
-          <button
-            type="button"
-            className="admin-configuracoes-visibility"
-            onClick={() => setMostrarSenhas((atual) => !atual)}
-          >
-            {mostrarSenhas ? <EyeOff size={17} /> : <Eye size={17} />}
-            {mostrarSenhas ? "Ocultar senhas" : "Mostrar senhas"}
-          </button>
+          <div className="admin-configuracoes-card-body">
+            <label className="admin-configuracoes-field">
+              <span>Senha atual</span>
+
+              <div className="admin-configuracoes-input">
+                <LockKeyhole size={18} />
+                <input
+                  type={mostrarSenhas ? "text" : "password"}
+                  value={senhaAtual}
+                  onChange={(evento) => setSenhaAtual(evento.target.value)}
+                  placeholder="Informe sua senha atual"
+                  autoComplete="current-password"
+                  required
+                  disabled={desabilitado}
+                />
+              </div>
+            </label>
+
+            <div className="admin-configuracoes-grid">
+              <label className="admin-configuracoes-field">
+                <span>Nova senha</span>
+
+                <div className="admin-configuracoes-input">
+                  <LockKeyhole size={18} />
+                  <input
+                    type={mostrarSenhas ? "text" : "password"}
+                    value={novaSenha}
+                    onChange={(evento) => setNovaSenha(evento.target.value)}
+                    placeholder="Mínimo de 8 caracteres"
+                    autoComplete="new-password"
+                    minLength={8}
+                    disabled={desabilitado}
+                  />
+                </div>
+              </label>
+
+              <label className="admin-configuracoes-field">
+                <span>Confirmar nova senha</span>
+
+                <div className="admin-configuracoes-input">
+                  <LockKeyhole size={18} />
+                  <input
+                    type={mostrarSenhas ? "text" : "password"}
+                    value={confirmarSenha}
+                    onChange={(evento) =>
+                      setConfirmarSenha(evento.target.value)
+                    }
+                    placeholder="Repita a nova senha"
+                    autoComplete="new-password"
+                    disabled={desabilitado}
+                  />
+                </div>
+              </label>
+            </div>
+
+            <button
+              type="button"
+              className="admin-configuracoes-visibility"
+              onClick={() => setMostrarSenhas((atual) => !atual)}
+              disabled={desabilitado}
+              aria-pressed={mostrarSenhas}
+            >
+              {mostrarSenhas ? (
+                <EyeOff size={17} />
+              ) : (
+                <Eye size={17} />
+              )}
+
+              {mostrarSenhas ? "Ocultar senhas" : "Mostrar senhas"}
+            </button>
+
+            <div className="admin-configuracoes-info">
+              <Info size={18} />
+              <p>
+                Para salvar qualquer alteração, informe sua senha atual.
+                Deixe os campos de nova senha vazios caso queira alterar
+                somente o e-mail.
+              </p>
+            </div>
+          </div>
         </section>
 
         {erro && (
-          <p className="admin-configuracoes-error" role="alert">
-            {erro}
-          </p>
+          <div
+            className="admin-configuracoes-feedback admin-configuracoes-error"
+            role="alert"
+          >
+            <AlertCircle size={19} />
+            <span>{erro}</span>
+          </div>
         )}
 
         {sucesso && (
-          <p className="admin-configuracoes-success" role="status">
-            {sucesso}
-          </p>
+          <div
+            className="admin-configuracoes-feedback admin-configuracoes-success"
+            role="status"
+          >
+            <CheckCircle2 size={19} />
+            <span>{sucesso}</span>
+          </div>
         )}
 
         <div className="admin-configuracoes-actions">
+          <p>
+            As alterações serão aplicadas à sua conta administrativa.
+          </p>
+
           <button
             type="submit"
-            className="admin-primary-button"
-            disabled={salvando || carregando}
+            className="admin-configuracoes-save"
+            disabled={desabilitado}
           >
             <Save size={18} />
             {salvando ? "Salvando..." : "Salvar alterações"}
