@@ -23,15 +23,13 @@ import {
   Save,
   Check
 } from "lucide-react";
-
 import AdminReceitas from "../components/AdminReceitas";
 import AdminCurriculos from "../components/AdminCurriculos";
 import { categoriasGaleria } from "../data/galeria";
 import { produtosApi, galeriaApi, uploadApi } from "../services/api";
 import "../styles/Admin.css";
-
+import AdminConfiguracoes from "../components/AdminConfiguracoes";
 const LIMITE_IMAGEM = 20 * 1024 * 1024;
-
 const menuItems = [
   { id: "dashboard", label: "Visão geral", icon: LayoutDashboard },
   { id: "produtos", label: "Produtos", icon: Package },
@@ -40,7 +38,6 @@ const menuItems = [
   { id: "curriculos", label: "Currículos", icon: FileText },
   { id: "configuracoes", label: "Configurações", icon: Settings }
 ];
-
 const produtoVazio = {
   nome: "",
   descricao: "",
@@ -51,7 +48,6 @@ const produtoVazio = {
   prioridade: 0,
   ativo: true
 };
-
 const publicacaoVazia = {
   titulo: "",
   descricao: "",
@@ -61,27 +57,22 @@ const publicacaoVazia = {
   videoUrl: "",
   ativo: true
 };
-
 const categoriasPublicacao = categoriasGaleria.filter((categoria) =>
   ["Produtos", "Novidades", "Eventos", "Bastidores"].includes(categoria)
 );
-
 const posicoesDestaque = [
   { valor: 0, titulo: "Ordem automática", descricao: "Sem posição fixa na Home" },
   { valor: 1, titulo: "1º destaque", descricao: "Primeiro produto da Home" },
   { valor: 2, titulo: "2º destaque", descricao: "Segundo produto da Home" },
   { valor: 3, titulo: "3º destaque", descricao: "Terceiro produto da Home" }
 ];
-
 function normalizarLista(dados, propriedade) {
   return Array.isArray(dados) ? dados : dados?.[propriedade] ?? [];
 }
-
 function ordenarProdutos(lista) {
   return [...lista].sort((a, b) => {
     const prioridadeA = a.prioridade > 0 ? a.prioridade : Infinity;
     const prioridadeB = b.prioridade > 0 ? b.prioridade : Infinity;
-
     return (
       prioridadeA - prioridadeB ||
       Number(b.maisVendido === true) - Number(a.maisVendido === true) ||
@@ -90,8 +81,7 @@ function ordenarProdutos(lista) {
     );
   });
 }
-
-export default function Admin({ admin, onLogout }) {
+export default function Admin({ admin, onLogout, onAtualizarAdmin }) {
   const [pagina, setPagina] = useState("dashboard");
   const [menuAberto, setMenuAberto] = useState(false);
   const [produtos, setProdutos] = useState([]);
@@ -108,20 +98,15 @@ export default function Admin({ admin, onLogout }) {
   const [arquivoImagem, setArquivoImagem] = useState(null);
   const [imagemPreview, setImagemPreview] = useState("");
   const [erro, setErro] = useState("");
-
   useEffect(() => {
     let ativo = true;
-
     async function carregarDados() {
       const [resultadoProdutos, resultadoGaleria] = await Promise.allSettled([
         produtosApi.listarTodos(),
         galeriaApi.listarTodos()
       ]);
-
       if (!ativo) return;
-
       const erros = [];
-
       if (resultadoProdutos.status === "fulfilled") {
         setProdutos(normalizarLista(resultadoProdutos.value, "produtos"));
       } else {
@@ -129,7 +114,6 @@ export default function Admin({ admin, onLogout }) {
           `Produtos: ${resultadoProdutos.reason?.message || "Erro ao carregar."}`
         );
       }
-
       if (resultadoGaleria.status === "fulfilled") {
         setPublicacoes(normalizarLista(resultadoGaleria.value, "publicacoes"));
       } else {
@@ -137,63 +121,47 @@ export default function Admin({ admin, onLogout }) {
           `Galeria: ${resultadoGaleria.reason?.message || "Erro ao carregar."}`
         );
       }
-
       setErroPagina(erros.join(" | "));
       setCarregando(false);
     }
-
     carregarDados();
-
     return () => {
       ativo = false;
     };
   }, []);
-
   useEffect(() => {
     if (!arquivoImagem) {
       setImagemPreview("");
       return;
     }
-
     const url = URL.createObjectURL(arquivoImagem);
     setImagemPreview(url);
-
     return () => URL.revokeObjectURL(url);
   }, [arquivoImagem]);
-
   useEffect(() => {
     if (!formulario) return;
-
     const overflowAnterior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
     function aoPressionarTecla(evento) {
       if (evento.key === "Escape" && !processando) {
         fecharFormulario();
       }
     }
-
     document.addEventListener("keydown", aoPressionarTecla);
-
     return () => {
       document.body.style.overflow = overflowAnterior;
       document.removeEventListener("keydown", aoPressionarTecla);
     };
   }, [formulario, processando]);
-
   const paginaAtual = menuItems.find((item) => item.id === pagina);
-  const IconePagina = paginaAtual.icon;
-
   const produtosFiltrados = ordenarProdutos(
     produtos.filter((produto) =>
       produto.nome.toLowerCase().includes(busca.toLowerCase())
     )
   );
-
   const publicacoesFiltradas = publicacoes.filter((item) =>
     item.titulo.toLowerCase().includes(buscaGaleria.toLowerCase())
   );
-
   const resumo = [
     { label: "Produtos cadastrados", value: produtos.length, icon: Package },
     { label: "Publicações", value: publicacoes.length, icon: Images },
@@ -203,27 +171,22 @@ export default function Admin({ admin, onLogout }) {
       icon: FileText
     }
   ];
-
   function fecharFormulario() {
     if (processando) return;
-
     setFormulario(null);
     setTipoFormulario(null);
     setEditandoId(null);
     setArquivoImagem(null);
     setErro("");
   }
-
   function navegar(destino) {
     setPagina(destino);
     setMenuAberto(false);
     fecharFormulario();
   }
-
   function abrirFormulario(tipo, item = null) {
     const dadosIniciais =
       tipo === "produto" ? produtoVazio : publicacaoVazia;
-
     setTipoFormulario(tipo);
     setEditandoId(item?.id ?? null);
     setFormulario(
@@ -232,41 +195,32 @@ export default function Admin({ admin, onLogout }) {
     setArquivoImagem(null);
     setErro("");
   }
-
   function atualizarCampo(campo, valor) {
     setFormulario((atual) => ({
       ...atual,
       [campo]: valor
     }));
   }
-
   function selecionarImagem(evento) {
     const arquivo = evento.target.files?.[0];
     evento.target.value = "";
-
     if (!arquivo) return;
-
     if (!["image/jpeg", "image/png", "image/webp"].includes(arquivo.type)) {
       setErro("Selecione uma imagem JPG, PNG ou WebP.");
       return;
     }
-
     if (arquivo.size > LIMITE_IMAGEM) {
       setErro("A imagem deve ter no máximo 20 MB.");
       return;
     }
-
     setArquivoImagem(arquivo);
     setErro("");
   }
-
   async function salvarFormulario(evento) {
     evento.preventDefault();
     if (processando) return;
-
     setErro("");
     setProcessando(true);
-
     try {
       if (tipoFormulario === "produto") {
         const dados = {
@@ -279,11 +233,9 @@ export default function Admin({ admin, onLogout }) {
           prioridade: Number(formulario.prioridade),
           ativo: formulario.ativo !== false
         };
-
         if (!dados.nome || !dados.descricao || !dados.categoria) {
           throw new Error("Preencha todos os campos obrigatórios.");
         }
-
         if (
           !Number.isInteger(dados.prioridade) ||
           dados.prioridade < 0 ||
@@ -291,22 +243,18 @@ export default function Admin({ admin, onLogout }) {
         ) {
           throw new Error("Selecione uma posição de destaque válida.");
         }
-
         if (arquivoImagem) {
           const resultado = await uploadApi.enviar(arquivoImagem);
           dados.imagem = resultado.url;
         }
-
         if (editandoId) {
           await produtosApi.atualizar(editandoId, dados);
         } else {
           await produtosApi.criar(dados);
         }
-
         const atualizados = await produtosApi.listarTodos();
         setProdutos(normalizarLista(atualizados, "produtos"));
       }
-
       if (tipoFormulario === "galeria") {
         const dados = {
           titulo: formulario.titulo.trim(),
@@ -320,30 +268,24 @@ export default function Admin({ admin, onLogout }) {
               : null,
           ativo: formulario.ativo !== false
         };
-
         if (!dados.titulo || !dados.descricao) {
           throw new Error("Preencha todos os campos obrigatórios.");
         }
-
         if (dados.tipo === "video" && !dados.videoUrl) {
           throw new Error("Informe a URL do vídeo.");
         }
-
         if (arquivoImagem) {
           const resultado = await uploadApi.enviar(arquivoImagem);
           dados.imagem = resultado.url;
         }
-
         if (editandoId) {
           await galeriaApi.atualizar(editandoId, dados);
         } else {
           await galeriaApi.criar(dados);
         }
-
         const atualizadas = await galeriaApi.listarTodos();
         setPublicacoes(normalizarLista(atualizadas, "publicacoes"));
       }
-
       setFormulario(null);
       setTipoFormulario(null);
       setEditandoId(null);
@@ -354,12 +296,9 @@ export default function Admin({ admin, onLogout }) {
       setProcessando(false);
     }
   }
-
   async function excluirItem(tipo, item) {
     const nome = tipo === "produto" ? item.nome : item.titulo;
-
     if (!window.confirm(`Excluir "${nome}"?`)) return;
-
     try {
       if (tipo === "produto") {
         await produtosApi.excluir(item.id);
@@ -372,16 +311,13 @@ export default function Admin({ admin, onLogout }) {
           atuais.filter((publicacao) => publicacao.id !== item.id)
         );
       }
-
       setErroPagina("");
     } catch (error) {
       setErroPagina(error.message || "Não foi possível excluir.");
     }
   }
-
   async function alternarStatus(tipo, item) {
     const ativo = item.ativo === false;
-
     try {
       if (tipo === "produto") {
         await produtosApi.atualizar(item.id, {
@@ -394,7 +330,6 @@ export default function Admin({ admin, onLogout }) {
           prioridade: item.prioridade ?? 0,
           ativo
         });
-
         const atualizados = await produtosApi.listarTodos();
         setProdutos(normalizarLista(atualizados, "produtos"));
       } else {
@@ -407,23 +342,19 @@ export default function Admin({ admin, onLogout }) {
           videoUrl: item.videoUrl || null,
           ativo
         });
-
         setPublicacoes((atuais) =>
           atuais.map((publicacao) =>
             publicacao.id === item.id ? { ...publicacao, ativo } : publicacao
           )
         );
       }
-
       setErroPagina("");
     } catch (error) {
       setErroPagina(error.message || "Não foi possível alterar o status.");
     }
   }
-
   function renderizarAcoes(tipo, item) {
     const nome = tipo === "produto" ? item.nome : item.titulo;
-
     return (
       <div className="admin-table-actions">
         <button
@@ -434,7 +365,6 @@ export default function Admin({ admin, onLogout }) {
         >
           <Pencil size={17} />
         </button>
-
         <button
           type="button"
           className="delete"
@@ -447,11 +377,9 @@ export default function Admin({ admin, onLogout }) {
       </div>
     );
   }
-
   function renderizarStatus(tipo, item) {
     const ativo = item.ativo !== false;
     const nome = tipo === "produto" ? item.nome : item.titulo;
-
     return (
       <button
         type="button"
@@ -463,7 +391,6 @@ export default function Admin({ admin, onLogout }) {
       </button>
     );
   }
-
   return (
     <div className="admin-layout">
       {menuAberto && (
@@ -474,7 +401,6 @@ export default function Admin({ admin, onLogout }) {
           onClick={() => setMenuAberto(false)}
         />
       )}
-
       <aside className={`admin-sidebar${menuAberto ? " open" : ""}`}>
         <div className="admin-brand">
           <img
@@ -483,7 +409,6 @@ export default function Admin({ admin, onLogout }) {
           />
           <span>PAINEL ADMINISTRATIVO</span>
         </div>
-
         <nav
           className="admin-navigation"
           aria-label="Menu administrativo"
@@ -500,21 +425,17 @@ export default function Admin({ admin, onLogout }) {
             </button>
           ))}
         </nav>
-
         <div className="admin-sidebar-bottom">
           <a href="/" className="admin-back-link">
             <ArrowUpRight size={18} />
             Visualizar site
           </a>
-
           <div className="admin-user">
             <div className="admin-avatar">A</div>
-
             <div className="admin-user-details">
               <strong>Administrador</strong>
               <span>{admin?.email || "Conta administrativa"}</span>
             </div>
-
             <button
               type="button"
               className="admin-logout"
@@ -527,7 +448,6 @@ export default function Admin({ admin, onLogout }) {
           </div>
         </div>
       </aside>
-
       <div className="admin-main">
         <header className="admin-topbar">
           <button
@@ -539,25 +459,21 @@ export default function Admin({ admin, onLogout }) {
           >
             {menuAberto ? <X size={23} /> : <Menu size={23} />}
           </button>
-
           <div>
             <span>CAMARÁ DISTRIBUIDORA</span>
             <h1>{paginaAtual.label}</h1>
           </div>
-
           <div className="admin-topbar-user">
             <div className="admin-avatar">A</div>
             <span>Administrador</span>
           </div>
         </header>
-
         <main className="admin-content">
           {erroPagina && (
             <p className="admin-page-error" role="alert">
               {erroPagina}
             </p>
           )}
-
           {pagina === "dashboard" && (
             <>
               <div className="admin-welcome">
@@ -568,7 +484,6 @@ export default function Admin({ admin, onLogout }) {
                   em um só lugar.
                 </p>
               </div>
-
               <div className="admin-stats">
                 {resumo.map(({ label, value, icon: Icon }) => (
                   <div className="admin-stat-card" key={label}>
@@ -580,13 +495,11 @@ export default function Admin({ admin, onLogout }) {
                   </div>
                 ))}
               </div>
-
               <section className="admin-panel">
                 <div className="admin-panel-heading">
                   <span>GERENCIAMENTO</span>
                   <h2>Acesso rápido</h2>
                 </div>
-
                 <div className="admin-shortcuts">
                   {menuItems
                     .filter((item) => item.id !== "dashboard")
@@ -605,13 +518,10 @@ export default function Admin({ admin, onLogout }) {
               </section>
             </>
           )}
-
           {pagina === "receitas" && <AdminReceitas />}
-
           {pagina === "curriculos" && (
             <AdminCurriculos onTotalChange={setTotalCurriculos} />
           )}
-
           {pagina === "produtos" && (
             <section className="admin-panel">
               <div className="admin-products-heading">
@@ -623,7 +533,6 @@ export default function Admin({ admin, onLogout }) {
                     da distribuidora.
                   </p>
                 </div>
-
                 <button
                   type="button"
                   className="admin-primary-button"
@@ -633,7 +542,6 @@ export default function Admin({ admin, onLogout }) {
                   Novo produto
                 </button>
               </div>
-
               <div className="admin-search">
                 <Search size={19} />
                 <input
@@ -643,7 +551,6 @@ export default function Admin({ admin, onLogout }) {
                   onChange={(evento) => setBusca(evento.target.value)}
                 />
               </div>
-
               <div className="admin-table-wrapper">
                 {carregando ? (
                   <p className="admin-no-results">
@@ -662,7 +569,6 @@ export default function Admin({ admin, onLogout }) {
                           <th>Ações</th>
                         </tr>
                       </thead>
-
                       <tbody>
                         {produtosFiltrados.map((produto) => (
                           <tr key={produto.id}>
@@ -678,16 +584,13 @@ export default function Admin({ admin, onLogout }) {
                                     <Package size={22} />
                                   </div>
                                 )}
-
                                 <div>
                                   <strong>{produto.nome}</strong>
                                   <span>{produto.descricao}</span>
                                 </div>
                               </div>
                             </td>
-
                             <td>{produto.categoria}</td>
-
                             <td>
                               <div className="admin-classification-list">
                                 {produto.maisVendido && (
@@ -695,29 +598,24 @@ export default function Admin({ admin, onLogout }) {
                                     Mais vendido
                                   </span>
                                 )}
-
                                 {produto.maisProcurado && (
                                   <span className="admin-classification-badge">
                                     Mais procurado
                                   </span>
                                 )}
-
                                 {!produto.maisVendido &&
                                   !produto.maisProcurado &&
                                   "Normal"}
                               </div>
                             </td>
-
                             <td>
                               {produto.prioridade > 0
                                 ? `${produto.prioridade}º destaque`
                                 : "Automática"}
                             </td>
-
                             <td>
                               {renderizarStatus("produto", produto)}
                             </td>
-
                             <td>
                               {renderizarAcoes("produto", produto)}
                             </td>
@@ -725,7 +623,6 @@ export default function Admin({ admin, onLogout }) {
                         ))}
                       </tbody>
                     </table>
-
                     {produtosFiltrados.length === 0 && (
                       <p className="admin-no-results">
                         Nenhum produto encontrado.
@@ -736,7 +633,6 @@ export default function Admin({ admin, onLogout }) {
               </div>
             </section>
           )}
-
           {pagina === "galeria" && (
             <section className="admin-panel">
               <div className="admin-products-heading">
@@ -749,7 +645,6 @@ export default function Admin({ admin, onLogout }) {
                     Organize fotos, vídeos, novidades e eventos da Camará.
                   </p>
                 </div>
-
                 <button
                   type="button"
                   className="admin-primary-button"
@@ -759,7 +654,6 @@ export default function Admin({ admin, onLogout }) {
                   Nova publicação
                 </button>
               </div>
-
               <div className="admin-search">
                 <Search size={19} />
                 <input
@@ -771,7 +665,6 @@ export default function Admin({ admin, onLogout }) {
                   }
                 />
               </div>
-
               <div className="admin-table-wrapper">
                 {carregando ? (
                   <p className="admin-no-results">
@@ -789,7 +682,6 @@ export default function Admin({ admin, onLogout }) {
                           <th>Ações</th>
                         </tr>
                       </thead>
-
                       <tbody>
                         {publicacoesFiltradas.map((item) => (
                           <tr key={item.id}>
@@ -809,24 +701,19 @@ export default function Admin({ admin, onLogout }) {
                                     )}
                                   </div>
                                 )}
-
                                 <div>
                                   <strong>{item.titulo}</strong>
                                   <span>{item.descricao}</span>
                                 </div>
                               </div>
                             </td>
-
                             <td>{item.categoria}</td>
-
                             <td>
                               {item.tipo === "video" ? "Vídeo" : "Foto"}
                             </td>
-
                             <td>
                               {renderizarStatus("galeria", item)}
                             </td>
-
                             <td>
                               {renderizarAcoes("galeria", item)}
                             </td>
@@ -834,7 +721,6 @@ export default function Admin({ admin, onLogout }) {
                         ))}
                       </tbody>
                     </table>
-
                     {publicacoesFiltradas.length === 0 && (
                       <p className="admin-no-results">
                         Nenhuma publicação encontrada.
@@ -845,29 +731,14 @@ export default function Admin({ admin, onLogout }) {
               </div>
             </section>
           )}
-
-          {![
-            "dashboard",
-            "produtos",
-            "receitas",
-            "galeria",
-            "curriculos"
-          ].includes(pagina) && (
-            <section className="admin-panel admin-empty">
-              <div className="admin-empty-icon">
-                <IconePagina size={30} />
-              </div>
-
-              <h2>{paginaAtual.label}</h2>
-              <p>
-                Esta área está preparada para receber as
-                funcionalidades de gerenciamento.
-              </p>
-            </section>
+          {pagina === "configuracoes" && (
+            <AdminConfiguracoes
+              admin={admin}
+              onAtualizar={onAtualizarAdmin}
+            />
           )}
         </main>
       </div>
-
       {formulario && (
         <div className="admin-modal-backdrop">
           <section
@@ -883,21 +754,18 @@ export default function Admin({ admin, onLogout }) {
                     ? "GERENCIAMENTO DE PRODUTOS"
                     : "GERENCIAMENTO DE GALERIA"}
                 </span>
-
                 <h2 id="admin-form-title">
                   {editandoId ? "Editar" : "Novo"}
                   {tipoFormulario === "produto"
                     ? " produto"
                     : " publicação"}
                 </h2>
-
                 <p>
                   {editandoId
                     ? "Atualize as informações e salve as alterações."
                     : "Preencha os dados para adicionar um novo item."}
                 </p>
               </div>
-
               <button
                 type="button"
                 className="admin-modal-close"
@@ -908,7 +776,6 @@ export default function Admin({ admin, onLogout }) {
                 <X size={21} />
               </button>
             </div>
-
             <form
               onSubmit={salvarFormulario}
               className="admin-product-form"
@@ -922,7 +789,6 @@ export default function Admin({ admin, onLogout }) {
                       <p>Dados que serão exibidos no site.</p>
                     </div>
                   </div>
-
                   <div className="admin-form-grid">
                     <label className="admin-form-field">
                       <span>
@@ -930,7 +796,6 @@ export default function Admin({ admin, onLogout }) {
                           ? "Nome do produto"
                           : "Título da publicação"}
                       </span>
-
                       <input
                         required
                         maxLength={120}
@@ -954,10 +819,8 @@ export default function Admin({ admin, onLogout }) {
                         }
                       />
                     </label>
-
                     <label className="admin-form-field">
                       <span>Categoria</span>
-
                       {tipoFormulario === "produto" ? (
                         <input
                           required
@@ -993,11 +856,9 @@ export default function Admin({ admin, onLogout }) {
                       )}
                     </label>
                   </div>
-
                   {tipoFormulario === "galeria" && (
                     <label className="admin-form-field">
                       <span>Tipo de publicação</span>
-
                       <select
                         value={formulario.tipo}
                         onChange={(evento) =>
@@ -1012,10 +873,8 @@ export default function Admin({ admin, onLogout }) {
                       </select>
                     </label>
                   )}
-
                   <label className="admin-form-field">
                     <span>Descrição</span>
-
                     <textarea
                       required
                       rows={4}
@@ -1029,18 +888,15 @@ export default function Admin({ admin, onLogout }) {
                         )
                       }
                     />
-
                     <small>
                       {formulario.descricao.length}/1000 caracteres
                     </small>
                   </label>
                 </section>
-
                 {tipoFormulario === "produto" && (
                   <section className="admin-form-section">
                     <div className="admin-form-section-heading">
                       <SlidersHorizontal size={19} />
-
                       <div>
                         <h3>Classificação e destaque</h3>
                         <p>
@@ -1049,7 +905,6 @@ export default function Admin({ admin, onLogout }) {
                         </p>
                       </div>
                     </div>
-
                     <div className="admin-classification-grid">
                       <label
                         className={`admin-classification-option ${
@@ -1066,25 +921,21 @@ export default function Admin({ admin, onLogout }) {
                             )
                           }
                         />
-
                         <div className="admin-classification-icon">
                           <TrendingUp size={20} />
                         </div>
-
                         <div className="admin-classification-text">
                           <strong>Mais vendido</strong>
                           <span>
                             Destacar como mais vendido
                           </span>
                         </div>
-
                         <span className="admin-classification-check">
                           {formulario.maisVendido && (
                             <Check size={14} />
                           )}
                         </span>
                       </label>
-
                       <label
                         className={`admin-classification-option ${
                           formulario.maisProcurado ? "selected" : ""
@@ -1100,18 +951,15 @@ export default function Admin({ admin, onLogout }) {
                             )
                           }
                         />
-
                         <div className="admin-classification-icon">
                           <Flame size={20} />
                         </div>
-
                         <div className="admin-classification-text">
                           <strong>Mais procurado</strong>
                           <span>
                             Destacar como mais procurado
                           </span>
                         </div>
-
                         <span className="admin-classification-check">
                           {formulario.maisProcurado && (
                             <Check size={14} />
@@ -1119,17 +967,14 @@ export default function Admin({ admin, onLogout }) {
                         </span>
                       </label>
                     </div>
-
                     <div className="admin-priority-field">
                       <span className="admin-priority-title">
                         Posição na página inicial
                       </span>
-
                       <p>
                         Escolha se este produto terá uma posição
                         fixa entre os três destaques da Home.
                       </p>
-
                       <div
                         className="admin-priority-options"
                         role="radiogroup"
@@ -1139,7 +984,6 @@ export default function Admin({ admin, onLogout }) {
                           const selecionada =
                             Number(formulario.prioridade) ===
                             posicao.valor;
-
                           const ocupado = produtos.find(
                             (produto) =>
                               produto.id !== editandoId &&
@@ -1147,7 +991,6 @@ export default function Admin({ admin, onLogout }) {
                                 posicao.valor &&
                               posicao.valor !== 0
                           );
-
                           return (
                             <label
                               key={posicao.valor}
@@ -1167,14 +1010,11 @@ export default function Admin({ admin, onLogout }) {
                                   )
                                 }
                               />
-
                               <span className="admin-priority-radio" />
-
                               <span className="admin-priority-content">
                                 <strong>
                                   {posicao.titulo}
                                 </strong>
-
                                 <small>
                                   {ocupado
                                     ? `Atualmente: ${ocupado.nome}`
@@ -1185,7 +1025,6 @@ export default function Admin({ admin, onLogout }) {
                           );
                         })}
                       </div>
-
                       <small className="admin-priority-hint">
                         Ao selecionar uma posição ocupada, o produto
                         anterior volta para a ordem automática.
@@ -1193,11 +1032,9 @@ export default function Admin({ admin, onLogout }) {
                     </div>
                   </section>
                 )}
-
                 <section className="admin-form-section">
                   <div className="admin-form-section-heading">
                     <ImageIcon size={19} />
-
                     <div>
                       <h3>
                         {tipoFormulario === "produto"
@@ -1209,7 +1046,6 @@ export default function Admin({ admin, onLogout }) {
                       </p>
                     </div>
                   </div>
-
                   <div className="admin-image-field">
                     {imagemPreview || formulario.imagem ? (
                       <div className="admin-image-preview">
@@ -1219,18 +1055,15 @@ export default function Admin({ admin, onLogout }) {
                           }
                           alt="Prévia da imagem"
                         />
-
                         <div className="admin-image-preview-details">
                           <strong>
                             Imagem selecionada
                           </strong>
-
                           <span>
                             {arquivoImagem
                               ? arquivoImagem.name
                               : "Imagem atual do cadastro"}
                           </span>
-
                           <button
                             type="button"
                             onClick={() => {
@@ -1251,16 +1084,13 @@ export default function Admin({ admin, onLogout }) {
                         </span>
                       </div>
                     )}
-
                     <label className="admin-image-upload">
                       <Upload size={17} />
-
                       <strong>
                         {imagemPreview || formulario.imagem
                           ? "Substituir imagem"
                           : "Selecionar imagem"}
                       </strong>
-
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"
@@ -1269,12 +1099,10 @@ export default function Admin({ admin, onLogout }) {
                       />
                     </label>
                   </div>
-
                   {tipoFormulario === "galeria" &&
                     formulario.tipo === "video" && (
                       <label className="admin-form-field">
                         <span>URL do vídeo</span>
-
                         <input
                           type="url"
                           required
@@ -1290,7 +1118,6 @@ export default function Admin({ admin, onLogout }) {
                       </label>
                     )}
                 </section>
-
                 <section className="admin-form-section admin-publication-section">
                   <div>
                     <h3>
@@ -1298,14 +1125,12 @@ export default function Admin({ admin, onLogout }) {
                         ? "Produto ativo"
                         : "Publicação ativa"}
                     </h3>
-
                     <p>
                       {formulario.ativo
                         ? "Este item ficará visível no site."
                         : "Este item ficará oculto no site."}
                     </p>
                   </div>
-
                   <label className="admin-switch">
                     <input
                       type="checkbox"
@@ -1318,11 +1143,9 @@ export default function Admin({ admin, onLogout }) {
                       }
                       aria-label="Ativar ou desativar item"
                     />
-
                     <span className="admin-switch-track" />
                   </label>
                 </section>
-
                 {erro && (
                   <p
                     className="admin-form-error"
@@ -1332,7 +1155,6 @@ export default function Admin({ admin, onLogout }) {
                   </p>
                 )}
               </div>
-
               <div className="admin-form-actions">
                 <button
                   type="button"
@@ -1342,14 +1164,12 @@ export default function Admin({ admin, onLogout }) {
                 >
                   Cancelar
                 </button>
-
                 <button
                   type="submit"
                   className="admin-primary-button"
                   disabled={processando}
                 >
                   <Save size={17} />
-
                   {processando
                     ? "Salvando..."
                     : editandoId

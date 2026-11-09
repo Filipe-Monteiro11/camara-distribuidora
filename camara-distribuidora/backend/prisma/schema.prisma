@@ -39,6 +39,7 @@ model Admin {
   email     String   @unique
   senhaHash String
   criadoEm  DateTime @default(now())
+  tokenVersion Int @default(0)
 }
 
 model Recipe {

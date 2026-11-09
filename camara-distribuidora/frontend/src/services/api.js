@@ -1,4 +1,4 @@
-import { obterToken, sair } from "./auth";
+import { obterToken, salvarToken, sair } from "./auth";
 
 const API_URL = "http://localhost:3001/api";
 
@@ -17,9 +17,10 @@ async function requisicao(caminho, opcoes = {}) {
     },
     ...(body !== undefined
       ? {
-          body: body instanceof FormData
-            ? body
-            : JSON.stringify(body)
+          body:
+            body instanceof FormData
+              ? body
+              : JSON.stringify(body)
         }
       : {})
   });
@@ -52,7 +53,9 @@ function criarApiCrud(recurso) {
     },
 
     buscar(id) {
-      return requisicao(`/${recurso}/${encodeURIComponent(id)}`);
+      return requisicao(
+        `/${recurso}/${encodeURIComponent(id)}`
+      );
     },
 
     criar(dados) {
@@ -63,16 +66,22 @@ function criarApiCrud(recurso) {
     },
 
     atualizar(id, dados) {
-      return requisicao(`/${recurso}/${encodeURIComponent(id)}`, {
-        method: "PUT",
-        body: dados
-      });
+      return requisicao(
+        `/${recurso}/${encodeURIComponent(id)}`,
+        {
+          method: "PUT",
+          body: dados
+        }
+      );
     },
 
     excluir(id) {
-      return requisicao(`/${recurso}/${encodeURIComponent(id)}`, {
-        method: "DELETE"
-      });
+      return requisicao(
+        `/${recurso}/${encodeURIComponent(id)}`,
+        {
+          method: "DELETE"
+        }
+      );
     }
   };
 }
@@ -90,6 +99,27 @@ export const uploadApi = {
       method: "POST",
       body: formulario
     });
+  }
+};
+
+export const configuracoesApi = {
+  perfil() {
+    return requisicao("/auth/me");
+  },
+
+  async atualizar(dados) {
+    const resposta = await requisicao("/auth/me", {
+      method: "PATCH",
+      body: dados
+    });
+
+    if (!resposta.token) {
+      throw new Error("O servidor não retornou o novo token.");
+    }
+
+    salvarToken(resposta.token);
+
+    return resposta;
   }
 };
 
@@ -141,7 +171,9 @@ export const curriculosApi = {
     );
 
     if (!resposta.ok) {
-      if (resposta.status === 401) sair();
+      if (resposta.status === 401) {
+        sair();
+      }
 
       const dados = await resposta.json().catch(() => null);
 
