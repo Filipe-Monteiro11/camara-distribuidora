@@ -7,7 +7,7 @@ import {
   MapPin,
   Package,
   ShieldCheck,
-  Truck
+  Truck,
 } from "lucide-react";
 
 import Header from "../components/Header";
@@ -15,6 +15,9 @@ import Footer from "../components/Footer";
 import ProdutoModal from "../components/ProdutoModal";
 import { produtosApi, receitasApi } from "../services/api";
 import "../styles/Home.css";
+
+const GOOGLE_MAPS_URL =
+  "https://www.google.com/maps/search/?api=1&query=Rua%20Manoel%20Honorato%20da%20Costa%20556%20Vila%20da%20F%C3%A1brica%20Camaragibe%20PE%2054759-475";
 
 function ordenarDestaques(lista) {
   return [...lista].sort((a, b) => {
@@ -52,7 +55,7 @@ export default function Home() {
       const [resultadoProdutos, resultadoReceitas] =
         await Promise.allSettled([
           produtosApi.listar(),
-          receitasApi.listar()
+          receitasApi.listar(),
         ]);
 
       if (!ativo) return;
@@ -101,6 +104,8 @@ export default function Home() {
       <Header />
 
       <main>
+        {/* HERO */}
+
         <section className="hero" id="inicio">
           <div className="hero-image" aria-hidden="true" />
           <div className="hero-overlay" aria-hidden="true" />
@@ -141,6 +146,8 @@ export default function Home() {
           </div>
         </section>
 
+        {/* DESTAQUES */}
+
         <section className="highlights">
           <div className="container highlights-grid">
             <div className="highlight-item">
@@ -168,6 +175,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* INTRODUÇÃO */}
 
         <section className="home-intro">
           <div className="container home-intro-grid">
@@ -197,6 +206,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* PRODUTOS */}
 
         <section className="section products-section" id="produtos">
           <div className="container">
@@ -251,7 +262,8 @@ export default function Home() {
                     <h3>{produto.nome}</h3>
 
                     <p>
-                      {produto.descricao || "Descrição não disponível."}
+                      {produto.descricao ||
+                        "Descrição não disponível."}
                     </p>
 
                     <button
@@ -291,6 +303,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* SOBRE NÓS */}
 
         <section className="home-about-section" id="sobre">
           <div className="about-photo">
@@ -344,6 +358,8 @@ export default function Home() {
             </Link>
           </div>
         </section>
+
+        {/* RECEITAS */}
 
         <section className="section recipes-section" id="receitas">
           <div className="container">
@@ -417,10 +433,14 @@ export default function Home() {
           </div>
         </section>
 
+        {/* LOCALIZAÇÃO */}
+
         <section className="location-section" id="localizacao">
           <div className="container location-content">
             <div className="location-text">
-              <span className="eyebrow">LOCALIZAÇÃO</span>
+              <span className="eyebrow">
+                LOCALIZAÇÃO
+              </span>
 
               <h2>
                 Estamos prontos
@@ -429,9 +449,9 @@ export default function Home() {
               </h2>
 
               <p>
-                Visite a Camará Distribuidora na Rua Manoel Honorato
-                da Costa, nº 556, Vila da Fábrica, Camaragibe – PE,
-                CEP 54759-475.
+                Visite a Camará Distribuidora na Rua Manoel
+                Honorato da Costa, nº 556, Vila da Fábrica,
+                Camaragibe – PE, CEP 54759-475.
               </p>
 
               <a href="#contato" className="btn btn-red">
@@ -441,21 +461,40 @@ export default function Home() {
             </div>
 
             <a
-              className="location-placeholder location-map-link"
-              href="https://www.google.com/maps/search/?api=1&query=Rua%20Manoel%20Honorato%20da%20Costa%20556%20Vila%20da%20F%C3%A1brica%20Camaragibe%20PE%2054759-475"
+              className="location-map-card"
+              href={GOOGLE_MAPS_URL}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Ver endereço da Camará Distribuidora no Google Maps"
             >
-              <MapPin size={45} strokeWidth={1.5} />
-              <strong>Camará Distribuidora</strong>
-              <span>Rua Manoel Honorato da Costa, 556</span>
-              <span>Vila da Fábrica, Camaragibe – PE</span>
-              <span>Ver no Google Maps ↗</span>
+              <div className="location-map-image">
+                <img
+                  src="/images/mapa.png"
+                  alt="Mapa ilustrativo da localização da Camará Distribuidora em Camaragibe, Pernambuco"
+                  loading="lazy"
+                />
+              </div>
+
+              <div className="location-map-footer">
+                <div className="location-map-details">
+                  <span className="location-map-icon">
+                    <MapPin size={20} />
+                  </span>
+
+                  <div>
+                    <strong>Camará Distribuidora</strong>
+                    <span>Camaragibe, Pernambuco</span>
+                  </div>
+                </div>
+
+                <span className="location-map-action">
+                  Ver no mapa
+                  <ArrowUpRight size={17} />
+                </span>
+              </div>
             </a>
           </div>
         </section>
-
       </main>
 
       <Footer />
