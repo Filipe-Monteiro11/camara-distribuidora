@@ -134,66 +134,38 @@ export default function Sobre() {
                 </h2>
 
                 <p>
-                  A Camará Distribuidora nasceu em 2009,
-                  a partir da visão empreendedora de Cícero
-                  e de uma oportunidade no setor de
-                  distribuição de alimentos.
-                </p>
-
-                <p>
-                  Na época, a empresa atuava na representação
-                  da Frinance Alimentos, atendendo grandes
-                  redes de supermercados. Ao perceber que
-                  alguns clientes tinham dificuldades para
-                  adquirir produtos de fornecedores de outros
-                  estados, surgiu a ideia de criar uma
-                  distribuidora própria, inicialmente voltada
-                  ao atendimento de apenas três ou quatro
-                  clientes.
-                </p>
-
-                <p>
-                  Em 2015, a empresa deu um passo importante
-                  ao conquistar um ponto comercial na CEASA,
-                  ampliando sua visibilidade e suas vendas.
-                  Entretanto, os altos custos operacionais
-                  tornaram difícil manter as atividades
-                  no local.
+                 A história da Camará Distribuidora começou em 2009,
+                 quando a visão empreendedora de Cícero
+                 transformou uma oportunidade em um sonho. <br/>
+                 
+                 O que começou atendendo poucos clientes
+                 logo se tornou um projeto de crescimento.
+                 Em 2015, a conquista de um espaço na CEASA
+                 marcou uma nova etapa dessa trajetória.
+                 Mas os desafios exigiram coragem para recomeçar.
+                 Foi em uma garagem, em Camaragibe,
+                 que a empresa encontrou forças para seguir adiante.
+                 Com trabalho, dedicação e determinação,
+                 cada obstáculo se transformou em conquista.
+                 Vieram a sede própria, a frota de entregas
+                 e uma equipe cada vez mais preparada.
+                 Hoje, em frente ao Shopping Camará,
+                 a empresa segue crescendo e construindo parcerias.
+                 Mais do que distribuir produtos, a Camará
+                 carrega uma história de sonhos, superação e confiança.
+                
                 </p>
               </div>
             </div>
 
             <div className="about-story-continuation">
               <div className="about-story-text">
-                <p>
-                  Por isso, a Camará transferiu suas operações
-                  para Camaragibe, recomeçando de forma simples,
-                  na garagem de casa.
-                </p>
+             
 
-                <p>
-                  A mudança permitiu reduzir custos e oferecer
-                  preços mais competitivos, sem abrir mão da
-                  qualidade dos produtos e do compromisso
-                  com os clientes.
-                </p>
+              
               </div>
 
               <div className="about-story-text">
-                <p>
-                  Com o passar dos anos, o trabalho e a dedicação
-                  trouxeram novos resultados. A empresa conquistou
-                  sua sede própria, localizada em frente ao
-                  Shopping Camará, estruturou sua frota de entregas
-                  e ampliou as equipes comercial, administrativa
-                  e logística.
-                </p>
-
-                <p>
-                  Hoje, a Camará Distribuidora continua crescendo,
-                  fortalecendo parcerias e valorizando as pessoas
-                  que fazem parte dessa trajetória.
-                </p>
               </div>
             </div>
 

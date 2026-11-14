@@ -1,22 +1,82 @@
 /* MODAL */
 
+.admin-modal-backdrop:has(.admin-recipe-modal) {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+}
+
 .admin-recipe-modal {
-  width: min(720px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  width: min(720px, 100%);
+  max-width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
+  max-height: 90dvh;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.admin-recipe-modal .admin-modal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 24px 32px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+}
+
+.admin-recipe-modal .admin-modal-heading h2 {
+  margin: 0;
+  color: #292929;
+  font-size: 23px;
+  font-weight: 700;
 }
 
 .admin-recipe-form {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
   gap: 22px;
-  padding: 28px 32px 32px;
+  min-height: 0;
+  padding: 28px 32px 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #c8c8c8 transparent;
+  box-sizing: border-box;
 }
+
+.admin-recipe-form::-webkit-scrollbar {
+  width: 7px;
+}
+
+.admin-recipe-form::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #c8c8c8;
+}
+
+/* CAMPOS */
 
 .admin-recipe-field {
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  flex-shrink: 0;
   gap: 9px;
   width: 100%;
   color: #333;
@@ -64,6 +124,7 @@
 .admin-recipe-image-field {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 12px;
 }
 
@@ -140,6 +201,7 @@
 .admin-recipe-checkbox {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   gap: 10px;
   width: fit-content;
   color: #333;
@@ -165,11 +227,17 @@
 /* AÇÕES */
 
 .admin-recipe-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   justify-content: flex-end;
+  flex-shrink: 0;
   gap: 12px;
-  padding-top: 22px;
+  margin: 0 -32px;
+  padding: 18px 32px;
   border-top: 1px solid #eee;
+  background: #fff;
 }
 
 .admin-recipe-actions button {
@@ -182,16 +250,45 @@
 /* RESPONSIVIDADE */
 
 @media (max-width: 600px) {
+  .admin-modal-backdrop:has(.admin-recipe-modal) {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .admin-recipe-modal {
+    width: 100%;
+    max-height: 96vh;
+    max-height: 96dvh;
+    border-radius: 18px 18px 0 0;
+  }
+
+  .admin-recipe-modal .admin-modal-heading {
+    padding: 20px;
+  }
+
+  .admin-recipe-modal .admin-modal-heading h2 {
+    font-size: 20px;
+  }
+
   .admin-recipe-form {
     gap: 18px;
-    padding: 22px 20px;
+    padding: 22px 20px 0;
   }
 
   .admin-recipe-actions {
     flex-direction: column-reverse;
+    gap: 10px;
+    margin: 0 -20px;
+    padding: 15px 20px;
+    padding-bottom: max(15px, env(safe-area-inset-bottom));
   }
 
   .admin-recipe-actions button {
     width: 100%;
+    min-height: 44px;
+  }
+
+  .admin-recipe-upload {
+    padding: 16px;
   }
 }
