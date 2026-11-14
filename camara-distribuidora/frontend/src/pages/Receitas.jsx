@@ -114,7 +114,7 @@ export default function Receitas() {
           <div className="container recipes-intro-content">
             <span className="recipes-eyebrow">
               <ChefHat size={17} aria-hidden="true" />
-              SABORES DA CAMARÁ
+              INDICAÇÕES DA CAMARÁ
             </span>
 
             <h1>
