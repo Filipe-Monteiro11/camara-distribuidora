@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import "../styles/WhatsAppButton.css";
 
-const WHATSAPP_NUMBER = "5581996328171";
+const WHATSAPP_NUMBER = "5581992329191";
 
 const MESSAGE =
   "Olá! Gostaria de saber mais sobre os produtos da Camará Distribuidora.";

@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import AdminGuard from "./components/AdminGuard";
 import WhatsAppButton from "./components/WhatsAppButton";
+import Camarencio from "./components/Camarencio";
 
 import Home from "./pages/Home";
 import Produtos from "./pages/Produtos";
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="/admin" element={<AdminGuard />} />
       </Routes>
 
+      <Camarencio />
       <WhatsAppButton />
     </BrowserRouter>
   );

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { X } from "lucide-react";
 import "../styles/Camarencio.css";
 
 const mensagens = {
@@ -14,113 +13,62 @@ const mensagens = {
   "/galeria":
     "Que tal conhecer um pouco mais da nossa estrutura e do nosso dia a dia?",
   "/trabalhe-conosco":
-    "Quer fazer parte da nossa equipe? Conheça nosso espaço de oportunidades!",
+    "Quer fazer parte da nossa equipe? Conheça nossas oportunidades!",
 };
 
-const TEMPO_BALAO = 7000;
-const CHAVE_SESSAO = "camara-camarencio-oculto";
+const TEMPO_EXIBICAO = 6000;
+const DURACAO_SAIDA = 600;
 
 export default function Camarencio() {
   const { pathname } = useLocation();
-
-  const [oculto, setOculto] = useState(
-    () => sessionStorage.getItem(CHAVE_SESSAO) === "true"
-  );
-
-  const [balaoAberto, setBalaoAberto] = useState(false);
-  const [paginaAtual, setPaginaAtual] = useState(pathname);
-
   const mensagem = mensagens[pathname];
 
-  useEffect(() => {
-    if (pathname !== paginaAtual) {
-      setPaginaAtual(pathname);
-    }
-  }, [pathname, paginaAtual]);
+  const [estado, setEstado] = useState("oculto");
 
   useEffect(() => {
-    if (oculto || !mensagem) return;
+    if (!mensagem) return;
 
-    const abrir = window.setTimeout(() => {
-      setBalaoAberto(true);
-    }, 400);
+    const entrada = window.setTimeout(() => {
+      setEstado("visivel");
+    }, 0);
 
-    const fechar = window.setTimeout(() => {
-      setBalaoAberto(false);
-    }, TEMPO_BALAO + 400);
+    const saida = window.setTimeout(() => {
+      setEstado("saindo");
+    }, TEMPO_EXIBICAO - DURACAO_SAIDA);
+
+    const remover = window.setTimeout(() => {
+      setEstado("oculto");
+    }, TEMPO_EXIBICAO);
 
     return () => {
-      window.clearTimeout(abrir);
-      window.clearTimeout(fechar);
+      window.clearTimeout(entrada);
+      window.clearTimeout(saida);
+      window.clearTimeout(remover);
     };
-  }, [paginaAtual, oculto, mensagem]);
+  }, [pathname, mensagem]);
 
-  function alternarBalao() {
-    setBalaoAberto((atual) => !atual);
-  }
-
-  function ocultarMascote() {
-    sessionStorage.setItem(CHAVE_SESSAO, "true");
-    setOculto(true);
-    setBalaoAberto(false);
-  }
-
-  if (oculto || !mensagem || pathname.startsWith("/admin")) {
+  if (!mensagem || estado === "oculto") {
     return null;
   }
 
   return (
     <aside
-      className="camarencio"
+      className={`camarencio ${
+        estado === "saindo" ? "camarencio-saindo" : ""
+      }`}
       aria-label="Camarêncio, mascote da Camará Distribuidora"
     >
-      <div className="camarencio-personagem">
-        <button
-          type="button"
-          className="camarencio-mascote"
-          onClick={alternarBalao}
-          aria-label={
-            balaoAberto
-              ? "Fechar mensagem do Camarêncio"
-              : "Ouvir mensagem do Camarêncio"
-          }
-          aria-expanded={balaoAberto}
-        >
-          <img
-            src="/images/camarencio.png"
-            alt="Camarêncio, mascote da Camará Distribuidora"
-            draggable="false"
-          />
-        </button>
+      <img
+        src="/images/camarencio.png"
+        alt="Camarêncio, mascote da Camará Distribuidora"
+        className="camarencio-imagem"
+        draggable="false"
+      />
 
-        <button
-          type="button"
-          className="camarencio-ocultar"
-          onClick={ocultarMascote}
-          aria-label="Ocultar Camarêncio nesta sessão"
-          title="Ocultar mascote"
-        >
-          <X size={14} />
-        </button>
+      <div className="camarencio-balao">
+        <strong>Camarêncio</strong>
+        <p>{mensagem}</p>
       </div>
-
-      {balaoAberto && (
-        <div className="camarencio-balao" role="status">
-          <div className="camarencio-balao-topo">
-            <strong>Camarêncio</strong>
-
-            <button
-              type="button"
-              onClick={() => setBalaoAberto(false)}
-              aria-label="Fechar balão de fala"
-            >
-              <X size={16} />
-            </button>
-          </div>
-
-          <p>{mensagem}</p>
-        </div>
-      )}
     </aside>
   );
 }
