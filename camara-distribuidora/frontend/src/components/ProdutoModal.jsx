@@ -4,12 +4,13 @@ import { Link } from "react-router-dom";
 import "../styles/ProdutoModal.css";
 
 export default function ProdutoModal({ produto, onClose }) {
+  const modalRef = useRef(null);
   const fecharRef = useRef(null);
 
   useEffect(() => {
     if (!produto) return;
 
-    const anterior = document.activeElement;
+    const elementoAnterior = document.activeElement;
     const overflowAnterior = document.body.style.overflow;
 
     document.body.style.overflow = "hidden";
@@ -17,16 +18,21 @@ export default function ProdutoModal({ produto, onClose }) {
 
     function aoPressionarTecla(evento) {
       if (evento.key === "Escape") {
+        evento.preventDefault();
         onClose();
+        return;
       }
 
       if (evento.key !== "Tab") return;
 
-      const elementos = fecharRef.current
-        ?.closest(".produto-modal")
-        ?.querySelectorAll("button:not([disabled]), a[href]");
+      const elementos = modalRef.current?.querySelectorAll(
+        'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+      );
 
-      if (!elementos?.length) return;
+      if (!elementos?.length) {
+        evento.preventDefault();
+        return;
+      }
 
       const primeiro = elementos[0];
       const ultimo = elementos[elementos.length - 1];
@@ -50,8 +56,11 @@ export default function ProdutoModal({ produto, onClose }) {
 
     return () => {
       document.body.style.overflow = overflowAnterior;
-      document.removeEventListener("keydown", aoPressionarTecla);
-      anterior?.focus?.();
+      document.removeEventListener(
+        "keydown",
+        aoPressionarTecla
+      );
+      elementoAnterior?.focus?.();
     };
   }, [produto, onClose]);
 
@@ -67,6 +76,7 @@ export default function ProdutoModal({ produto, onClose }) {
       }}
     >
       <section
+        ref={modalRef}
         className="produto-modal"
         role="dialog"
         aria-modal="true"
@@ -79,14 +89,17 @@ export default function ProdutoModal({ produto, onClose }) {
           onClick={onClose}
           aria-label="Fechar detalhes"
         >
-          <X size={22} />
+          <X size={22} aria-hidden="true" />
         </button>
 
         <div className="produto-modal-imagem">
           {produto.imagem ? (
-            <img src={produto.imagem} alt={produto.nome} />
+            <img
+              src={produto.imagem}
+              alt={produto.nome}
+            />
           ) : (
-            <Package size={52} />
+            <Package size={52} aria-hidden="true" />
           )}
         </div>
 
@@ -102,7 +115,8 @@ export default function ProdutoModal({ produto, onClose }) {
           </h2>
 
           <p>
-            {produto.descricao || "Descrição não disponível."}
+            {produto.descricao ||
+              "Descrição não disponível."}
           </p>
 
           <Link
@@ -111,7 +125,10 @@ export default function ProdutoModal({ produto, onClose }) {
             onClick={onClose}
           >
             Consultar disponibilidade
-            <ArrowUpRight size={18} />
+            <ArrowUpRight
+              size={18}
+              aria-hidden="true"
+            />
           </Link>
         </div>
       </section>

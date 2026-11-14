@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Package } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -8,15 +8,18 @@ import "../styles/Produtos.css";
 
 function ordenarProdutos(lista, tipo) {
   return [...lista].sort((a, b) => {
+    const compararNome = () =>
+      a.nome.localeCompare(b.nome, "pt-BR");
+
     if (tipo === "nome") {
-      return a.nome.localeCompare(b.nome, "pt-BR");
+      return compararNome();
     }
 
     if (tipo === "vendidos") {
       return (
         Number(b.maisVendido === true) -
           Number(a.maisVendido === true) ||
-        a.nome.localeCompare(b.nome, "pt-BR")
+        compararNome()
       );
     }
 
@@ -24,12 +27,14 @@ function ordenarProdutos(lista, tipo) {
       return (
         Number(b.maisProcurado === true) -
           Number(a.maisProcurado === true) ||
-        a.nome.localeCompare(b.nome, "pt-BR")
+        compararNome()
       );
     }
 
-    const prioridadeA = a.prioridade > 0 ? a.prioridade : Infinity;
-    const prioridadeB = b.prioridade > 0 ? b.prioridade : Infinity;
+    const prioridadeA =
+      a.prioridade > 0 ? a.prioridade : Infinity;
+    const prioridadeB =
+      b.prioridade > 0 ? b.prioridade : Infinity;
 
     return (
       prioridadeA - prioridadeB ||
@@ -37,7 +42,7 @@ function ordenarProdutos(lista, tipo) {
         Number(a.maisVendido === true) ||
       Number(b.maisProcurado === true) -
         Number(a.maisProcurado === true) ||
-      a.nome.localeCompare(b.nome, "pt-BR")
+      compararNome()
     );
   });
 }
@@ -49,7 +54,14 @@ export default function Produtos() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  const fecharModal = useCallback(() => setSelecionado(null), []);
+  const fecharModal = useCallback(() => {
+    setSelecionado(null);
+  }, []);
+
+  const produtosOrdenados = useMemo(
+    () => ordenarProdutos(produtos, ordenacao),
+    [produtos, ordenacao]
+  );
 
   useEffect(() => {
     let ativo = true;
@@ -62,7 +74,9 @@ export default function Produtos() {
           : dados?.produtos ?? [];
 
         if (ativo) {
-          setProdutos(lista.filter((produto) => produto.ativo !== false));
+          setProdutos(
+            lista.filter((produto) => produto.ativo !== false)
+          );
         }
       } catch {
         if (ativo) {
@@ -105,9 +119,15 @@ export default function Produtos() {
         <section className="catalog-section">
           <div className="container">
             <div className="catalog-heading">
-              <span className="eyebrow">NOSSOS PRODUTOS</span>
+              <span className="eyebrow">
+                NOSSOS PRODUTOS
+              </span>
+
               <h2>Conheça nossas opções</h2>
-              <p>Confira os produtos disponíveis em nosso catálogo.</p>
+
+              <p>
+                Confira os produtos disponíveis em nosso catálogo.
+              </p>
             </div>
 
             <div className="catalog-sort">
@@ -118,7 +138,9 @@ export default function Produtos() {
               <select
                 id="ordenacao-produtos"
                 value={ordenacao}
-                onChange={(evento) => setOrdenacao(evento.target.value)}
+                onChange={(evento) =>
+                  setOrdenacao(evento.target.value)
+                }
               >
                 <option value="destaques">Destaques</option>
                 <option value="vendidos">Mais vendidos</option>
@@ -128,8 +150,11 @@ export default function Produtos() {
             </div>
 
             <div className="catalog-grid">
-              {ordenarProdutos(produtos, ordenacao).map((produto) => (
-                <article className="catalog-card" key={produto.id}>
+              {produtosOrdenados.map((produto) => (
+                <article
+                  className="catalog-card"
+                  key={produto.id}
+                >
                   <button
                     type="button"
                     className="catalog-image"
@@ -157,7 +182,8 @@ export default function Produtos() {
                     <h3>{produto.nome}</h3>
 
                     <p>
-                      {produto.descricao || "Descrição não disponível."}
+                      {produto.descricao ||
+                        "Descrição não disponível."}
                     </p>
 
                     <button
@@ -166,7 +192,10 @@ export default function Produtos() {
                       onClick={() => setSelecionado(produto)}
                     >
                       Conhecer produto
-                      <ArrowUpRight size={17} />
+                      <ArrowUpRight
+                        size={17}
+                        aria-hidden="true"
+                      />
                     </button>
                   </div>
                 </article>
@@ -174,7 +203,9 @@ export default function Produtos() {
             </div>
 
             {carregando && (
-              <p className="catalog-empty">Carregando produtos...</p>
+              <p className="catalog-empty" role="status">
+                Carregando produtos...
+              </p>
             )}
 
             {!carregando && erro && (
@@ -183,18 +214,23 @@ export default function Produtos() {
               </p>
             )}
 
-            {!carregando && !erro && produtos.length === 0 && (
-              <p className="catalog-empty">
-                Nenhum produto disponível no momento.
-              </p>
-            )}
+            {!carregando &&
+              !erro &&
+              produtos.length === 0 && (
+                <p className="catalog-empty">
+                  Nenhum produto disponível no momento.
+                </p>
+              )}
           </div>
         </section>
       </main>
 
       <Footer />
 
-      <ProdutoModal produto={selecionado} onClose={fecharModal} />
+      <ProdutoModal
+        produto={selecionado}
+        onClose={fecharModal}
+      />
     </>
   );
 }

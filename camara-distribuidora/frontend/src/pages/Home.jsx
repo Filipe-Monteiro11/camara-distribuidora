@@ -26,10 +26,8 @@ function ordenarDestaques(lista) {
 
     return (
       prioridadeA - prioridadeB ||
-      Number(b.maisVendido === true) -
-        Number(a.maisVendido === true) ||
-      Number(b.maisProcurado === true) -
-        Number(a.maisProcurado === true) ||
+      Number(b.maisVendido === true) - Number(a.maisVendido === true) ||
+      Number(b.maisProcurado === true) - Number(a.maisProcurado === true) ||
       a.nome.localeCompare(b.nome, "pt-BR")
     );
   });
@@ -104,8 +102,6 @@ export default function Home() {
       <Header />
 
       <main>
-        {/* HERO */}
-
         <section className="hero" id="inicio">
           <div className="hero-image" aria-hidden="true" />
           <div className="hero-overlay" aria-hidden="true" />
@@ -146,8 +142,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* DESTAQUES */}
-
         <section className="highlights">
           <div className="container highlights-grid">
             <div className="highlight-item">
@@ -176,15 +170,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* INTRODUÇÃO */}
-
         <section className="home-intro">
           <div className="container home-intro-grid">
             <div>
               <span className="eyebrow">
                 BEM-VINDO À CAMARÁ
               </span>
-
               <h2>
                 Uma marca para
                 <br />
@@ -207,9 +198,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* PRODUTOS */}
-
-        <section className="section products-section" id="produtos">
+        <section
+          className="section products-section"
+          id="produtos"
+        >
           <div className="container">
             <div className="section-heading">
               <div>
@@ -230,7 +222,10 @@ export default function Home() {
 
             <div className="products-grid">
               {produtos.map((produto) => (
-                <article className="product-card" key={produto.id}>
+                <article
+                  className="product-card"
+                  key={produto.id}
+                >
                   <div className="product-image">
                     {produto.imagem ? (
                       <img
@@ -247,7 +242,9 @@ export default function Home() {
                     <button
                       type="button"
                       className="product-overlay"
-                      onClick={() => setProdutoSelecionado(produto)}
+                      onClick={() =>
+                        setProdutoSelecionado(produto)
+                      }
                       aria-label={`Ver detalhes de ${produto.nome}`}
                     >
                       <ArrowUpRight size={23} />
@@ -269,7 +266,9 @@ export default function Home() {
                     <button
                       type="button"
                       className="product-details-button"
-                      onClick={() => setProdutoSelecionado(produto)}
+                      onClick={() =>
+                        setProdutoSelecionado(produto)
+                      }
                     >
                       Conhecer produto
                       <ArrowUpRight size={17} />
@@ -296,7 +295,10 @@ export default function Home() {
               )}
 
             <div className="section-action">
-              <Link to="/produtos" className="btn btn-red">
+              <Link
+                to="/produtos"
+                className="btn btn-red"
+              >
                 Ver todos os produtos
                 <ArrowUpRight size={18} />
               </Link>
@@ -304,9 +306,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SOBRE NÓS */}
-
-        <section className="home-about-section" id="sobre">
+        <section
+          className="home-about-section"
+          id="sobre"
+        >
           <div className="about-photo">
             <img
               src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1400&q=85"
@@ -359,9 +362,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* RECEITAS */}
-
-        <section className="section recipes-section" id="receitas">
+        <section
+          className="section recipes-section"
+          id="receitas"
+        >
           <div className="container">
             <div className="section-heading">
               <div>
@@ -384,7 +388,10 @@ export default function Home() {
 
             <div className="recipes-grid">
               {receitas.map((receita, index) => (
-                <article className="recipe-card" key={receita.id}>
+                <article
+                  className="recipe-card"
+                  key={receita.id}
+                >
                   {receita.imagem && (
                     <img
                       src={receita.imagem}
@@ -395,7 +402,8 @@ export default function Home() {
 
                   <div className="recipe-content">
                     <span>
-                      RECEITA {String(index + 1).padStart(2, "0")}
+                      RECEITA{" "}
+                      {String(index + 1).padStart(2, "0")}
                     </span>
 
                     <h3>{receita.titulo}</h3>
@@ -425,7 +433,10 @@ export default function Home() {
               )}
 
             <div className="section-action">
-              <Link to="/receitas" className="btn btn-red">
+              <Link
+                to="/receitas"
+                className="btn btn-red"
+              >
                 Ver todas as receitas
                 <ArrowUpRight size={18} />
               </Link>
@@ -433,9 +444,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* LOCALIZAÇÃO */}
-
-        <section className="location-section" id="localizacao">
+        <section
+          className="location-section"
+          id="localizacao"
+        >
           <div className="container location-content">
             <div className="location-text">
               <span className="eyebrow">
@@ -449,12 +461,16 @@ export default function Home() {
               </h2>
 
               <p>
-                Visite a Camará Distribuidora na Rua Manoel
-                Honorato da Costa, nº 556, Vila da Fábrica,
-                Camaragibe – PE, CEP 54759-475.
+                Visite a Camará Distribuidora na Rua
+                Manoel Honorato da Costa, nº 556,
+                Vila da Fábrica, Camaragibe – PE,
+                CEP 54759-475.
               </p>
 
-              <a href="#contato" className="btn btn-red">
+              <a
+                href="#contato"
+                className="btn btn-red"
+              >
                 Entre em contato
                 <ArrowUpRight size={18} />
               </a>
@@ -482,8 +498,12 @@ export default function Home() {
                   </span>
 
                   <div>
-                    <strong>Camará Distribuidora</strong>
-                    <span>Camaragibe, Pernambuco</span>
+                    <strong>
+                      Camará Distribuidora
+                    </strong>
+                    <span>
+                      Camaragibe, Pernambuco
+                    </span>
                   </div>
                 </div>
 

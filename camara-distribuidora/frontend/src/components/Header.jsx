@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import "../styles/Header.css";
 
@@ -14,8 +14,31 @@ const links = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { pathname } = useLocation();
 
-  const closeMenu = () => setMenuOpen(false);
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function onKeyDown(event) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+
+    function onResize() {
+      if (window.innerWidth > 900) setMenuOpen(false);
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [menuOpen]);
 
   return (
     <header className="site-header">
@@ -24,7 +47,7 @@ export default function Header() {
           to="/#inicio"
           className="brand"
           aria-label="Camará Distribuidora - Início"
-          onClick={closeMenu}
+          onClick={() => setMenuOpen(false)}
         >
           <img
             src="/images/logo-camara.png"
@@ -34,15 +57,18 @@ export default function Header() {
         </Link>
 
         <nav
-          className={`header-nav${menuOpen ? " open" : ""}`}
           id="header-navigation"
+          className={`header-nav${menuOpen ? " open" : ""}`}
           aria-label="Navegação principal"
         >
           {links.map(({ label, href }) => (
             <Link
               key={href}
               to={href}
-              onClick={closeMenu}
+              onClick={() => setMenuOpen(false)}
+              aria-current={
+                pathname === href.split("#")[0] ? "page" : undefined
+              }
             >
               {label}
             </Link>

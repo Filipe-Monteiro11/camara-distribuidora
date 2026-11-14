@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  ArrowUpRight,
   Building2,
   Camera,
   Flower2,
@@ -10,7 +9,6 @@ import {
   MapPin,
   Truck,
 } from "lucide-react";
-
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import "../styles/Sobre.css";
@@ -69,8 +67,6 @@ export default function Sobre() {
       <Header />
 
       <main className="about-page">
-        {/* APRESENTAÇÃO */}
-
         <section className="about-hero">
           <div className="container about-hero-content">
             <span className="about-eyebrow">
@@ -94,12 +90,10 @@ export default function Sobre() {
               className="about-hero-link"
             >
               Conheça nossa história
-              <ArrowRight size={18} />
+              <ArrowRight size={18} aria-hidden="true" />
             </a>
           </div>
         </section>
-
-        {/* NOSSA HISTÓRIA */}
 
         <section
           className="about-story-section"
@@ -110,84 +104,67 @@ export default function Sobre() {
               <div className="about-story-visual">
                 <div className="about-story-image">
                   <img
-                    src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=85"
-                    alt="Imagem ilustrativa de ambiente industrial"
+                    src="/images/frente-loja.png"
+                    alt="Fachada da sede da Camará Distribuidora em Camaragibe, Pernambuco"
                     loading="lazy"
                   />
                 </div>
-
-                <span className="about-image-label">
-                  IMAGEM ILUSTRATIVA
-                </span>
               </div>
 
               <div className="about-story-content">
                 <span className="about-eyebrow">
-                  <History size={17} />
+                  <History size={17} aria-hidden="true" />
                   NOSSA TRAJETÓRIA
                 </span>
 
                 <h2>
                   Uma história de
                   <br />
-                  <span>determinação e crescimento.</span>
+                  <span>
+                    determinação e crescimento.
+                  </span>
                 </h2>
 
                 <p>
-                 A história da Camará Distribuidora começou em 2009,
-                 quando a visão empreendedora de Cícero
-                 transformou uma oportunidade em um sonho. <br/>
-                 
-                 O que começou atendendo poucos clientes
-                 logo se tornou um projeto de crescimento.
-                 Em 2015, a conquista de um espaço na CEASA
-                 marcou uma nova etapa dessa trajetória.
-                 Mas os desafios exigiram coragem para recomeçar.
-                 Foi em uma garagem, em Camaragibe,
-                 que a empresa encontrou forças para seguir adiante.
-                 Com trabalho, dedicação e determinação,
-                 cada obstáculo se transformou em conquista.
-                 Vieram a sede própria, a frota de entregas
-                 e uma equipe cada vez mais preparada.
-                 Hoje, em frente ao Shopping Camará,
-                 a empresa segue crescendo e construindo parcerias.
-                 Mais do que distribuir produtos, a Camará
-                 carrega uma história de sonhos, superação e confiança.
-                
+                  A história da Camará Distribuidora começou em
+                  2009, quando a visão empreendedora de Cícero
+                  transformou uma oportunidade em um sonho.
+                  <br />
+                  O que começou atendendo poucos clientes logo
+                  se tornou um projeto de crescimento. Em 2015,
+                  a conquista de um espaço na CEASA marcou uma
+                  nova etapa dessa trajetória. Mas os desafios
+                  exigiram coragem para recomeçar. Foi em uma
+                  garagem, em Camaragibe, que a empresa encontrou
+                  forças para seguir adiante. Com trabalho,
+                  dedicação e determinação, cada obstáculo se
+                  transformou em conquista. Vieram a sede própria,
+                  a frota de entregas e uma equipe cada vez mais
+                  preparada. Hoje, em frente ao Shopping Camará,
+                  a empresa segue crescendo e construindo
+                  parcerias. Mais do que distribuir produtos,
+                  a Camará carrega uma história de sonhos,
+                  superação e confiança.
                 </p>
               </div>
             </div>
 
-            <div className="about-story-continuation">
-              <div className="about-story-text">
-             
-
-              
-              </div>
-
-              <div className="about-story-text">
-              </div>
-            </div>
-
             <div className="about-info-note">
-              <Building2 size={21} />
-
+              <Building2 size={21} aria-hidden="true" />
               <p>
-                Mais do que uma empresa, somos o resultado de
-                uma história construída com trabalho,
+                Mais do que uma empresa, somos o resultado
+                de uma história construída com trabalho,
                 determinação, disciplina e vontade de crescer.
               </p>
             </div>
           </div>
         </section>
 
-        {/* LINHA DO TEMPO */}
-
         <section className="about-timeline-section">
           <div className="container">
             <div className="about-section-heading">
               <span className="about-eyebrow">
-                <History size={17} />
+                <History size={17} aria-hidden="true" />
                 NOSSA EVOLUÇÃO
               </span>
 
@@ -224,13 +201,11 @@ export default function Sobre() {
           </div>
         </section>
 
-        {/* HISTÓRIA DA LOGOMARCA */}
-
         <section className="about-identity-section">
           <div className="container about-identity-grid">
             <div className="about-identity-content">
               <span className="about-eyebrow">
-                <Flower2 size={17} />
+                <Flower2 size={17} aria-hidden="true" />
                 NOSSA IDENTIDADE
               </span>
 
@@ -289,17 +264,17 @@ export default function Sobre() {
 
               <div className="about-symbol-details">
                 <div>
-                  <Flower2 size={17} />
+                  <Flower2 size={17} aria-hidden="true" />
                   Origem e raízes
                 </div>
 
                 <div>
-                  <MapPin size={17} />
+                  <MapPin size={17} aria-hidden="true" />
                   Presença e distribuição
                 </div>
 
                 <div>
-                  <Truck size={17} />
+                  <Truck size={17} aria-hidden="true" />
                   Compromisso com os clientes
                 </div>
               </div>
@@ -322,14 +297,12 @@ export default function Sobre() {
           </div>
         </section>
 
-        {/* GALERIA */}
-
         <section className="about-gallery-section">
           <div className="container">
             <div className="about-gallery-header">
               <div>
                 <span className="about-eyebrow">
-                  <Images size={17} />
+                  <Images size={17} aria-hidden="true" />
                   NOSSA ESTRUTURA
                 </span>
 
@@ -354,7 +327,11 @@ export default function Sobre() {
                   key={item.titulo}
                 >
                   <div className="about-gallery-visual">
-                    <Camera size={35} strokeWidth={1.4} />
+                    <Camera
+                      size={35}
+                      strokeWidth={1.4}
+                      aria-hidden="true"
+                    />
                     <span>FOTO 0{index + 1}</span>
                   </div>
 
@@ -367,7 +344,6 @@ export default function Sobre() {
             </div>
           </div>
         </section>
-
       </main>
 
       <Footer />
