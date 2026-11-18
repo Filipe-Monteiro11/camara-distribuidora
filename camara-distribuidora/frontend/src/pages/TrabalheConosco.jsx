@@ -1,3 +1,4 @@
+
 import { useRef, useState } from "react";
 import {
   ArrowUpRight,
@@ -56,6 +57,33 @@ const destaques = [
   }
 ];
 
+function validarCurriculo(arquivo) {
+  if (!arquivo) {
+    return "Anexe seu currículo para continuar.";
+  }
+
+  const extensaoValida = arquivo.name
+    .toLowerCase()
+    .endsWith(".pdf");
+
+  const tipoValido =
+    !arquivo.type || arquivo.type === "application/pdf";
+
+  if (!extensaoValida || !tipoValido) {
+    return "Selecione um currículo em formato PDF.";
+  }
+
+  if (arquivo.size === 0) {
+    return "O arquivo selecionado está vazio.";
+  }
+
+  if (arquivo.size > MAX_FILE_SIZE) {
+    return "O currículo deve ter no máximo 5 MB.";
+  }
+
+  return "";
+}
+
 export default function TrabalheConosco() {
   const [form, setForm] = useState(initialForm);
   const [curriculo, setCurriculo] = useState(null);
@@ -78,37 +106,31 @@ export default function TrabalheConosco() {
   }
 
   function handleFile(event) {
-    const file = event.target.files?.[0];
+    const arquivo = event.target.files?.[0];
 
     setErro("");
     setSucesso("");
 
-    if (!file) {
+    if (!arquivo) {
       setCurriculo(null);
       return;
     }
 
-    if (
-      file.type !== "application/pdf" ||
-      !file.name.toLowerCase().endsWith(".pdf")
-    ) {
-      setErro("Selecione um currículo em formato PDF.");
+    const erroArquivo = validarCurriculo(arquivo);
+
+    if (erroArquivo) {
+      setErro(erroArquivo);
+      setCurriculo(null);
       event.target.value = "";
-      setCurriculo(null);
       return;
     }
 
-    if (file.size > MAX_FILE_SIZE) {
-      setErro("O currículo deve ter no máximo 5 MB.");
-      event.target.value = "";
-      setCurriculo(null);
-      return;
-    }
-
-    setCurriculo(file);
+    setCurriculo(arquivo);
   }
 
   function removeFile() {
+    if (enviando) return;
+
     setCurriculo(null);
     setErro("");
     setSucesso("");
@@ -126,29 +148,48 @@ export default function TrabalheConosco() {
     setErro("");
     setSucesso("");
 
-    if (!curriculo) {
-      setErro("Anexe seu currículo para continuar.");
+    const nome = form.nome.trim();
+    const email = form.email.trim();
+    const telefone = form.telefone.trim();
+    const mensagem = form.mensagem.trim();
+
+    if (nome.length < 3) {
+      setErro("Informe seu nome completo.");
+      return;
+    }
+
+    if (!email || !telefone || !form.area) {
+      setErro("Preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    const erroArquivo = validarCurriculo(curriculo);
+
+    if (erroArquivo) {
+      setErro(erroArquivo);
       return;
     }
 
     const dados = new FormData();
 
-    dados.append("nome", form.nome.trim());
-    dados.append("email", form.email.trim());
-    dados.append("telefone", form.telefone.trim());
+    dados.append("nome", nome);
+    dados.append("email", email);
+    dados.append("telefone", telefone);
     dados.append("area", form.area);
-    dados.append("mensagem", form.mensagem.trim());
+    dados.append("mensagem", mensagem);
     dados.append("curriculo", curriculo);
+
     setEnviando(true);
 
     try {
       const resposta = await curriculosApi.enviar(dados);
 
       setSucesso(
-        resposta?.message || "Currículo enviado com sucesso!"
+        resposta?.message ||
+          "Currículo enviado com sucesso! Agradecemos seu interesse."
       );
 
-      setForm(initialForm);
+      setForm({ ...initialForm });
       setCurriculo(null);
 
       if (fileInputRef.current) {
@@ -156,7 +197,8 @@ export default function TrabalheConosco() {
       }
     } catch (error) {
       setErro(
-        error.message || "Não foi possível enviar seu currículo."
+        error?.message ||
+          "Não foi possível enviar seu currículo. Tente novamente."
       );
     } finally {
       setEnviando(false);
@@ -455,7 +497,9 @@ export default function TrabalheConosco() {
 
                 <label
                   htmlFor="careers-curriculo"
-                  className="careers-upload"
+                  className={`careers-upload${
+                    enviando ? " is-disabled" : ""
+                  }`}
                 >
                   <Upload
                     size={27}
@@ -479,7 +523,15 @@ export default function TrabalheConosco() {
                   onChange={handleFile}
                   disabled={enviando}
                   required={!curriculo}
+                  aria-describedby="careers-file-help"
                 />
+
+                <span
+                  id="careers-file-help"
+                  className="careers-file-help"
+                >
+                  Apenas arquivos PDF de até 5 MB.
+                </span>
 
                 {curriculo && (
                   <div className="careers-selected-file">
@@ -488,7 +540,9 @@ export default function TrabalheConosco() {
                       aria-hidden="true"
                     />
 
-                    <span>{curriculo.name}</span>
+                    <span title={curriculo.name}>
+                      {curriculo.name}
+                    </span>
 
                     <button
                       type="button"
@@ -518,13 +572,11 @@ export default function TrabalheConosco() {
                 <p
                   className="careers-form-success"
                   role="status"
-                  style={{
-                    color: "#257345",
-                    background: "#e8f5ed",
-                    padding: "12px",
-                    borderRadius: "6px"
-                  }}
                 >
+                  <CheckCircle2
+                    size={19}
+                    aria-hidden="true"
+                  />
                   {sucesso}
                 </p>
               )}

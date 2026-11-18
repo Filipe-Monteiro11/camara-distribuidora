@@ -1,32 +1,47 @@
-import { useEffect, useState } from "react";
-import { ImageIcon, Play, X, ArrowUpRight } from "lucide-react";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowUpRight, ImageIcon, Play, X } from "lucide-react";
+
 import { categoriasGaleria } from "../data/galeria";
 import { galeriaApi } from "../services/api";
 import "../styles/Galeria.css";
 
 function obterUrlVideo(url) {
+  if (!url || typeof url !== "string") return "";
+
   try {
     const endereco = new URL(url);
     const hostname = endereco.hostname.toLowerCase();
     let id = "";
 
-    if (hostname === "youtu.be") {
+    if (hostname === "youtu.be" || hostname === "www.youtu.be") {
       id = endereco.pathname.split("/")[1];
     } else if (
-      ["youtube.com", "www.youtube.com", "m.youtube.com"].includes(hostname)
+      ["youtube.com", "www.youtube.com", "m.youtube.com"].includes(
+        hostname
+      )
     ) {
       if (endereco.pathname === "/watch") {
         id = endereco.searchParams.get("v");
       } else if (
         endereco.pathname.startsWith("/embed/") ||
-        endereco.pathname.startsWith("/shorts/")
+        endereco.pathname.startsWith("/shorts/") ||
+        endereco.pathname.startsWith("/live/")
       ) {
+        id = endereco.pathname.split("/")[2];
+      }
+    } else if (
+      ["youtube-nocookie.com", "www.youtube-nocookie.com"].includes(
+        hostname
+      )
+    ) {
+      if (endereco.pathname.startsWith("/embed/")) {
         id = endereco.pathname.split("/")[2];
       }
     }
 
     return /^[a-zA-Z0-9_-]{11}$/.test(id || "")
-      ? `https://www.youtube.com/embed/${id}`
+      ? `https://www.youtube-nocookie.com/embed/${id}`
       : "";
   } catch {
     return "";
@@ -35,10 +50,13 @@ function obterUrlVideo(url) {
 
 export default function Galeria() {
   const [categoria, setCategoria] = useState("Todos");
-  const [publicacao, setPublicacao] = useState(null);
   const [publicacoes, setPublicacoes] = useState([]);
+  const [publicacao, setPublicacao] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+
+  const modalRef = useRef(null);
+  const triggerRef = useRef(null);
 
   useEffect(() => {
     let ativo = true;
@@ -47,9 +65,15 @@ export default function Galeria() {
       try {
         const dados = await galeriaApi.listar();
 
+        const lista = Array.isArray(dados)
+          ? dados
+          : Array.isArray(dados?.publicacoes)
+            ? dados.publicacoes
+            : [];
+
         if (ativo) {
           setPublicacoes(
-            Array.isArray(dados) ? dados : dados?.publicacoes ?? []
+            lista.filter((item) => item.ativo !== false)
           );
         }
       } catch {
@@ -70,35 +94,91 @@ export default function Galeria() {
     };
   }, []);
 
+  const publicacoesFiltradas = useMemo(
+    () =>
+      publicacoes.filter(
+        (item) =>
+          categoria === "Todos" || item.categoria === categoria
+      ),
+    [publicacoes, categoria]
+  );
+
+  const urlVideo = useMemo(
+    () =>
+      publicacao?.tipo === "video"
+        ? obterUrlVideo(publicacao.videoUrl)
+        : "",
+    [publicacao]
+  );
+
+  function abrirPublicacao(item, elemento) {
+    triggerRef.current = elemento;
+    setPublicacao(item);
+  }
+
+  function fecharPublicacao() {
+    setPublicacao(null);
+  }
+
   useEffect(() => {
     if (!publicacao) return;
 
-    function fechar(evento) {
+    const overflowAnterior = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    modalRef.current?.focus();
+
+    function aoPressionarTecla(evento) {
       if (evento.key === "Escape") {
-        setPublicacao(null);
+        fecharPublicacao();
+        return;
+      }
+
+      if (evento.key !== "Tab" || !modalRef.current) return;
+
+      const elementos = Array.from(
+        modalRef.current.querySelectorAll(
+          'button:not([disabled]), a[href], iframe, input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(
+        (elemento) =>
+          elemento.getAttribute("aria-hidden") !== "true"
+      );
+
+      if (!elementos.length) {
+        evento.preventDefault();
+        modalRef.current.focus();
+        return;
+      }
+
+      const primeiro = elementos[0];
+      const ultimo = elementos[elementos.length - 1];
+
+      if (evento.shiftKey) {
+        if (
+          document.activeElement === primeiro ||
+          document.activeElement === modalRef.current
+        ) {
+          evento.preventDefault();
+          ultimo.focus();
+        }
+      } else if (
+        document.activeElement === ultimo ||
+        document.activeElement === modalRef.current
+      ) {
+        evento.preventDefault();
+        primeiro.focus();
       }
     }
 
-    const overflowAnterior = document.body.style.overflow;
-
-    document.body.style.overflow = "hidden";
-    document.addEventListener("keydown", fechar);
+    document.addEventListener("keydown", aoPressionarTecla);
 
     return () => {
       document.body.style.overflow = overflowAnterior;
-      document.removeEventListener("keydown", fechar);
+      document.removeEventListener("keydown", aoPressionarTecla);
+      triggerRef.current?.focus();
     };
   }, [publicacao]);
-
-  const publicacoesFiltradas = publicacoes.filter(
-    (item) =>
-      item.ativo !== false &&
-      (categoria === "Todos" || item.categoria === categoria)
-  );
-
-  function abrirPublicacao(item) {
-    setPublicacao(item);
-  }
 
   return (
     <main className="gallery-page">
@@ -119,7 +199,7 @@ export default function Galeria() {
 
           <a href="#galeria" className="gallery-hero-link">
             Explorar galeria
-            <ArrowUpRight size={18} />
+            <ArrowUpRight size={18} aria-hidden="true" />
           </a>
         </div>
       </section>
@@ -146,6 +226,7 @@ export default function Galeria() {
 
           <div
             className="gallery-filters"
+            role="group"
             aria-label="Filtrar publicações"
           >
             {categoriasGaleria.map((item) => (
@@ -163,70 +244,82 @@ export default function Galeria() {
 
           <div className="gallery-grid">
             {publicacoesFiltradas.map((item) => (
-              <article
-                className="gallery-card"
-                key={item.id}
-                role="button"
-                tabIndex={0}
-                aria-label={`Visualizar ${item.titulo}`}
-                onClick={() => abrirPublicacao(item)}
-                onKeyDown={(evento) => {
-                  if (
-                    evento.key === "Enter" ||
-                    evento.key === " "
-                  ) {
-                    evento.preventDefault();
-                    abrirPublicacao(item);
+              <article className="gallery-card" key={item.id}>
+                <button
+                  type="button"
+                  className="gallery-card-button"
+                  aria-label={`Visualizar ${item.titulo}`}
+                  onClick={(evento) =>
+                    abrirPublicacao(item, evento.currentTarget)
                   }
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="gallery-card-media">
-                  {item.imagem ? (
-                    <img
-                      src={item.imagem}
-                      alt={item.titulo}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="gallery-placeholder">
-                      {item.tipo === "video" ? (
-                        <Play size={35} />
-                      ) : (
-                        <ImageIcon size={35} />
-                      )}
+                >
+                  <div className="gallery-card-media">
+                    {item.imagem ? (
+                      <img
+                        src={item.imagem}
+                        alt={item.titulo}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="gallery-placeholder">
+                        {item.tipo === "video" ? (
+                          <Play size={35} aria-hidden="true" />
+                        ) : (
+                          <ImageIcon
+                            size={35}
+                            aria-hidden="true"
+                          />
+                        )}
 
-                      <span>Conteúdo em breve</span>
-                    </div>
-                  )}
+                        <span>Conteúdo em breve</span>
+                      </div>
+                    )}
 
-                  <span className="gallery-card-category">
-                    {item.categoria}
-                  </span>
+                    {item.categoria && (
+                      <span className="gallery-card-category">
+                        {item.categoria}
+                      </span>
+                    )}
 
-                  {item.tipo === "video" && (
-                    <span className="gallery-video-icon">
-                      <Play size={19} fill="currentColor" />
+                    {item.tipo === "video" && (
+                      <span className="gallery-video-icon">
+                        <Play
+                          size={19}
+                          fill="currentColor"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="gallery-card-content">
+                    <span className="gallery-card-type">
+                      {item.tipo === "video"
+                        ? "VÍDEO"
+                        : "FOTOGRAFIA"}
                     </span>
-                  )}
-                </div>
 
-                <div className="gallery-card-content">
-                  <span className="gallery-card-type">
-                    {item.tipo === "video"
-                      ? "VÍDEO"
-                      : "FOTOGRAFIA"}
-                  </span>
+                    <h3>{item.titulo}</h3>
 
-                  <h3>{item.titulo}</h3>
-                  <p>{item.descricao}</p>
-                </div>
+                    {item.descricao && (
+                      <p>{item.descricao}</p>
+                    )}
+
+                    <span className="gallery-card-action">
+                      Visualizar publicação
+                      <ArrowUpRight
+                        size={17}
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </div>
+                </button>
               </article>
             ))}
           </div>
 
           {carregando && (
-            <p className="gallery-notice">
+            <p className="gallery-notice" role="status">
               Carregando publicações...
             </p>
           )}
@@ -252,32 +345,33 @@ export default function Galeria() {
           className="gallery-modal-backdrop"
           onMouseDown={(evento) => {
             if (evento.target === evento.currentTarget) {
-              setPublicacao(null);
+              fecharPublicacao();
             }
           }}
         >
-          <div
+          <section
+            ref={modalRef}
             className="gallery-modal"
             role="dialog"
             aria-modal="true"
-            aria-label={publicacao.titulo}
+            aria-labelledby="gallery-modal-title"
+            tabIndex={-1}
           >
             <button
               type="button"
               className="gallery-modal-close"
-              onClick={() => setPublicacao(null)}
-              aria-label="Fechar"
-              autoFocus
+              aria-label="Fechar publicação"
+              onClick={fecharPublicacao}
             >
-              <X size={22} />
+              <X size={22} aria-hidden="true" />
             </button>
 
-            {publicacao.tipo === "video" &&
-            obterUrlVideo(publicacao.videoUrl) ? (
+            {urlVideo ? (
               <iframe
-                src={obterUrlVideo(publicacao.videoUrl)}
+                src={urlVideo}
                 title={publicacao.titulo}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
                 allowFullScreen
               />
             ) : publicacao.imagem ? (
@@ -286,17 +380,27 @@ export default function Galeria() {
                 alt={publicacao.titulo}
               />
             ) : (
-              <div className="gallery-placeholder">
-                <ImageIcon size={35} />
+              <div className="gallery-placeholder gallery-modal-placeholder">
+                {publicacao.tipo === "video" ? (
+                  <Play size={35} aria-hidden="true" />
+                ) : (
+                  <ImageIcon size={35} aria-hidden="true" />
+                )}
+
                 <span>Conteúdo em breve</span>
               </div>
             )}
 
             <div className="gallery-modal-info">
-              <h3>{publicacao.titulo}</h3>
-              <p>{publicacao.descricao}</p>
+              <h2 id="gallery-modal-title">
+                {publicacao.titulo}
+              </h2>
+
+              {publicacao.descricao && (
+                <p>{publicacao.descricao}</p>
+              )}
             </div>
-          </div>
+          </section>
         </div>
       )}
     </main>
