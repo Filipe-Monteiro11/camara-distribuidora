@@ -1,7 +1,15 @@
+/* BASE */
+
 .about-page {
+  position: relative;
+  z-index: 11;
   width: 100%;
   min-width: 0;
-  overflow: clip;
+  overflow: visible;
+}
+
+.site-header:has(+ .about-page) {
+  z-index: 10;
 }
 
 .about-page .container {
@@ -44,30 +52,54 @@
   line-height: 1.85;
 }
 
-/* Banner */
+/* BANNER */
 
 .about-hero {
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
-  min-height: 530px;
+  min-height: 580px;
   padding: 95px 0;
-  overflow: hidden;
+  overflow: visible;
+  background: #540101;
+}
+
+.about-hero-background {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
   background:
     linear-gradient(
       90deg,
-      rgba(35, 0, 0, 0.98) 0%,
-      rgba(65, 0, 0, 0.94) 28%,
-      rgba(75, 0, 0, 0.77) 47%,
-      rgba(65, 0, 0, 0.32) 72%,
-      rgba(25, 0, 0, 0.08) 100%
+      rgba(35, 0, 0, 0.42) 0%,
+      rgba(65, 0, 0, 0.16) 55%,
+      transparent 100%
     ),
-    url("/images/mascote-banner.png") center center / cover no-repeat;
+    url("/images/banner-produtos.png") center / cover no-repeat;
+}
+
+/* CAMARÊNCIO COM EFEITO 3D */
+
+.about-hero-mascot {
+  position: absolute;
+  z-index: 1;
+  right: 2%;
+  bottom: 0;
+  display: block;
+  width: min(100%, 1900px);
+  max-width: none;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(
+    -10px 14px 16px rgba(0, 0, 0, 0.18)
+  );
 }
 
 .about-hero-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .about-hero .about-eyebrow {
@@ -90,39 +122,42 @@
 
 .about-hero p {
   max-width: 540px;
-  margin: 0 0 30px;
+  margin: 0;
   color: #f5eaea;
   font-size: 16px;
   line-height: 1.85;
 }
 
+/* LINK DO BANNER - PADRÃO RECEITAS */
+
 .about-hero-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 12px;
-  min-height: 48px;
-  padding: 13px 22px;
-  border-radius: 6px;
-  background: var(--yellow, #f4ba00);
-  color: #260000;
+  margin-top: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
   font-size: 13px;
   font-weight: 800;
   text-decoration: none;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    gap 0.2s ease;
 }
 
 .about-hero-link:hover {
-  background: #ffd02e;
-  transform: translateY(-2px);
+  gap: 17px;
+  color: var(--yellow, #f4ba00);
 }
 
 .about-hero-link:focus-visible {
-  outline: 3px solid #fff;
+  outline: 2px solid var(--yellow, #f4ba00);
   outline-offset: 4px;
 }
 
-/* História */
+/* HISTÓRIA */
 
 .about-story-section {
   padding: 110px 0 100px;
@@ -132,12 +167,13 @@
 
 .about-story-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
   gap: clamp(35px, 5vw, 75px);
 }
 
-.about-story-visual {
+.about-story-visual,
+.about-story-content {
   min-width: 0;
 }
 
@@ -155,10 +191,6 @@
   aspect-ratio: 4 / 3;
   object-fit: cover;
   object-position: center;
-}
-
-.about-story-content {
-  min-width: 0;
 }
 
 .about-story-content h2 {
@@ -193,7 +225,7 @@
   font-size: 14px;
 }
 
-/* Linha do tempo */
+/* LINHA DO TEMPO */
 
 .about-timeline-section {
   padding: 105px 0 115px;
@@ -227,7 +259,9 @@
   border: 1px solid #ebe3dc;
   border-radius: 10px;
   background: #fff;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .about-timeline-card:hover {
@@ -256,7 +290,7 @@
   font-size: 13px;
 }
 
-/* Identidade visual */
+/* IDENTIDADE VISUAL */
 
 .about-identity-section {
   padding: 115px 0;
@@ -342,7 +376,7 @@
   letter-spacing: 1px;
 }
 
-/* Galeria */
+/* GALERIA */
 
 .about-gallery-section {
   padding: 105px 0 120px;
@@ -413,7 +447,16 @@
   font-size: 13px;
 }
 
-/* Tablets */
+/* NOTEBOOKS */
+
+@media (max-width: 1200px) {
+  .about-hero-mascot {
+    right: 0;
+    width: 110%;
+  }
+}
+
+/* TABLETS */
 
 @media (max-width: 1024px) {
   .about-hero {
@@ -421,11 +464,18 @@
     padding: 80px 0;
   }
 
-  .about-story-section,
-  .about-identity-section {
-    padding: 85px 0;
+  .about-hero-mascot {
+    right: -8%;
+    width: 120%;
   }
 
+  .about-hero h1 {
+    max-width: 570px;
+    font-size: clamp(40px, 5vw, 56px);
+  }
+
+  .about-story-section,
+  .about-identity-section,
   .about-timeline-section,
   .about-gallery-section {
     padding: 85px 0;
@@ -445,19 +495,34 @@
   }
 }
 
+@media (max-width: 900px) {
+  .site-header:has(+ .about-page) {
+    z-index: 100;
+  }
+
+  .about-page {
+    z-index: auto;
+  }
+}
+
 @media (max-width: 768px) {
   .about-hero {
-    min-height: 420px;
-    background-position: center, 65% center;
+    min-height: 440px;
+  }
+
+  .about-hero-mascot {
+    right: -25%;
+    bottom: 0;
+    width: 150%;
+    opacity: 0.4;
+  }
+
+  .about-hero-content {
+    max-width: 100%;
   }
 
   .about-hero h1 {
-    max-width: 570px;
-    font-size: clamp(38px, 7vw, 54px);
-  }
-
-  .about-hero p {
-    max-width: 460px;
+    max-width: 560px;
   }
 
   .about-story-grid,
@@ -467,14 +532,6 @@
 
   .about-story-image img {
     aspect-ratio: 16 / 10;
-  }
-
-  .about-identity-content {
-    order: 0;
-  }
-
-  .about-brand-card {
-    order: 1;
   }
 
   .about-gallery-header {
@@ -488,39 +545,35 @@
   }
 }
 
-/* Celulares */
+/* CELULARES */
 
 @media (max-width: 600px) {
   .about-page .container {
-    width: min(100% - 36px, 1200px);
+    width: calc(100% - 36px);
   }
 
   .about-hero {
     min-height: 410px;
     padding: 65px 0;
-    background:
-      linear-gradient(
-        90deg,
-        rgba(35, 0, 0, 0.96) 0%,
-        rgba(65, 0, 0, 0.87) 55%,
-        rgba(55, 0, 0, 0.55) 100%
-      ),
-      url("/images/mascote-banner.png") 68% center / cover no-repeat;
+  }
+
+  .about-hero-mascot {
+    right: -45%;
+    bottom: 0;
+    width: 185%;
+    opacity: 0.22;
   }
 
   .about-hero h1 {
     margin: 20px 0;
-    font-size: clamp(35px, 9vw, 46px);
-    letter-spacing: -1.3px;
+    font-size: clamp(36px, 9vw, 48px);
+    letter-spacing: -1.5px;
   }
 
   .about-hero p {
+    max-width: 440px;
     font-size: 14px;
     line-height: 1.75;
-  }
-
-  .about-hero-link {
-    min-height: 48px;
   }
 
   .about-page h2 {
@@ -564,7 +617,7 @@
   .about-timeline,
   .about-gallery-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 18px;
   }
 
   .about-timeline-card {
@@ -573,23 +626,42 @@
 
   .about-brand-symbol {
     min-height: 280px;
-    padding: 35px;
+    padding: 30px;
   }
 
   .about-gallery-visual {
-    min-height: 210px;
+    min-height: 200px;
   }
 }
 
-@media (max-width: 380px) {
+/* CELULARES PEQUENOS */
+
+@media (max-width: 400px) {
+  .about-hero {
+    min-height: 390px;
+    padding: 55px 0;
+  }
+
   .about-hero h1 {
     font-size: 34px;
   }
 
+  .about-hero-mascot {
+    right: -55%;
+    width: 200%;
+  }
+
+  .about-info-note {
+    gap: 12px;
+    padding: 18px;
+  }
+
   .about-brand-bottom {
-    flex-direction: column;
+    padding: 18px;
   }
 }
+
+/* DISPOSITIVOS TOUCH */
 
 @media (hover: none) {
   .about-timeline-card:hover {
@@ -597,6 +669,8 @@
     box-shadow: none;
   }
 }
+
+/* ACESSIBILIDADE */
 
 @media (prefers-reduced-motion: reduce) {
   .about-hero-link,

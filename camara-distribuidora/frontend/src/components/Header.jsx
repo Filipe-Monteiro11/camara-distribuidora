@@ -14,21 +14,25 @@ const links = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
 
   useEffect(() => {
     setMenuOpen(false);
-  }, [pathname]);
+  }, [pathname, hash]);
 
   useEffect(() => {
     if (!menuOpen) return;
 
     function onKeyDown(event) {
-      if (event.key === "Escape") setMenuOpen(false);
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
     }
 
     function onResize() {
-      if (window.innerWidth > 900) setMenuOpen(false);
+      if (window.innerWidth > 900) {
+        setMenuOpen(false);
+      }
     }
 
     window.addEventListener("keydown", onKeyDown);
@@ -61,18 +65,23 @@ export default function Header() {
           className={`header-nav${menuOpen ? " open" : ""}`}
           aria-label="Navegação principal"
         >
-          {links.map(({ label, href }) => (
-            <Link
-              key={href}
-              to={href}
-              onClick={() => setMenuOpen(false)}
-              aria-current={
-                pathname === href.split("#")[0] ? "page" : undefined
-              }
-            >
-              {label}
-            </Link>
-          ))}
+          {links.map(({ label, href }) => {
+            const route = href.split("#")[0] || "/";
+            const active =
+              pathname === route &&
+              (route !== "/" || !hash || hash === "#inicio");
+
+            return (
+              <Link
+                key={href}
+                to={href}
+                onClick={() => setMenuOpen(false)}
+                aria-current={active ? "page" : undefined}
+              >
+                {label}
+              </Link>
+            );
+          })}
         </nav>
 
         <button

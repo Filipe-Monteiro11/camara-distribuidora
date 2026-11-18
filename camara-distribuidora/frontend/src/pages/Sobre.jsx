@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Building2,
@@ -68,6 +67,19 @@ export default function Sobre() {
 
       <main className="about-page">
         <section className="about-hero">
+          <div
+            className="about-hero-background"
+            aria-hidden="true"
+          />
+
+          <img
+            className="about-hero-mascot"
+            src="/images/camarencioProdutos-banner.png"
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+          />
+
           <div className="container about-hero-content">
             <span className="about-eyebrow">
               CAMARÁ DISTRIBUIDORA
@@ -149,6 +161,7 @@ export default function Sobre() {
 
             <div className="about-info-note">
               <Building2 size={21} aria-hidden="true" />
+
               <p>
                 Mais do que uma empresa, somos o resultado
                 de uma história construída com trabalho,
@@ -330,6 +343,7 @@ export default function Sobre() {
                       strokeWidth={1.4}
                       aria-hidden="true"
                     />
+
                     <span>FOTO 0{index + 1}</span>
                   </div>
 
