@@ -1,5 +1,6 @@
+
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, Package } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Package } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProdutoModal from "../components/ProdutoModal";
@@ -33,6 +34,7 @@ function ordenarProdutos(lista, tipo) {
 
     const prioridadeA =
       a.prioridade > 0 ? a.prioridade : Infinity;
+
     const prioridadeB =
       b.prioridade > 0 ? b.prioridade : Infinity;
 
@@ -69,6 +71,7 @@ export default function Produtos() {
     async function carregarProdutos() {
       try {
         const dados = await produtosApi.listar();
+
         const lista = Array.isArray(dados)
           ? dados
           : dados?.produtos ?? [];
@@ -83,7 +86,9 @@ export default function Produtos() {
           setErro("Não foi possível carregar os produtos.");
         }
       } finally {
-        if (ativo) setCarregando(false);
+        if (ativo) {
+          setCarregando(false);
+        }
       }
     }
 
@@ -100,7 +105,7 @@ export default function Produtos() {
 
       <main className="catalog-page">
         <section className="catalog-intro">
-          <div className="container">
+          <div className="container catalog-intro-content">
             <span className="eyebrow">
               CAMARÁ DISTRIBUIDORA
             </span>
@@ -113,10 +118,21 @@ export default function Produtos() {
               Conheça nossa linha de produtos e entre em contato
               para consultar informações e disponibilidade.
             </p>
+
+            <a
+              href="#nossos-produtos"
+              className="catalog-hero-link"
+            >
+              Explorar nossos produtos
+              <ArrowRight size={18} aria-hidden="true" />
+            </a>
           </div>
         </section>
 
-        <section className="catalog-section">
+        <section
+          className="catalog-section"
+          id="nossos-produtos"
+        >
           <div className="container">
             <div className="catalog-heading">
               <span className="eyebrow">
@@ -168,7 +184,7 @@ export default function Produtos() {
                         loading="lazy"
                       />
                     ) : (
-                      <Package size={38} />
+                      <Package size={38} aria-hidden="true" />
                     )}
                   </button>
 

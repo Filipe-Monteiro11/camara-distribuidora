@@ -50,19 +50,16 @@ export default function Home() {
     let ativo = true;
 
     async function carregarDados() {
-      const [resultadoProdutos, resultadoReceitas] =
-        await Promise.allSettled([
-          produtosApi.listar(),
-          receitasApi.listar(),
-        ]);
+      const [resultadoProdutos, resultadoReceitas] = await Promise.allSettled([
+        produtosApi.listar(),
+        receitasApi.listar(),
+      ]);
 
       if (!ativo) return;
 
       if (resultadoProdutos.status === "fulfilled") {
         const dados = resultadoProdutos.value;
-        const lista = Array.isArray(dados)
-          ? dados
-          : dados?.produtos ?? [];
+        const lista = Array.isArray(dados) ? dados : dados?.produtos ?? [];
 
         setProdutos(
           ordenarDestaques(
@@ -75,9 +72,7 @@ export default function Home() {
 
       if (resultadoReceitas.status === "fulfilled") {
         const dados = resultadoReceitas.value;
-        const lista = Array.isArray(dados)
-          ? dados
-          : dados?.receitas ?? [];
+        const lista = Array.isArray(dados) ? dados : dados?.receitas ?? [];
 
         setReceitas(
           lista.filter((item) => item.ativo !== false).slice(0, 3)
@@ -107,9 +102,7 @@ export default function Home() {
           <div className="hero-overlay" aria-hidden="true" />
 
           <div className="container hero-content">
-            <span className="hero-tag">
-              CAMARÁ DISTRIBUIDORA
-            </span>
+            <span className="hero-tag">CAMARÁ DISTRIBUIDORA</span>
 
             <h1>
               O sabor da tradição
@@ -118,9 +111,8 @@ export default function Home() {
             </h1>
 
             <p>
-              Conheça a Camará Distribuidora e explore nossa
-              seleção de carnes e produtos para diferentes
-              momentos à mesa.
+              Conheça a Camará Distribuidora e explore nossa seleção
+              de carnes e produtos para diferentes momentos à mesa.
             </p>
 
             <div className="hero-actions">
@@ -173,9 +165,7 @@ export default function Home() {
         <section className="home-intro">
           <div className="container home-intro-grid">
             <div>
-              <span className="eyebrow">
-                BEM-VINDO À CAMARÁ
-              </span>
+              <span className="eyebrow">BEM-VINDO À CAMARÁ</span>
               <h2>
                 Uma marca para
                 <br />
@@ -185,9 +175,9 @@ export default function Home() {
 
             <div className="home-intro-text">
               <p>
-                A Camará Distribuidora apresenta um espaço
-                dedicado aos seus produtos, à sua história
-                e ao contato com seus clientes.
+                A Camará Distribuidora apresenta um espaço dedicado
+                aos seus produtos, à sua história e ao contato com
+                seus clientes.
               </p>
 
               <Link to="/sobre" className="text-link">
@@ -198,17 +188,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section
-          className="section products-section"
-          id="produtos"
-        >
+        <section className="section products-section" id="produtos">
           <div className="container">
             <div className="section-heading">
               <div>
-                <span className="eyebrow">
-                  SELEÇÃO CAMARÁ
-                </span>
-
+                <span className="eyebrow">SELEÇÃO CAMARÁ</span>
                 <h2>
                   Conheça nossos <span>produtos.</span>
                 </h2>
@@ -222,10 +206,7 @@ export default function Home() {
 
             <div className="products-grid">
               {produtos.map((produto) => (
-                <article
-                  className="product-card"
-                  key={produto.id}
-                >
+                <article className="product-card" key={produto.id}>
                   <div className="product-image">
                     {produto.imagem ? (
                       <img
@@ -242,9 +223,7 @@ export default function Home() {
                     <button
                       type="button"
                       className="product-overlay"
-                      onClick={() =>
-                        setProdutoSelecionado(produto)
-                      }
+                      onClick={() => setProdutoSelecionado(produto)}
                       aria-label={`Ver detalhes de ${produto.nome}`}
                     >
                       <ArrowUpRight size={23} />
@@ -259,16 +238,13 @@ export default function Home() {
                     <h3>{produto.nome}</h3>
 
                     <p>
-                      {produto.descricao ||
-                        "Descrição não disponível."}
+                      {produto.descricao || "Descrição não disponível."}
                     </p>
 
                     <button
                       type="button"
                       className="product-details-button"
-                      onClick={() =>
-                        setProdutoSelecionado(produto)
-                      }
+                      onClick={() => setProdutoSelecionado(produto)}
                     >
                       Conhecer produto
                       <ArrowUpRight size={17} />
@@ -278,14 +254,10 @@ export default function Home() {
               ))}
             </div>
 
-            {carregandoProdutos && (
-              <p>Carregando produtos...</p>
-            )}
+            {carregandoProdutos && <p>Carregando produtos...</p>}
 
             {!carregandoProdutos && erroProdutos && (
-              <p role="alert">
-                Não foi possível carregar os produtos.
-              </p>
+              <p role="alert">Não foi possível carregar os produtos.</p>
             )}
 
             {!carregandoProdutos &&
@@ -295,10 +267,7 @@ export default function Home() {
               )}
 
             <div className="section-action">
-              <Link
-                to="/produtos"
-                className="btn btn-red"
-              >
+              <Link to="/produtos" className="btn btn-red">
                 Ver todos os produtos
                 <ArrowUpRight size={18} />
               </Link>
@@ -306,26 +275,17 @@ export default function Home() {
           </div>
         </section>
 
-        <section
-          className="home-about-section"
-          id="sobre"
-        >
+        <section className="home-about-section" id="sobre">
           <div className="about-photo">
             <img
-              src="https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1400&q=85"
-              alt="Imagem ilustrativa de ambiente industrial"
+              src="/images/frente-camara.png"
+              alt="Fachada da Camará Distribuidora em Camaragibe, Pernambuco"
               loading="lazy"
             />
-
-            <span className="image-note">
-              Imagem ilustrativa
-            </span>
           </div>
 
           <div className="home-about-content">
-            <span className="eyebrow">
-              NOSSA HISTÓRIA
-            </span>
+            <span className="eyebrow">NOSSA HISTÓRIA</span>
 
             <h2>
               Muito mais que
@@ -334,15 +294,14 @@ export default function Home() {
             </h2>
 
             <p>
-              Toda empresa tem uma história. A Camará
-              também tem uma trajetória, uma identidade
-              e pessoas que fazem parte dela.
+              Toda empresa tem uma história. A Camará também tem
+              uma trajetória, uma identidade e pessoas que fazem
+              parte dela.
             </p>
 
             <p>
-              Conheça o espaço dedicado à história
-              da distribuidora, à origem da marca
-              e à sua estrutura.
+              Conheça o espaço dedicado à história da distribuidora,
+              à origem da marca e à sua estrutura.
             </p>
 
             <div className="about-check">
@@ -362,17 +321,11 @@ export default function Home() {
           </div>
         </section>
 
-        <section
-          className="section recipes-section"
-          id="receitas"
-        >
+        <section className="section recipes-section" id="receitas">
           <div className="container">
             <div className="section-heading">
               <div>
-                <span className="eyebrow">
-                  SABORES E INSPIRAÇÕES
-                </span>
-
+                <span className="eyebrow">SABORES E INSPIRAÇÕES</span>
                 <h2>
                   Da nossa seleção
                   <br />
@@ -381,17 +334,14 @@ export default function Home() {
               </div>
 
               <p>
-                Explore inspirações de pratos e descubra
-                maneiras de preparar receitas com charque.
+                Explore inspirações de pratos e descubra maneiras
+                de preparar receitas com charque.
               </p>
             </div>
 
             <div className="recipes-grid">
               {receitas.map((receita, index) => (
-                <article
-                  className="recipe-card"
-                  key={receita.id}
-                >
+                <article className="recipe-card" key={receita.id}>
                   {receita.imagem && (
                     <img
                       src={receita.imagem}
@@ -402,12 +352,10 @@ export default function Home() {
 
                   <div className="recipe-content">
                     <span>
-                      RECEITA{" "}
-                      {String(index + 1).padStart(2, "0")}
+                      RECEITA {String(index + 1).padStart(2, "0")}
                     </span>
 
                     <h3>{receita.titulo}</h3>
-
                     <span className="recipe-note">
                       Conheça nossas receitas
                     </span>
@@ -416,14 +364,10 @@ export default function Home() {
               ))}
             </div>
 
-            {carregandoReceitas && (
-              <p>Carregando receitas...</p>
-            )}
+            {carregandoReceitas && <p>Carregando receitas...</p>}
 
             {!carregandoReceitas && erroReceitas && (
-              <p role="alert">
-                Não foi possível carregar as receitas.
-              </p>
+              <p role="alert">Não foi possível carregar as receitas.</p>
             )}
 
             {!carregandoReceitas &&
@@ -433,10 +377,7 @@ export default function Home() {
               )}
 
             <div className="section-action">
-              <Link
-                to="/receitas"
-                className="btn btn-red"
-              >
+              <Link to="/receitas" className="btn btn-red">
                 Ver todas as receitas
                 <ArrowUpRight size={18} />
               </Link>
@@ -444,15 +385,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section
-          className="location-section"
-          id="localizacao"
-        >
+        <section className="location-section" id="localizacao">
           <div className="container location-content">
             <div className="location-text">
-              <span className="eyebrow">
-                LOCALIZAÇÃO
-              </span>
+              <span className="eyebrow">LOCALIZAÇÃO</span>
 
               <h2>
                 Estamos prontos
@@ -461,16 +397,12 @@ export default function Home() {
               </h2>
 
               <p>
-                Visite a Camará Distribuidora na Rua
-                Manoel Honorato da Costa, nº 556,
-                Vila da Fábrica, Camaragibe – PE,
+                Visite a Camará Distribuidora na Rua Manoel Honorato
+                da Costa, nº 556, Vila da Fábrica, Camaragibe – PE,
                 CEP 54759-475.
               </p>
 
-              <a
-                href="#contato"
-                className="btn btn-red"
-              >
+              <a href="#contato" className="btn btn-red">
                 Entre em contato
                 <ArrowUpRight size={18} />
               </a>
@@ -486,7 +418,7 @@ export default function Home() {
               <div className="location-map-image">
                 <img
                   src="/images/mapa.png"
-                  alt="Mapa ilustrativo da localização da Camará Distribuidora em Camaragibe, Pernambuco"
+                  alt="Mapa da localização da Camará Distribuidora em Camaragibe, Pernambuco"
                   loading="lazy"
                 />
               </div>
@@ -498,12 +430,8 @@ export default function Home() {
                   </span>
 
                   <div>
-                    <strong>
-                      Camará Distribuidora
-                    </strong>
-                    <span>
-                      Camaragibe, Pernambuco
-                    </span>
+                    <strong>Camará Distribuidora</strong>
+                    <span>Camaragibe, Pernambuco</span>
                   </div>
                 </div>
 

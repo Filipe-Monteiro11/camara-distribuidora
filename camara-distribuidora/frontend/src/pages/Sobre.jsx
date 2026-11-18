@@ -120,9 +120,7 @@ export default function Sobre() {
                 <h2>
                   Uma história de
                   <br />
-                  <span>
-                    determinação e crescimento.
-                  </span>
+                  <span>determinação e crescimento.</span>
                 </h2>
 
                 <p>
