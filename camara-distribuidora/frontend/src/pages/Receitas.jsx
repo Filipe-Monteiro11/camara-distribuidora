@@ -4,13 +4,48 @@ import {
   ArrowRight,
   ArrowUpRight,
   ChefHat,
-  X
+  X,
 } from "lucide-react";
 
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { receitasApi } from "../services/api";
 import "../styles/Receitas.css";
+
+function normalizarIngredientes(ingredientes) {
+  if (Array.isArray(ingredientes)) {
+    return ingredientes
+      .map((item) => String(item ?? "").trim())
+      .filter(Boolean);
+  }
+
+  if (typeof ingredientes === "string") {
+    return ingredientes
+      .split(/\r?\n/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function normalizarPreparo(preparo) {
+  if (Array.isArray(preparo)) {
+    return preparo
+      .map((passo) => String(passo ?? "").trim())
+      .filter(Boolean);
+  }
+
+  if (typeof preparo === "string") {
+    return preparo
+      .split(/\r?\n/)
+      .map((passo) => passo.trim())
+      .filter(Boolean)
+      .map((passo) => passo.replace(/^\d+[.)]\s*/, ""));
+  }
+
+  return [];
+}
 
 export default function Receitas() {
   const [receitas, setReceitas] = useState([]);
@@ -27,9 +62,16 @@ export default function Receitas() {
     async function carregarReceitas() {
       try {
         const dados = await receitasApi.listar();
+        const lista = Array.isArray(dados)
+          ? dados
+          : Array.isArray(dados?.receitas)
+            ? dados.receitas
+            : [];
 
         if (ativo) {
-          setReceitas(Array.isArray(dados) ? dados : []);
+          setReceitas(
+            lista.filter((receita) => receita.ativo !== false)
+          );
         }
       } catch {
         if (ativo) {
@@ -49,8 +91,8 @@ export default function Receitas() {
     };
   }, []);
 
-  function abrirReceita(receita) {
-    triggerRef.current = document.activeElement;
+  function abrirReceita(receita, elemento) {
+    triggerRef.current = elemento;
     setReceitaSelecionada(receita);
   }
 
@@ -62,11 +104,14 @@ export default function Receitas() {
     if (!receitaSelecionada) return;
 
     const overflowAnterior = document.body.style.overflow;
+    const elementoAnterior = triggerRef.current;
+
     document.body.style.overflow = "hidden";
     modalRef.current?.focus();
 
     function aoPressionarTecla(evento) {
       if (evento.key === "Escape") {
+        evento.preventDefault();
         fecharReceita();
         return;
       }
@@ -75,22 +120,30 @@ export default function Receitas() {
 
       const elementos = Array.from(
         modalRef.current.querySelectorAll(
-          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+          'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
         )
-      );
+      ).filter((elemento) => elemento.getClientRects().length > 0);
 
       if (!elementos.length) {
         evento.preventDefault();
+        modalRef.current.focus();
         return;
       }
 
       const primeiro = elementos[0];
       const ultimo = elementos[elementos.length - 1];
+      const focoAtual = document.activeElement;
 
-      if (evento.shiftKey && document.activeElement === primeiro) {
+      if (
+        evento.shiftKey &&
+        (focoAtual === primeiro || focoAtual === modalRef.current)
+      ) {
         evento.preventDefault();
         ultimo.focus();
-      } else if (!evento.shiftKey && document.activeElement === ultimo) {
+      } else if (
+        !evento.shiftKey &&
+        (focoAtual === ultimo || focoAtual === modalRef.current)
+      ) {
         evento.preventDefault();
         primeiro.focus();
       }
@@ -101,9 +154,20 @@ export default function Receitas() {
     return () => {
       document.body.style.overflow = overflowAnterior;
       document.removeEventListener("keydown", aoPressionarTecla);
-      triggerRef.current?.focus();
+
+      if (elementoAnterior?.isConnected) {
+        elementoAnterior.focus();
+      }
     };
   }, [receitaSelecionada]);
+
+  const ingredientes = receitaSelecionada
+    ? normalizarIngredientes(receitaSelecionada.ingredientes)
+    : [];
+
+  const passos = receitaSelecionada
+    ? normalizarPreparo(receitaSelecionada.preparo)
+    : [];
 
   return (
     <>
@@ -129,7 +193,10 @@ export default function Receitas() {
               para preparar pratos especiais.
             </p>
 
-            <a href="#nossas-receitas" className="recipes-intro-link">
+            <a
+              href="#nossas-receitas"
+              className="recipes-intro-link"
+            >
               Explorar receitas
               <ArrowRight size={18} aria-hidden="true" />
             </a>
@@ -165,7 +232,6 @@ export default function Receitas() {
                 <article
                   className="recipes-list-card"
                   key={receita.id}
-                  style={{ position: "relative" }}
                 >
                   <div className="recipes-list-image">
                     {receita.imagem && (
@@ -183,39 +249,31 @@ export default function Receitas() {
 
                   <div className="recipes-list-info">
                     <h3>{receita.titulo}</h3>
-                    <p>{receita.descricao}</p>
+
+                    {receita.descricao && (
+                      <p>{receita.descricao}</p>
+                    )}
 
                     <button
                       type="button"
-                      onClick={() => abrirReceita(receita)}
+                      onClick={(evento) =>
+                        abrirReceita(receita, evento.currentTarget)
+                      }
                       aria-label={`Ver receita completa de ${receita.titulo}`}
                     >
                       Ver receita completa
-                      <ArrowUpRight size={18} aria-hidden="true" />
+                      <ArrowUpRight
+                        size={18}
+                        aria-hidden="true"
+                      />
                     </button>
                   </div>
-
-                  <button
-                    type="button"
-                    aria-label={`Abrir detalhes de ${receita.titulo}`}
-                    onClick={() => abrirReceita(receita)}
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                      opacity: 0,
-                      cursor: "pointer",
-                      border: 0,
-                      padding: 0
-                    }}
-                  />
                 </article>
               ))}
             </div>
 
             {carregando && (
-              <p className="recipes-disclaimer">
+              <p className="recipes-disclaimer" role="status">
                 Carregando receitas...
               </p>
             )}
@@ -233,7 +291,6 @@ export default function Receitas() {
             )}
           </div>
         </section>
-
 
         {receitaSelecionada && (
           <div
@@ -287,27 +344,27 @@ export default function Receitas() {
 
                 <h3>Ingredientes</h3>
 
-                <ul>
-                  {receitaSelecionada.ingredientes.map(
-                    (ingrediente, index) => (
+                {ingredientes.length > 0 ? (
+                  <ul>
+                    {ingredientes.map((ingrediente, index) => (
                       <li key={index}>{ingrediente}</li>
-                    )
-                  )}
-                </ul>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Ingredientes não informados.</p>
+                )}
 
                 <h3>Modo de preparo</h3>
 
-                <ol>
-                  {receitaSelecionada.preparo
-                    .split("\n")
-                    .map((passo) => passo.trim())
-                    .filter(Boolean)
-                    .map((passo, index) => (
-                      <li key={index}>
-                        {passo.replace(/^\d+[.)]\s*/, "")}
-                      </li>
+                {passos.length > 0 ? (
+                  <ol>
+                    {passos.map((passo, index) => (
+                      <li key={index}>{passo}</li>
                     ))}
-                </ol>
+                  </ol>
+                ) : (
+                  <p>Modo de preparo não informado.</p>
+                )}
 
                 <button
                   type="button"

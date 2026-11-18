@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   Truck,
 } from "lucide-react";
-
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ProdutoModal from "../components/ProdutoModal";
@@ -59,7 +58,9 @@ export default function Home() {
 
       if (resultadoProdutos.status === "fulfilled") {
         const dados = resultadoProdutos.value;
-        const lista = Array.isArray(dados) ? dados : dados?.produtos ?? [];
+        const lista = Array.isArray(dados)
+          ? dados
+          : dados?.produtos ?? [];
 
         setProdutos(
           ordenarDestaques(
@@ -72,7 +73,9 @@ export default function Home() {
 
       if (resultadoReceitas.status === "fulfilled") {
         const dados = resultadoReceitas.value;
-        const lista = Array.isArray(dados) ? dados : dados?.receitas ?? [];
+        const lista = Array.isArray(dados)
+          ? dados
+          : dados?.receitas ?? [];
 
         setReceitas(
           lista.filter((item) => item.ativo !== false).slice(0, 3)
@@ -96,7 +99,7 @@ export default function Home() {
     <>
       <Header />
 
-      <main>
+      <main className="home-page">
         <section className="hero" id="inicio">
           <div className="hero-image" aria-hidden="true" />
           <div className="hero-overlay" aria-hidden="true" />
@@ -118,12 +121,12 @@ export default function Home() {
             <div className="hero-actions">
               <Link to="/produtos" className="btn btn-yellow">
                 Explorar produtos
-                <ArrowUpRight size={18} />
+                <ArrowUpRight size={18} aria-hidden="true" />
               </Link>
 
               <Link to="/sobre" className="hero-secondary">
                 Conheça a Camará
-                <ArrowRight size={18} />
+                <ArrowRight size={18} aria-hidden="true" />
               </Link>
             </div>
 
@@ -134,10 +137,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="highlights">
+        <section className="highlights" aria-label="Destaques da Camará">
           <div className="container highlights-grid">
             <div className="highlight-item">
-              <Package size={30} strokeWidth={1.6} />
+              <Package size={30} strokeWidth={1.6} aria-hidden="true" />
               <div>
                 <strong>Nosso catálogo</strong>
                 <span>Explore nossas linhas de produtos</span>
@@ -145,7 +148,7 @@ export default function Home() {
             </div>
 
             <div className="highlight-item">
-              <ShieldCheck size={30} strokeWidth={1.6} />
+              <ShieldCheck size={30} strokeWidth={1.6} aria-hidden="true" />
               <div>
                 <strong>Conheça a Camará</strong>
                 <span>Saiba mais sobre nossa identidade</span>
@@ -153,7 +156,7 @@ export default function Home() {
             </div>
 
             <div className="highlight-item">
-              <Truck size={30} strokeWidth={1.6} />
+              <Truck size={30} strokeWidth={1.6} aria-hidden="true" />
               <div>
                 <strong>Atendimento</strong>
                 <span>Fale com nossa equipe</span>
@@ -182,7 +185,7 @@ export default function Home() {
 
               <Link to="/sobre" className="text-link">
                 Saiba mais sobre nós
-                <ArrowUpRight size={18} />
+                <ArrowUpRight size={18} aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -200,7 +203,7 @@ export default function Home() {
 
               <Link to="/produtos" className="text-link">
                 Ver catálogo completo
-                <ArrowUpRight size={18} />
+                <ArrowUpRight size={18} aria-hidden="true" />
               </Link>
             </div>
 
@@ -216,7 +219,7 @@ export default function Home() {
                       />
                     ) : (
                       <div className="product-image-placeholder">
-                        <Package size={36} />
+                        <Package size={36} aria-hidden="true" />
                       </div>
                     )}
 
@@ -226,7 +229,7 @@ export default function Home() {
                       onClick={() => setProdutoSelecionado(produto)}
                       aria-label={`Ver detalhes de ${produto.nome}`}
                     >
-                      <ArrowUpRight size={23} />
+                      <ArrowUpRight size={23} aria-hidden="true" />
                     </button>
                   </div>
 
@@ -247,14 +250,16 @@ export default function Home() {
                       onClick={() => setProdutoSelecionado(produto)}
                     >
                       Conhecer produto
-                      <ArrowUpRight size={17} />
+                      <ArrowUpRight size={17} aria-hidden="true" />
                     </button>
                   </div>
                 </article>
               ))}
             </div>
 
-            {carregandoProdutos && <p>Carregando produtos...</p>}
+            {carregandoProdutos && (
+              <p role="status">Carregando produtos...</p>
+            )}
 
             {!carregandoProdutos && erroProdutos && (
               <p role="alert">Não foi possível carregar os produtos.</p>
@@ -269,7 +274,7 @@ export default function Home() {
             <div className="section-action">
               <Link to="/produtos" className="btn btn-red">
                 Ver todos os produtos
-                <ArrowUpRight size={18} />
+                <ArrowUpRight size={18} aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -305,18 +310,18 @@ export default function Home() {
             </p>
 
             <div className="about-check">
-              <Check size={17} />
+              <Check size={17} aria-hidden="true" />
               História e identidade da marca
             </div>
 
             <div className="about-check">
-              <Check size={17} />
+              <Check size={17} aria-hidden="true" />
               Estrutura e informações institucionais
             </div>
 
             <Link to="/sobre" className="btn btn-red">
               Conheça nossa história
-              <ArrowUpRight size={18} />
+              <ArrowUpRight size={18} aria-hidden="true" />
             </Link>
           </div>
         </section>
@@ -356,6 +361,7 @@ export default function Home() {
                     </span>
 
                     <h3>{receita.titulo}</h3>
+
                     <span className="recipe-note">
                       Conheça nossas receitas
                     </span>
@@ -364,7 +370,9 @@ export default function Home() {
               ))}
             </div>
 
-            {carregandoReceitas && <p>Carregando receitas...</p>}
+            {carregandoReceitas && (
+              <p role="status">Carregando receitas...</p>
+            )}
 
             {!carregandoReceitas && erroReceitas && (
               <p role="alert">Não foi possível carregar as receitas.</p>
@@ -379,7 +387,7 @@ export default function Home() {
             <div className="section-action">
               <Link to="/receitas" className="btn btn-red">
                 Ver todas as receitas
-                <ArrowUpRight size={18} />
+                <ArrowUpRight size={18} aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -404,7 +412,7 @@ export default function Home() {
 
               <a href="#contato" className="btn btn-red">
                 Entre em contato
-                <ArrowUpRight size={18} />
+                <ArrowUpRight size={18} aria-hidden="true" />
               </a>
             </div>
 
@@ -426,7 +434,7 @@ export default function Home() {
               <div className="location-map-footer">
                 <div className="location-map-details">
                   <span className="location-map-icon">
-                    <MapPin size={20} />
+                    <MapPin size={20} aria-hidden="true" />
                   </span>
 
                   <div>
@@ -437,7 +445,7 @@ export default function Home() {
 
                 <span className="location-map-action">
                   Ver no mapa
-                  <ArrowUpRight size={17} />
+                  <ArrowUpRight size={17} aria-hidden="true" />
                 </span>
               </div>
             </a>

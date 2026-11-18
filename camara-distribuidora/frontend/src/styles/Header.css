@@ -1,3 +1,5 @@
+/* HEADER */
+
 .site-header {
   position: sticky;
   top: 0;
@@ -21,6 +23,8 @@
   box-sizing: border-box;
 }
 
+/* LOGO */
+
 .brand {
   display: flex;
   align-items: center;
@@ -38,6 +42,8 @@
   height: 175px;
   object-fit: contain;
 }
+
+/* NAVEGAÇÃO */
 
 .header-nav {
   position: absolute;
@@ -60,8 +66,10 @@
 
 .header-nav a:hover,
 .header-nav a[aria-current="page"] {
-  color: var(--red, #780e20);
+  color: var(--red, #540101);
 }
+
+/* MENU MOBILE */
 
 .menu-toggle {
   display: none;
@@ -74,16 +82,20 @@
   border: 0;
   border-radius: 9px;
   background: #f9f4f4;
-  color: var(--red, #780e20);
+  color: var(--red, #540101);
   cursor: pointer;
 }
+
+/* ACESSIBILIDADE */
 
 .brand:focus-visible,
 .header-nav a:focus-visible,
 .menu-toggle:focus-visible {
-  outline: 2px solid var(--red, #780e20);
+  outline: 2px solid var(--red, #540101);
   outline-offset: 3px;
 }
+
+/* NOTEBOOKS */
 
 @media (max-width: 1200px) {
   .site-header .header-content {
@@ -98,6 +110,8 @@
     font-size: 13px;
   }
 }
+
+/* TABLETS E CELULARES */
 
 @media (max-width: 900px) {
   .site-header .header-content {
@@ -131,8 +145,8 @@
     max-height: 0;
     padding: 0 20px;
     overflow: hidden;
-    background: #fff;
     border-bottom: 0 solid #eee;
+    background: #fff;
     box-shadow: none;
     opacity: 0;
     visibility: hidden;
@@ -171,6 +185,8 @@
   }
 }
 
+/* CELULARES PEQUENOS */
+
 @media (max-width: 480px) {
   .site-header .header-content {
     min-height: 66px;
@@ -191,6 +207,8 @@
     max-height: min(480px, calc(100dvh - 66px));
   }
 }
+
+/* MOVIMENTO REDUZIDO */
 
 @media (prefers-reduced-motion: reduce) {
   .header-nav,

@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, ArrowUpRight, Package } from "lucide-react";
 import Header from "../components/Header";
@@ -10,7 +9,7 @@ import "../styles/Produtos.css";
 function ordenarProdutos(lista, tipo) {
   return [...lista].sort((a, b) => {
     const compararNome = () =>
-      a.nome.localeCompare(b.nome, "pt-BR");
+      String(a.nome ?? "").localeCompare(String(b.nome ?? ""), "pt-BR");
 
     if (tipo === "nome") {
       return compararNome();
@@ -33,10 +32,10 @@ function ordenarProdutos(lista, tipo) {
     }
 
     const prioridadeA =
-      a.prioridade > 0 ? a.prioridade : Infinity;
+      Number(a.prioridade) > 0 ? Number(a.prioridade) : Infinity;
 
     const prioridadeB =
-      b.prioridade > 0 ? b.prioridade : Infinity;
+      Number(b.prioridade) > 0 ? Number(b.prioridade) : Infinity;
 
     return (
       prioridadeA - prioridadeB ||
