@@ -1,6 +1,12 @@
 
-import { open, rename, copyFile, unlink } from "node:fs/promises";
-import { COPYFILE_EXCL } from "node:fs";
+import {
+  open,
+  rename,
+  copyFile,
+  unlink
+} from "node:fs/promises";
+
+import { constants } from "node:fs";
 import path from "node:path";
 
 import { uploadDir } from "../middleware/upload.js";
@@ -74,7 +80,12 @@ async function moverArquivo(origem, destino) {
       throw error;
     }
 
-    await copyFile(origem, destino, COPYFILE_EXCL);
+    await copyFile(
+      origem,
+      destino,
+      constants.COPYFILE_EXCL
+    );
+
     await removerArquivo(origem);
   }
 }
