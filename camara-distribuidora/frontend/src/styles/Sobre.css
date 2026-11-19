@@ -73,7 +73,7 @@
     linear-gradient(
       90deg,
       rgba(35, 0, 0, 0.42) 0%,
-      rgba(65, 0, 0, 0.16) 55%,
+      rgba(65, 0, 0, 0.16) 15%,
       transparent 100%
     ),
     url("/images/banner-produtos.png") center / cover no-repeat;
