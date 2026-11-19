@@ -1,4 +1,3 @@
-
 import { useRef, useState } from "react";
 import {
   ArrowUpRight,
@@ -62,10 +61,7 @@ function validarCurriculo(arquivo) {
     return "Anexe seu currículo para continuar.";
   }
 
-  const extensaoValida = arquivo.name
-    .toLowerCase()
-    .endsWith(".pdf");
-
+  const extensaoValida = arquivo.name.toLowerCase().endsWith(".pdf");
   const tipoValido =
     !arquivo.type || arquivo.type === "application/pdf";
 

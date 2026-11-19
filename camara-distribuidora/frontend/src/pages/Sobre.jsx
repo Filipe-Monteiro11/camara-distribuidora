@@ -308,54 +308,7 @@ export default function Sobre() {
           </div>
         </section>
 
-        <section className="about-gallery-section">
-          <div className="container">
-            <div className="about-gallery-header">
-              <div>
-                <span className="about-eyebrow">
-                  <Images size={17} aria-hidden="true" />
-                  NOSSA ESTRUTURA
-                </span>
-
-                <h2>
-                  Conheça mais
-                  <br />
-                  sobre a <span>Camará.</span>
-                </h2>
-              </div>
-
-              <p>
-                Um espaço reservado para apresentar fotografias
-                das instalações, ambientes e estruturas
-                relacionadas à empresa.
-              </p>
-            </div>
-
-            <div className="about-gallery-grid">
-              {galeria.map((item, index) => (
-                <article
-                  className="about-gallery-card"
-                  key={item.titulo}
-                >
-                  <div className="about-gallery-visual">
-                    <Camera
-                      size={35}
-                      strokeWidth={1.4}
-                      aria-hidden="true"
-                    />
-
-                    <span>FOTO 0{index + 1}</span>
-                  </div>
-
-                  <div className="about-gallery-info">
-                    <h3>{item.titulo}</h3>
-                    <p>{item.descricao}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        
       </main>
 
       <Footer />
