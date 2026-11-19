@@ -1,9 +1,12 @@
+
 import multer from "multer";
 import path from "node:path";
 import { mkdirSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 
-export const curriculosDir = path.resolve("private/curriculos");
+export const curriculosDir = path.resolve(
+  process.env.CURRICULOS_DIR || "private/curriculos"
+);
 
 mkdirSync(curriculosDir, { recursive: true });
 
@@ -18,7 +21,9 @@ const storage = multer.diskStorage({
 });
 
 function validarArquivo(req, file, callback) {
-  const extensao = path.extname(file.originalname).toLowerCase();
+  const extensao = path.extname(
+    file.originalname
+  ).toLowerCase();
 
   if (
     file.mimetype !== "application/pdf" ||
@@ -38,6 +43,9 @@ export const uploadCurriculo = multer({
   limits: {
     fileSize: 5 * 1024 * 1024,
     files: 1,
-    fields: 5
+    fields: 5,
+    parts: 6,
+    fieldSize: 10 * 1024,
+    fieldNameSize: 100
   }
 }).single("curriculo");

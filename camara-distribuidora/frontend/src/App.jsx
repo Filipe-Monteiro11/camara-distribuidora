@@ -1,4 +1,10 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation
+} from "react-router-dom";
 
 import ScrollToSection from "./components/ScrollToSection";
 import Header from "./components/Header";
@@ -14,20 +20,56 @@ import Sobre from "./pages/Sobre";
 import Galeria from "./pages/Galeria";
 import TrabalheConosco from "./pages/TrabalheConosco";
 
-export default function App() {
+function ElementosPublicos() {
+  const { pathname } = useLocation();
+
+  const paginaAdministrativa =
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/");
+
+  if (paginaAdministrativa) {
+    return null;
+  }
+
   return (
-    <BrowserRouter>
+    <>
+      <Camarencio />
+      <WhatsAppButton />
+    </>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <>
       <ScrollToSection />
 
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/produtos" element={<Produtos />} />
-        <Route path="/receitas" element={<Receitas />} />
-        <Route path="/sobre" element={<Sobre />} />
+        <Route
+          path="/"
+          element={<Home />}
+        />
+
+        <Route
+          path="/produtos"
+          element={<Produtos />}
+        />
+
+        <Route
+          path="/receitas"
+          element={<Receitas />}
+        />
+
+        <Route
+          path="/sobre"
+          element={<Sobre />}
+        />
+
         <Route
           path="/trabalhe-conosco"
           element={<TrabalheConosco />}
         />
+
         <Route
           path="/galeria"
           element={
@@ -38,11 +80,22 @@ export default function App() {
             </>
           }
         />
-        <Route path="/admin" element={<AdminGuard />} />
+
+        <Route
+          path="/admin"
+          element={<AdminGuard />}
+        />
       </Routes>
 
-      <Camarencio />
-      <WhatsAppButton />
+      <ElementosPublicos />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
     </BrowserRouter>
   );
 }

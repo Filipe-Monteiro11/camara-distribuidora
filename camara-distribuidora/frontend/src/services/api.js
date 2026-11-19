@@ -1,29 +1,47 @@
+
 import { obterToken, salvarToken, sair } from "./auth";
 
-const API_URL = "http://localhost:3001/api";
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:3001/api"
+).replace(/\/+$/, "");
 
 async function requisicao(caminho, opcoes = {}) {
   const { body, headers = {}, ...configuracao } = opcoes;
   const token = obterToken();
 
-  const resposta = await fetch(`${API_URL}${caminho}`, {
-    ...configuracao,
-    headers: {
-      ...(body !== undefined && !(body instanceof FormData)
-        ? { "Content-Type": "application/json" }
-        : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers
-    },
-    ...(body !== undefined
-      ? {
-          body:
-            body instanceof FormData
-              ? body
-              : JSON.stringify(body)
-        }
-      : {})
-  });
+  let resposta;
+
+  try {
+    resposta = await fetch(`${API_URL}${caminho}`, {
+      ...configuracao,
+      headers: {
+        ...(body !== undefined && !(body instanceof FormData)
+          ? { "Content-Type": "application/json" }
+          : {}),
+        ...(token
+          ? { Authorization: `Bearer ${token}` }
+          : {}),
+        ...headers
+      },
+      ...(body !== undefined
+        ? {
+            body:
+              body instanceof FormData
+                ? body
+                : JSON.stringify(body)
+          }
+        : {})
+    });
+  } catch {
+    throw new Error(
+      "Não foi possível conectar ao servidor. Verifique sua conexão."
+    );
+  }
+
+  if (resposta.status === 204) {
+    return null;
+  }
 
   const dados = await resposta.json().catch(() => null);
 
@@ -87,12 +105,15 @@ function criarApiCrud(recurso) {
 }
 
 export const produtosApi = criarApiCrud("products");
+
 export const galeriaApi = criarApiCrud("gallery");
+
 export const receitasApi = criarApiCrud("recipes");
 
 export const uploadApi = {
   enviar(arquivo) {
     const formulario = new FormData();
+
     formulario.append("imagem", arquivo);
 
     return requisicao("/upload", {
@@ -113,8 +134,10 @@ export const configuracoesApi = {
       body: dados
     });
 
-    if (!resposta.token) {
-      throw new Error("O servidor não retornou o novo token.");
+    if (!resposta?.token) {
+      throw new Error(
+        "O servidor não retornou o novo token."
+      );
     }
 
     salvarToken(resposta.token);
@@ -158,17 +181,27 @@ export const curriculosApi = {
     const token = obterToken();
 
     if (!token) {
-      throw new Error("Faça login para baixar currículos.");
+      throw new Error(
+        "Faça login para baixar currículos."
+      );
     }
 
-    const resposta = await fetch(
-      `${API_URL}/curriculos/${encodeURIComponent(id)}/download`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+    let resposta;
+
+    try {
+      resposta = await fetch(
+        `${API_URL}/curriculos/${encodeURIComponent(id)}/download`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      }
-    );
+      );
+    } catch {
+      throw new Error(
+        "Não foi possível conectar ao servidor."
+      );
+    }
 
     if (!resposta.ok) {
       if (resposta.status === 401) {
@@ -178,7 +211,8 @@ export const curriculosApi = {
       const dados = await resposta.json().catch(() => null);
 
       throw new Error(
-        dados?.error || "Não foi possível baixar o currículo."
+        dados?.error ||
+        "Não foi possível baixar o currículo."
       );
     }
 
